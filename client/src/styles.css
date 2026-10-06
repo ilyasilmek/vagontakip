@@ -67,3 +67,13 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 :root[data-theme=dark] .badge.amber::before {background:#E8B735}
 :root[data-theme=dark] .badge.blue::before {background:#8BBAD7}
 :root[data-theme=dark] .badge.teal::before {background:#8AC2AE}
+
+/* Koyu temada alan adı, değer ve bölüm sınırlarını ayır. */
+:root[data-theme=dark] .modal-header {background:#1C303E}
+:root[data-theme=dark] .modal-header h2 {color:#E8B735}
+:root[data-theme=dark] .detail-grid {gap:24px 20px}
+:root[data-theme=dark] .detail-field {border-top:1px solid #657D8C;padding-top:14px;min-width:0}
+:root[data-theme=dark] .detail-field span {color:#E8B735;font-size:13px;font-weight:600;letter-spacing:.8px;margin-bottom:10px}
+:root[data-theme=dark] .detail-field p {color:#E4EBEF;font-weight:400;line-height:1.7}
+:root[data-theme=dark] .record-history strong {color:#E8B735;font-weight:600}
+:root[data-theme=dark] .record-history {color:#B4C4CF}
