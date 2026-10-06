@@ -24,7 +24,7 @@ Listelerde arama, durum filtresi ve görünen kayıtları CSV olarak indirme bul
 | Ekip hesabı oluşturma, rol ve şifre değiştirme, pasifleştirme/silme | Hayır | Evet |
 | İşlem geçmişini görüntüleme | Hayır | Evet |
 
-Yönetici **Yönetim** ekranından kullanıcıları ve işlem geçmişini yönetir; operasyon kayıtlarını ilgili listelerden düzenler veya siler. Son aktif yöneticinin silinmesi ya da yetkisinin kaldırılması engellenir. Kullanıcının silinmesi, daha önce oluşturduğu operasyon kayıtlarını silmez. Şifreler en az 12 karakter olmalıdır.
+Yönetici **Yönetim** ekranından kullanıcıları ve işlem geçmişini yönetir; operasyon kayıtlarını ilgili listelerden düzenler veya siler. Son aktif yöneticinin silinmesi ya da yetkisinin kaldırılması engellenir. Kullanıcının silinmesi, daha önce oluşturduğu operasyon kayıtlarını silmez. Şifreler en az 8 karakter olmalıdır.
 
 ## Telefona kurulum
 

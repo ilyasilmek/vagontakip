@@ -25,7 +25,8 @@ export class GitHubStore<T> {
   }
 
   private headers(): HeadersInit {
-    if (!this.env.GITHUB_TOKEN || !this.env.DB_ENCRYPTION_KEY) throw new ApiError(503, 'CONFIGURATION_REQUIRED', 'GitHub erişimi ve veritabanı şifreleme anahtarı yapılandırılmalı.');
+    const missing = (['GITHUB_TOKEN', 'DB_ENCRYPTION_KEY'] as const).filter(name => !this.env[name]?.trim());
+    if (missing.length) throw new ApiError(503, 'CONFIGURATION_REQUIRED', `Cloudflare Worker Secrets ayarlarında eksik veya boş: ${missing.join(', ')}. Değerleri çalışan Worker'ın Production ortamına ekleyip yayımlayın.`);
     return { Authorization: `Bearer ${this.env.GITHUB_TOKEN}`, Accept: 'application/vnd.github.object+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'VagonTakip-Worker', 'Content-Type': 'application/json' };
   }
 

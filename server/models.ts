@@ -59,7 +59,7 @@ export function validateWagonWorkflow(candidate: Pick<Wagon, 'entryDate' | 'chan
 }
 
 export const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9._-]{3,64}$/, 'Kullanıcı adı 3–64 harf, rakam, nokta, tire veya alt çizgiden oluşmalı.');
-export const passwordSchema = z.string().min(12, 'Şifre en az 12 karakter olmalı.').max(256);
+export const passwordSchema = z.string().min(8, 'Şifre en az 8 karakter olmalı.').max(256);
 export const createUserSchema = z.object({
   username: usernameSchema,
   displayName: z.string().trim().min(1).max(100),

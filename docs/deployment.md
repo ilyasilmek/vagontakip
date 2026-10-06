@@ -28,7 +28,7 @@ Bulut ortamının ağ ayarlarında mevcut izinleri koruyarak `api.cloudflare.com
 | `GITHUB_TOKEN` | Gerçek GitHub fine-grained token; yalnız `ilyasilmek/vagontakip` deposuna **Contents: Read and write** |
 | `DB_ENCRYPTION_KEY` | Mevcut `.local/production-secrets.json` içindeki eşleşen anahtar; base64 biçiminde 32 bayt AES anahtarı |
 | `SESSION_SECRET` | Aynı güvenli dosyadaki oturum anahtarı; en az 32 karakter |
-| `ADMIN_PASSWORD` | Hazırlanan güvenli dosyadaki ilk yönetici şifresi veya sizin seçtiğiniz güçlü şifre; 12–256 karakter |
+| `ADMIN_PASSWORD` | Hazırlanan güvenli dosyadaki ilk yönetici şifresi veya sizin seçtiğiniz güçlü şifre; 8–256 karakter |
 
 Token/parola değerlerini sohbet, Git, kaynak kodu, ekran görüntüsü veya komut satırı argümanlarıyla paylaşmayın. Bulut ortamında görünen platform `GH_TOKEN` bağını Worker'a kopyalamayın; platformun Git proxy kimliği Worker'ın GitHub API erişimi için kullanılmaz.
 

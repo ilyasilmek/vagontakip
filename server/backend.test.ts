@@ -55,6 +55,10 @@ function testDocument(): DatabaseDocument {
 beforeAll(async () => { passwordHash = await createPasswordHash(ADMIN_PASSWORD); });
 
 describe('authenticated shared records', () => {
+  it('supports a nine-character administrator password without storing plaintext', async () => {
+    const object = makeObject(makeEnv({ ADMIN_PASSWORD: 'Example9!' }));
+    await login(object, 'admin', 'Example9!');
+  });
   it('rejects anonymous data reads and returns only safe user fields', async () => {
     const object = makeObject();
     expect((await call(object, '/api/data')).status).toBe(401);
@@ -231,6 +235,24 @@ describe('encrypted GitHub canonical storage', () => {
   function remoteEnv(): DatabaseEnvironment {
     return { SESSION_SECRET: SECRET, DB_ENCRYPTION_KEY: DB_KEY, GITHUB_TOKEN: 'test-repository-token', GITHUB_REPOSITORY: 'owner/repo' };
   }
+
+  it.each([
+    { GITHUB_TOKEN: undefined, DB_ENCRYPTION_KEY: DB_KEY, missing: ['GITHUB_TOKEN'] },
+    { GITHUB_TOKEN: 'test-repository-token', DB_ENCRYPTION_KEY: ' ', missing: ['DB_ENCRYPTION_KEY'] },
+    { GITHUB_TOKEN: '', DB_ENCRYPTION_KEY: undefined, missing: ['GITHUB_TOKEN', 'DB_ENCRYPTION_KEY'] },
+  ])('identifies missing runtime secrets before contacting GitHub ($missing)', async ({ missing, ...env }) => {
+    const fetcher = vi.fn();
+    const store = new GitHubStore({ ...remoteEnv(), ...env }, fetcher as unknown as typeof fetch);
+    try {
+      await store.read();
+      throw new Error('Expected missing configuration to fail');
+    } catch (error) {
+      expect(error).toMatchObject({ code: 'CONFIGURATION_REQUIRED', status: 503 });
+      expect((error as Error).message).toContain(missing.join(', '));
+      expect((error as Error).message).not.toContain('test-repository-token');
+    }
+    expect(fetcher).not.toHaveBeenCalled();
+  });
 
   it('writes authenticated ciphertext and never commits a failed write to the local cache', async () => {
     const github = fakeGitHub();
