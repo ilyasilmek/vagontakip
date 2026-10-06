@@ -1,6 +1,6 @@
 # Cloudflare'da canlı yayın
 
-Bu uygulama tek Cloudflare Worker olarak yayınlanır: React PWA dosyaları ve `/api/*` aynı HTTPS adresindedir. `wrangler.jsonc` Worker adını `vagon-takip`, kalıcı koordinasyon nesnesini `VagonDatabase` olarak tanımlar. SQLite tabanlı Durable Object kullanılır; ayrı D1, Pages, R2 veya sunucu kurulumu gerekmez.
+Bu uygulama tek Cloudflare Worker olarak yayınlanır: React PWA dosyaları ve `/api/*` aynı HTTPS adresindedir. `wrangler.jsonc` Worker adını `vagontakip`, kalıcı koordinasyon nesnesini `VagonDatabase` olarak tanımlar. SQLite tabanlı Durable Object kullanılır; ayrı D1, Pages, R2 veya sunucu kurulumu gerekmez.
 
 ## Bu teslimdeki durum
 
@@ -19,7 +19,7 @@ Kontrol edilen bulut ortamında Cloudflare tokenı ve hesap kimliği bağlı de�
 
 Cloudflare tokenını hedef hesapla sınırlayın. Worker yayını için **Account → Workers Scripts → Edit**, hesap keşfi için **Account → Account Settings → Read** yetkisi kullanılır. Hesapta SQLite Durable Objects kullanılabilmelidir. Yalnız `workers.dev` adresiyle yayın için özel alan adı ve DNS yetkileri gerekmez. Ayrı D1 oluşturulmadığından D1 izni istenmez.
 
-Bulut ortamının ağ ayarlarında mevcut izinleri koruyarak `api.cloudflare.com` ve `api.github.com` ekleyin. Yayın sonrası uygulamayı bu ortamdan doğrulamak için oluşan `vagon-takip.<hesap-alt-alanı>.workers.dev` adresini de ekleyin. Paket indirme adresleri zaten paket yöneticisi politikasındadır. Cloudflare'da çalışan Worker'ın GitHub erişimi, bu geliştirme ortamının ağ listesinden ayrıdır.
+Bulut ortamının ağ ayarlarında mevcut izinleri koruyarak `api.cloudflare.com` ve `api.github.com` ekleyin. Yayın sonrası uygulamayı bu ortamdan doğrulamak için oluşan `vagontakip.<hesap-alt-alanı>.workers.dev` adresini de ekleyin. Paket indirme adresleri zaten paket yöneticisi politikasındadır. Cloudflare'da çalışan Worker'ın GitHub erişimi, bu geliştirme ortamının ağ listesinden ayrıdır.
 
 ### Cloudflare Worker secrets
 
@@ -59,7 +59,7 @@ ADMIN_USERNAME=admin
 
    Bu komut derleme, tip kontrolü ve PWA service worker üretimini yapar; ardından Wrangler'ı repo içindeki güvenli yerel cache/log konumlarıyla çalıştırır. Konsoldaki `workers.dev` adresi uygulamanın adresidir.
 
-4. Cloudflare panelinde **Workers & Pages → vagon-takip → Settings → Variables and Secrets** altında yukarıdaki dört Worker değerini **Secret** türünde ekleyip uygulayın. İlk yayında bu bağlar henüz yoksa giriş/veri API'si yapılandırma hatası verir; uygulama başlangıç verisini boş veriyle değiştirmez. Alternatif olarak kişisel güvenli terminalinizde Wrangler'ın değerleri gizli isteyen secret komutlarını kullanın:
+4. Cloudflare panelinde **Workers & Pages → vagontakip → Settings → Variables and Secrets** altında yukarıdaki dört Worker değerini **Secret** türünde ekleyip uygulayın. İlk yayında bu bağlar henüz yoksa giriş/veri API'si yapılandırma hatası verir; uygulama başlangıç verisini boş veriyle değiştirmez. Alternatif olarak kişisel güvenli terminalinizde Wrangler'ın değerleri gizli isteyen secret komutlarını kullanın:
 
    ```bash
    node scripts/wrangler.mjs secret put GITHUB_TOKEN
