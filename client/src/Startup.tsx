@@ -4,7 +4,7 @@ import { Brand } from './Login';
 export default function Startup({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const timer = window.setTimeout(onDone, reduced ? 150 : 1500);
+    const timer = window.setTimeout(onDone, reduced ? 150 : 4200);
     return () => window.clearTimeout(timer);
   }, [onDone]);
   return <div className="startup-overlay" role="status" aria-label="Vagon Takip açılıyor"><Brand /><div className="startup-track" aria-hidden="true" /><svg className="startup-train" viewBox="0 0 760 120" aria-hidden="true">
