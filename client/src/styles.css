@@ -34,3 +34,36 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 .modal-header h2 {font-weight:600;text-transform:uppercase}
 @media(min-width:1101px) {.dashboard-columns>section+section {border-left:2px solid #718694;padding-left:24px}}
 @media(max-width:1100px) {.metric:nth-child(n+3) {border-top:2px solid #718694}}
+
+.account-theme {margin-bottom:24px;padding-bottom:24px;border-bottom:2px solid var(--border)}
+.account-theme select {margin:9px 0}
+:root[data-theme=dark] {color:#E4EBEF;background:#101C25;--ink:#E4EBEF;--muted:#B4C4CF;--border:#657D8C;--nav:#142632;--teal:#E4EBEF}
+:root[data-theme=dark] button {color:inherit}
+:root[data-theme=dark] .primary {color:#182C3A}
+:root[data-theme=dark] :is(input,select,textarea) {background:#1C303E;border-color:#7C94A3;color:#E4EBEF}
+:root[data-theme=dark] :is(input,textarea)::placeholder {color:#B4C4CF}
+:root[data-theme=dark] :is(button,a,[role=button]):focus-visible {outline-color:#E8B735}
+:root[data-theme=dark] :is(input,select,textarea):focus {outline-color:#E8B735}
+:root[data-theme=dark] .secondary:hover:not(:disabled) {background:#294252}
+:root[data-theme=dark] :is(.modal,.modal-footer) {background:#101C25}
+:root[data-theme=dark] .metrics {background:#1C303E}
+:root[data-theme=dark] .wagon-table th {background:#294252;color:#E4EBEF}
+:root[data-theme=dark] .detail-field span {color:#E4EBEF}
+:root[data-theme=dark] .danger-button {background:#3A2424;color:#FFD3C8;border-color:#DE9B89}
+:root[data-theme=dark] .notice {background:#243A2E;color:#DCEBDC;border-color:#8EAF99}
+:root[data-theme=dark] :is(.notice.error,.login-session-notice,.confirm-delete) {background:#3A2424;color:#FFD3C8;border-color:#DE9B89}
+:root[data-theme=dark] .confirm-delete h3 {color:#FFD3C8}
+:root[data-theme=dark] .update-banner {background:#243A2E;color:#DCEBDC;border-color:#8EAF99}
+:root[data-theme=dark] .offline-label {background:#443B24;color:#F4DEAA}
+:root[data-theme=dark] .badge {color:#E4EBEF}
+:root[data-theme=dark] .table-row:hover {background:#1C303E}
+:root[data-theme=dark] .filter-pill {color:#B4C4CF}
+:root[data-theme=dark] .filter-pill.active {color:#E4EBEF}
+:root[data-theme=dark] .filter-pill span {background:#294252;color:#E4EBEF}
+:root[data-theme=dark] .login-footer {color:#B4C4CF}
+:root[data-theme=dark] .gbz-plate {color:#182C3A}
+:root[data-theme=dark] .nav-button.active,:root[data-theme=dark] .mobile-nav-button.active {color:#E8B735}
+:root[data-theme=dark] .login-shell {background:#101C25}
+:root[data-theme=dark] .badge.amber::before {background:#E8B735}
+:root[data-theme=dark] .badge.blue::before {background:#8BBAD7}
+:root[data-theme=dark] .badge.teal::before {background:#8AC2AE}

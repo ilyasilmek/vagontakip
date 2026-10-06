@@ -10,6 +10,7 @@ import Admin, { initials } from './Admin';
 import Account from './Account';
 import Install, { useInstall } from './Install';
 import Startup from './Startup';
+import { useTheme } from './theme';
 
 type Page = 'dashboard' | CollectionName | 'admin' | 'account';
 const navigation = [
@@ -20,6 +21,7 @@ const navigation = [
 ] as const;
 
 export default function App() {
+  const { theme, changeTheme } = useTheme();
   const [intro, setIntro] = useState(true);
   const finishIntro = useCallback(() => setIntro(false), []);
   const [booting, setBooting] = useState(true);
@@ -134,6 +136,6 @@ export default function App() {
     {page === 'dashboard' && <Dashboard data={data} online={online} onNavigate={setPage} onEdit={edit} notify={notify} />}
     {(page === 'wagons' || page === 'parts' || page === 'inventory') && <Collection key={page} collection={page} rows={data[page]} online={online} onEdit={record => edit(page, record)} updatedAt={data.updatedAt} />}
     {page === 'admin' && user.role === 'admin' && <Admin online={online} onExpired={expired} notify={notify} />}
-    {page === 'account' && <Account onUpdated={setUser} user={user} online={online} onLogout={logout} onExpired={expired} notify={notify} />}
+    {page === 'account' && <Account theme={theme} onThemeChange={changeTheme} onUpdated={setUser} user={user} online={online} onLogout={logout} onExpired={expired} notify={notify} />}
   </main></div><nav className="mobile-bottom" aria-label="Mobil gezinme">{navigation.map(({ page: target, mobile, Icon }) => <button key={target} className={`mobile-nav-button ${page === target ? 'active' : ''}`} onClick={() => setPage(target)} aria-current={page === target ? 'page' : undefined}><Icon /><span>{mobile}</span></button>)}<button className={`mobile-nav-button ${page === 'admin' || page === 'account' ? 'active' : ''}`} onClick={() => setPage(user.role === 'admin' ? 'admin' : 'account')} aria-current={page === 'admin' || page === 'account' ? 'page' : undefined}>{user.role === 'admin' ? <ShieldCheck /> : <CircleUserRound />}<span>{user.role === 'admin' ? 'Yönetim' : 'Hesabım'}</span></button></nav>{editor && <RecordEditor {...editor} user={user} online={online} onClose={() => setEditor(null)} onSaved={saved} onExpired={expired} onConflict={() => refresh()} />}{installOpen && <Install {...install} onClose={() => setInstallOpen(false)} />}{toast && <div className="toast" role="status"><Check /><span>{toast}</span></div>}</div>;
 }
