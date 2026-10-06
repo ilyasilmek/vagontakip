@@ -102,6 +102,13 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     expect((await data(admin)).wagons.find(wagon => wagon.id === record.id)?.notes).toBe('Ordinary user edited on another phone.');
     await expectNoHorizontalOverflow(page);
     await navigation.getByRole('button', { name: 'Hesabım', exact: true }).click();
+    await expect(page.getByLabel('Postası', { exact: true }).locator('option')).toHaveCount(7);
+    await page.getByLabel('Postası', { exact: true }).selectOption('Hava-Fren');
+    await page.getByRole('button', { name: 'Postayı kaydet', exact: true }).click();
+    await expect(page.getByRole('status')).toContainText('Postanız kaydedildi.');
+    await page.reload();
+    await page.getByRole('navigation', { name: 'Mobil gezinme' }).getByRole('button', { name: 'Hesabım', exact: true }).click();
+    await expect(page.getByLabel('Postası', { exact: true })).toHaveValue('Hava-Fren');
     await page.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Giriş yap', exact: true })).toBeVisible();
     const clearedSnapshot = await page.evaluate(async () => new Promise<boolean>(resolve => {

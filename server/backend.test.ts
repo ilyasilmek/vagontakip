@@ -55,6 +55,19 @@ function testDocument(): DatabaseDocument {
 beforeAll(async () => { passwordHash = await createPasswordHash(ADMIN_PASSWORD); });
 
 describe('authenticated shared records', () => {
+  it('persists account post choices without allowing privilege changes', async () => {
+    const object = makeObject();
+    expect((await call(object, '/api/account', 'PATCH', { post: 'Boji' })).status).toBe(401);
+    const session = await login(object);
+    const response = await call(object, '/api/account', 'PATCH', { post: 'Boji' }, session);
+    expect(response.status).toBe(200);
+    expect((await response.json() as { user: { post: string } }).user.post).toBe('Boji');
+    const restored = await (await call(object, '/api/session', 'GET', undefined, session)).json() as { user: { post: string } };
+    expect(restored.user.post).toBe('Boji');
+    expect((await call(object, '/api/account', 'PATCH', { post: 'Unknown' }, session)).status).toBe(400);
+    expect((await call(object, '/api/account', 'PATCH', { post: 'Boji', role: 'admin' }, session)).status).toBe(400);
+  });
+
   it('persists wagon types, accepts legacy records and rejects unknown types', async () => {
     const object = makeObject();
     const session = await login(object);

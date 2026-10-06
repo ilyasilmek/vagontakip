@@ -3,7 +3,7 @@ import type { CollectionName, Inventory, OperationalRecord, Part, Wagon } from '
 import { PASSWORD_ITERATIONS, createPasswordHash, signSession, verifyPassword, verifySession, type SessionClaims } from './crypto';
 import { DatabaseEngine, assertActor, audit, type DatabaseEnvironment } from './database';
 import { ApiError, errorResponse } from './errors';
-import { createUserSchema, fieldSchemas, parseInput, passwordSchema, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
+import { createUserSchema, fieldSchemas, parseInput, passwordSchema, postSchema, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
 
 export interface Env extends DatabaseEnvironment {
   DB: DurableObjectNamespace;
@@ -185,6 +185,19 @@ export class VagonDatabase {
 
       if (pathname === '/api/data' && method === 'GET') return json(await this.engine.data(await this.requireClaims(request)));
 
+      if (pathname === '/api/account' && method === 'PATCH') {
+        const claims = await this.requireClaims(request);
+        const input = parseInput(z.object({ post: postSchema }).strict(), await body(request));
+        const { result: user } = await this.engine.mutate(database => {
+          const user = assertActor(database, claims);
+          user.post = input.post;
+          user.updatedAt = new Date().toISOString();
+          audit(database, user, 'Postası değiştirildi', 'user', user.id);
+          return safeUser(user);
+        });
+        return json({ user });
+      }
+
       if (pathname === '/api/password' && method === 'POST') {
         const claims = await this.requireClaims(request);
         const input = parseInput(z.object({ currentPassword: z.string().min(1).max(256), password: passwordSchema }).strict(), await body(request));
@@ -271,7 +284,7 @@ export class VagonDatabase {
         const actor = assertActor(database, claims, true);
         if (database.users.some(user => user.username === input.username)) throw new ApiError(409, 'USERNAME_TAKEN', 'Bu kullanıcı adı zaten kullanılıyor.');
         const now = new Date().toISOString();
-        const user: StoredUser = { id, username: input.username, displayName: input.displayName, role: input.role, active: true, password, authVersion: 1, createdAt: now, updatedAt: now };
+        const user: StoredUser = { id, username: input.username, displayName: input.displayName, post: input.post || '', role: input.role, active: true, password, authVersion: 1, createdAt: now, updatedAt: now };
         database.users.push(user);
         audit(database, actor, 'Kullanıcı oluşturuldu', 'user', user.id);
         return safeUser(user);
@@ -298,6 +311,7 @@ export class VagonDatabase {
           return safeUser(user);
         }
         if (input.displayName !== undefined) user.displayName = input.displayName;
+        if (input.post !== undefined) user.post = input.post;
         if (input.role !== undefined) user.role = input.role;
         if (input.active !== undefined) user.active = input.active;
         if (password) user.password = password;
