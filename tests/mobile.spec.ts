@@ -17,7 +17,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     temporaryUserId = temporary.user.id;
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Giriş yapın.' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Giriş yap', exact: true })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await loginThroughPage(page, account);
     await expectNoHorizontalOverflow(page);
@@ -44,6 +44,8 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     const wagonName = uniqueName('mobilewagon');
     const editor = page.getByRole('dialog', { name: 'Yeni vagon ekle' });
     await editor.getByLabel('Vagon numarası', { exact: false }).fill(wagonName);
+    await expect(editor.getByLabel('Vagon tipi', { exact: true }).locator('option')).toHaveCount(21);
+    await editor.getByLabel('Vagon tipi', { exact: true }).selectOption('Hbbills');
     await editor.getByLabel(/^Giriş tarihi/).fill('2026-10-06');
     await editor.getByLabel(/^Açıklama/).fill('Created on a phone.');
     await expectNoHorizontalOverflow(page);
@@ -58,6 +60,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     await page.getByRole('textbox', { name: 'Vagonlar içinde ara' }).fill(wagonName);
     const row = page.getByRole('button', { name: `Vagon ${wagonName} ayrıntıları`, exact: true });
     await expect(row).toBeVisible();
+    await expect(row).toContainText('Hbbills');
     await expect(page.locator('.record-card')).toHaveCount(1);
     await row.click();
     const details = page.getByRole('dialog', { name: 'Vagon ayrıntıları' });
@@ -79,11 +82,12 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     await workbook.xlsx.readFile(downloadedPath);
     expect(workbook.worksheets.map(sheet => sheet.name)).toEqual(['Vagonlar', 'Parçalar', 'Demirbaşlar']);
     expect(workbook.getWorksheet('Vagonlar')?.getCell('A1').value).toBe('Vagon numarası');
+    expect(workbook.getWorksheet('Vagonlar')?.getCell('B1').value).toBe('Vagon tipi');
     expect(workbook.getWorksheet('Vagonlar')?.rowCount).toBeGreaterThan(1);
 
     await page.getByRole('button', { name: 'Hesabımı aç', exact: true }).click();
     await page.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Giriş yapın.' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Giriş yap', exact: true })).toBeVisible();
     await loginThroughPage(page, temporary.account);
     await expect(navigation.getByRole('button', { name: 'Yönetim', exact: true })).toHaveCount(0);
     await expect(navigation.getByRole('button', { name: 'Hesabım', exact: true })).toBeVisible();
@@ -99,7 +103,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     await expectNoHorizontalOverflow(page);
     await navigation.getByRole('button', { name: 'Hesabım', exact: true }).click();
     await page.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Giriş yapın.' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Giriş yap', exact: true })).toBeVisible();
     const clearedSnapshot = await page.evaluate(async () => new Promise<boolean>(resolve => {
       const request = indexedDB.open('vagon-takip-offline', 1);
       request.onerror = () => resolve(false);
@@ -113,7 +117,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     }));
     expect(clearedSnapshot, 'Logging out removes the offline operational snapshot.').toBe(true);
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Giriş yapın.' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Giriş yap', exact: true })).toBeVisible();
     expect(browserErrors, 'Uncaught browser errors').toEqual([]);
   } finally {
     try { await deleteCreatedRecords(admin, created); }

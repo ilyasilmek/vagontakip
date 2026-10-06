@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { WAGON_STATUSES, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
+import { WAGON_STATUSES, WAGON_TYPES, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
 import type { PasswordHash } from './crypto';
 import { ApiError } from './errors';
 
@@ -26,6 +26,7 @@ const quantity = z.number().int().min(0).max(1_000_000);
 
 export const wagonFields = z.object({
   number: requiredText,
+  wagonType: z.union([z.enum(WAGON_TYPES), z.literal('')]).optional(),
   entryDate: date,
   channelDate: date,
   completedDate: date,

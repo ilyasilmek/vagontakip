@@ -1,4 +1,4 @@
-import { WAGON_STATUSES, type CollectionName, type OperationalRecord, type Wagon, type Part, type Inventory } from '../../shared/types';
+import { WAGON_STATUSES, WAGON_TYPES, type CollectionName, type OperationalRecord, type Wagon, type Part, type Inventory } from '../../shared/types';
 
 export interface FieldDefinition { key: string; label: string; kind?: 'date' | 'number' | 'textarea' | 'select'; options?: readonly string[]; required?: boolean; wide?: boolean; hint?: string; }
 export const collectionNames: Record<CollectionName, string> = { wagons: 'Vagonlar', parts: 'Parçalar', inventory: 'Demirbaşlar' };
@@ -6,6 +6,7 @@ export const singularNames: Record<CollectionName, string> = { wagons: 'Vagon', 
 export const fields: Record<CollectionName, FieldDefinition[]> = {
   wagons: [
     { key: 'number', label: 'Vagon numarası', required: true },
+    { key: 'wagonType', label: 'Vagon tipi', kind: 'select', options: WAGON_TYPES },
     { key: 'status', label: 'Durum', kind: 'select', options: WAGON_STATUSES, required: true },
     { key: 'entryDate', label: 'Giriş tarihi', kind: 'date', required: true },
     { key: 'channelDate', label: 'Kanala giriş tarihi', kind: 'date' },

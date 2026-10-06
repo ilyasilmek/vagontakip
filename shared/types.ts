@@ -1,5 +1,7 @@
 export const WAGON_STATUSES = ['Bekliyor', 'Parça bekliyor', 'Bakım devam ediyor', 'Tamamlandı'] as const;
 export type WagonStatus = typeof WAGON_STATUSES[number];
+export const WAGON_TYPES = ['Hbbills', 'Habins', 'Gabs', 'Sgns', 'Sggmrss', 'Rns', 'Eanos', 'Fals', 'Tagnpps', 'Uacs', 'Zans', 'Zacns', 'Laaes', 'Falns', 'Roos', 'Shimmns', 'Tamns', 'Remms', 'Sggrss', 'Zaes'] as const;
+export type WagonType = typeof WAGON_TYPES[number];
 export type UserRole = 'admin' | 'user';
 
 export interface RecordMetadata {
@@ -12,6 +14,7 @@ export interface RecordMetadata {
 
 export interface Wagon extends RecordMetadata {
   number: string;
+  wagonType?: WagonType | '';
   entryDate: string;
   channelDate: string;
   completedDate: string;

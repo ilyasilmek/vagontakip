@@ -55,6 +55,19 @@ function testDocument(): DatabaseDocument {
 beforeAll(async () => { passwordHash = await createPasswordHash(ADMIN_PASSWORD); });
 
 describe('authenticated shared records', () => {
+  it('persists wagon types, accepts legacy records and rejects unknown types', async () => {
+    const object = makeObject();
+    const session = await login(object);
+    const response = await call(object, '/api/wagons', 'POST', { ...wagonFields, wagonType: 'Hbbills' }, session);
+    expect(response.status).toBe(201);
+    const saved = await response.json() as { record: Wagon };
+    expect(saved.record.wagonType).toBe('Hbbills');
+    expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, number: 'legacy' }, session)).status).toBe(201);
+    expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, number: 'bad', wagonType: 'Unknown' }, session)).status).toBe(400);
+    const result = await (await call(object, '/api/data', 'GET', undefined, session)).json() as { wagons: Wagon[] };
+    expect(result.wagons.find(wagon => wagon.id === saved.record.id)?.wagonType).toBe('Hbbills');
+  });
+
   it('supports a nine-character administrator password without storing plaintext', async () => {
     const object = makeObject(makeEnv({ ADMIN_PASSWORD: 'Example9!' }));
     await login(object, 'admin', 'Example9!');
