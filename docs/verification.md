@@ -12,3 +12,9 @@
 - Testler kendi geçici kayıtlarını ve hesaplarını temizledi. Aktarılan özgün 137 kayıt testlerden sonra başlangıç kopyasıyla aynıydı.
 
 Cloudflare hesabına erişim bağları henüz mevcut olmadığından üretim yayını ve canlı GitHub API bağlantısı doğrulanmadı. Fiziksel Android/iPhone cihaz testi yapılmadı; yukarıdaki mobil kontroller Chromium ekran ve dokunma emülasyonuyla yürütüldü. Canlı giriş ve kayıt yazma kontrolü yayın sonrasında yapılmalıdır.
+
+## GitHub bağlantısı düzeltmesi
+
+Cloudflare Workers'ın gerçek yerel runtime'ında, nesne alanına saklanan native `fetch` fonksiyonunu nesne metodu olarak çağırmanın `Illegal invocation` hatası verdiği yeniden üretildi. GitHub bağlantısı artık fonksiyonu global receiver ile çağırıyor. Gerçek `GitHubStore` istek yolu aynı runtime'da yerel HTTP hedefine başarılı `200` yanıtı aldı. Bu kontrol GitHub'ın üretim erişim tokenını doğrulamaz.
+
+Veritabanı veya yapılandırma hatası, parola kontrolünden önce oluşursa giriş denemesi sayacı geri alınır; yanlış parola denemeleri korunur. Bu düzeltmeler için regresyon testleri eklendi.

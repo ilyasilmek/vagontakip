@@ -31,7 +31,9 @@ export class GitHubStore<T> {
   }
 
   private async request(url: string, init: RequestInit): Promise<Response> {
-    try { return await this.fetcher(url, { ...init, signal: AbortSignal.timeout(15_000) }); }
+    // Workers' native fetch requires the global receiver. Calling a stored
+    // function as this.fetcher(...) incorrectly binds it to GitHubStore.
+    try { return await this.fetcher.call(globalThis, url, { ...init, signal: AbortSignal.timeout(15_000) }); }
     catch { throw new ApiError(503, 'GITHUB_UNAVAILABLE', 'Ortak veritabanına ulaşılamadı. Daha sonra tekrar deneyin.'); }
   }
 

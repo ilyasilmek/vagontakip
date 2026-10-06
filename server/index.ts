@@ -156,7 +156,14 @@ export class VagonDatabase {
       if (pathname === '/api/login' && method === 'POST') {
         const input = parseInput(z.object({ username: z.string().trim().min(1).max(64).transform(v => v.toLowerCase()), password: z.string().min(1).max(256) }).strict(), await body(request));
         const loginKeys = await this.limitLogin(request, input.username);
-        const database = await this.engine.load();
+        let database: DatabaseDocument;
+        try { database = await this.engine.load(); }
+        catch (error) {
+          // A database/configuration outage does not indicate a bad password.
+          // Refund this attempt while retaining earlier credential failures.
+          await this.successfulLogin(loginKeys);
+          throw error;
+        }
         const user = database.users.find(u => u.username === input.username);
         // Unknown accounts take the same PBKDF2 work as existing accounts.
         const valid = await verifyPassword(input.password, user?.password ?? { algorithm: 'PBKDF2-SHA256', iterations: PASSWORD_ITERATIONS, salt: 'AAAAAAAAAAAAAAAAAAAAAA==', hash: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' });

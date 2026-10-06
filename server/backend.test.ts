@@ -155,6 +155,17 @@ describe('authenticated shared records', () => {
     expect(await oversized.json()).toMatchObject({ code: 'INVALID_LOCAL_SEED' });
   });
 
+  it('does not lock users out when configuration fails before checking credentials', async () => {
+    const storage = new MemoryStorage();
+    const object = makeObject(makeEnv({ LOCAL_SEED_BASE64: '%%%not-base64%%%' }), storage);
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const response = await call(object, '/api/login', 'POST', { username: 'admin', password: ADMIN_PASSWORD });
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({ code: 'INVALID_LOCAL_SEED' });
+    }
+    expect(await storage.get('loginLimits')).toEqual({});
+  });
+
   it('keeps the new password session and rejects old sessions and logged-out cookie replay', async () => {
     const object = makeObject();
     const admin = await login(object);
@@ -235,6 +246,17 @@ describe('encrypted GitHub canonical storage', () => {
   function remoteEnv(): DatabaseEnvironment {
     return { SESSION_SECRET: SECRET, DB_ENCRYPTION_KEY: DB_KEY, GITHUB_TOKEN: 'test-repository-token', GITHUB_REPOSITORY: 'owner/repo' };
   }
+
+  it('calls fetch with the global receiver required by the Workers runtime', async () => {
+    const encrypted = await encryptDatabase(testDocument(), DB_KEY);
+    const fetcher = async function(this: unknown): Promise<Response> {
+      if (this !== globalThis) throw new TypeError('Illegal invocation');
+      return Response.json({ encoding: 'base64', sha: 'sha-global', content: toBase64(new TextEncoder().encode(JSON.stringify(encrypted))) });
+    };
+    const result = await new GitHubStore<DatabaseDocument>(remoteEnv(), fetcher as typeof fetch).read();
+    expect(result?.sha).toBe('sha-global');
+    expect(result?.database.wagons).toEqual(testDocument().wagons);
+  });
 
   it.each([
     { GITHUB_TOKEN: undefined, DB_ENCRYPTION_KEY: DB_KEY, missing: ['GITHUB_TOKEN'] },
