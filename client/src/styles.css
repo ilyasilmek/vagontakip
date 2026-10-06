@@ -20,3 +20,17 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 @media(prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}.startup-train {display:none}}
 
 .startup-club {position:absolute;top:50%;left:20px;right:20px;transform:translateY(-50%);text-align:center}.startup-club p {font-family:'IBM Plex Sans Condensed',sans-serif;font-size:clamp(23px,5.5vw,36px);font-weight:600;letter-spacing:1px;line-height:1.4;color:#EDF1F2;margin:0}.startup-club-line {display:block;white-space:nowrap}.startup-letter {display:inline-block;opacity:0;transform:translateY(5px);animation:club-letter 160ms ease-out var(--letter-delay) both}.startup-train {z-index:1}@keyframes club-letter {from {opacity:0;transform:translateY(5px)}to {opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce) {.startup-letter {opacity:1;transform:none}}
+
+/* Çizelge bölümleri: belirgin ayırıcılar ve kayıt alanı başlıkları. */
+.dispatch-summary {border-bottom:2px solid #718694}
+.metrics {border-top:2px solid #718694;border-bottom:2px solid #718694;background:#E3EAEE}
+.metric {border-right:2px solid #718694}
+.dashboard-columns>section {border-top:3px solid #B58B20;padding-top:20px}
+.wagon-table th {background:#D3DEE5;color:#182C3A;border-bottom:2px solid #718694}
+.wagon-table td {border-top:2px solid #718694}
+.wagon-table tbody tr:last-child td {border-bottom:2px solid #718694}
+.activity-item {border-bottom:2px solid #718694}
+.detail-field span {font-size:14px;font-weight:600;letter-spacing:.6px;color:#182C3A}
+.modal-header h2 {font-weight:600;text-transform:uppercase}
+@media(min-width:1101px) {.dashboard-columns>section+section {border-left:2px solid #718694;padding-left:24px}}
+@media(max-width:1100px) {.metric:nth-child(n+3) {border-top:2px solid #718694}}
