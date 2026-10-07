@@ -84,3 +84,25 @@ test('starts maintenance from wagon details, prefills its number and returns to 
   await admin.dispose();
  }
 });
+
+test('creates a wagon and maintenance from the new-wagon menu with one final save',async({page,playwright})=>{
+ const admin=await apiContext(playwright);const number=uniqueName('combined');let wagonId='';let operationId='';
+ try{
+  await login(admin,await credentials());await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());
+  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Vagonlar',exact:true}).click();
+  await page.getByRole('button',{name:'Vagon ekle',exact:true}).first().click();
+  const wagonForm=page.getByRole('dialog',{name:'Yeni vagon ekle',exact:true});await wagonForm.getByLabel('Vagon numarası *',{exact:true}).fill(number);await wagonForm.getByRole('combobox',{name:'Vagon tipi',exact:true}).selectOption('Sgss-w');
+  await wagonForm.getByRole('button',{name:'Bakım ekle',exact:true}).click();const combined=page.getByRole('dialog',{name:'Vagon ve bakım ekle',exact:true});await expect(combined.getByLabel('Vagon numarası',{exact:true})).toHaveValue(number);
+  let data=await (await admin.get('/api/data')).json();expect(data.wagons.some((w:{number:string})=>w.number===number)).toBe(false);
+  await combined.getByRole('button',{name:'Vazgeç',exact:true}).click();await expect(wagonForm).toBeVisible();await expect(wagonForm.getByLabel('Vagon numarası *',{exact:true})).toHaveValue(number);
+  await wagonForm.getByRole('button',{name:'Bakım ekle',exact:true}).click();
+  const day=new Date().toISOString().slice(0,10);await combined.getByLabel('Başlangıç tarih ve saati').fill(day+'T09:00');await combined.getByLabel('Bitiş tarih ve saati').fill(day+'T11:00');await combined.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');await combined.getByRole('checkbox',{name:/^Sabo sök-tak/}).check();
+  const saved=page.waitForResponse(r=>r.url().endsWith('/api/maintenance/with-wagon')&&r.request().method()==='POST');await combined.getByRole('button',{name:'Vagon ve bakımı kaydet',exact:true}).click();const response=await saved;expect(response.status()).toBe(201);const result=await response.json();wagonId=result.wagon.id;operationId=result.operation.id;
+  expect(result.wagon.number).toBe(number);expect(result.operation.wagonNumber).toBe(number);await expect(combined).toHaveCount(0);await expect(wagonForm).toHaveCount(0);await expectNoHorizontalOverflow(page);
+  data=await (await admin.get('/api/data')).json();expect(data.wagons.filter((w:{number:string})=>w.number===number)).toHaveLength(1);
+ }finally{
+  if(operationId){const listing=await (await admin.get('/api/maintenance')).json();const o=listing.operations.find((r:{id:string})=>r.id===operationId);if(o)expect((await admin.delete('/api/maintenance/'+operationId,{data:{revision:o.revision}})).status()).toBe(200);}
+  if(wagonId){const data=await (await admin.get('/api/data')).json();const w=data.wagons.find((r:{id:string})=>r.id===wagonId);if(w)expect((await admin.delete('/api/wagons/'+wagonId,{data:{revision:w.revision}})).status()).toBe(200);}
+  await admin.dispose();
+ }
+});

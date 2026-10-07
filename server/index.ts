@@ -221,6 +221,22 @@ export class VagonDatabase {
         if (this.env.MAINTENANCE_ENABLED !== 'true') throw new ApiError(404, 'NOT_FOUND', 'Bu bölüm bu ortamda etkin değil.');
         const id = maintenanceRoute[1];
         const claims = await this.requireClaims(request, method === 'DELETE');
+        if (method === 'POST' && id === 'with-wagon') {
+          const input = parseInput(z.object({wagon:fieldSchemas.wagons,maintenance:maintenanceInputSchema}).strict(),await body(request));
+          validateWagonWorkflow(input.wagon);
+          if (input.wagon.number !== input.maintenance.wagonNumber) throw new ApiError(400,'WAGON_MISMATCH','Vagon ve bakım numarası aynı olmalı.');
+          const {result,version}=await this.engine.mutate(database=>{
+            const actor=assertActor(database,claims);const now=new Date().toISOString();
+            const metadata={revision:1,createdAt:now,updatedAt:now,updatedBy:actor.id};
+            const operation=parseInput(maintenanceRecordSchema,{...input.maintenance,jobs:resolveJobs(input.maintenance.jobs,database.jobTypes??JOB_TYPES),...metadata,id:crypto.randomUUID()});
+            const wagon={...input.wagon,...metadata,id:crypto.randomUUID()} as Wagon;
+            database.wagons.push(wagon);(database.maintenanceOperations??=[]).push(operation);
+            audit(database,actor,'Vagon ve bakım birlikte eklendi','wagon',wagon.id);
+            audit(database,actor,'Bakım operasyonu eklendi','maintenance',operation.id);
+            return {wagon,operation};
+          });
+          return json({...result,version},201);
+        }
         if (method === 'GET' && !id) {
           const database = await this.engine.load();
           return json({ operations: database.maintenanceOperations ?? [], jobTypes: database.jobTypes ?? JOB_TYPES });

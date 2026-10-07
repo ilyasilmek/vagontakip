@@ -48,3 +48,5 @@ Aylık özet, operasyonlar, yapılan işler ve beklemeler Excel'e indirilir. Det
 Yalnız test ortamında Vagonlar → vagon ayrıntıları → Bakım ekle, vagon numarası hazır gelen bakım formunu açar. Kaydet veya vazgeç sonrasında vagon detayına dönülür; bakım operasyonları ve rapor bölümü ayrı kalır. Bakım kaydı vagonun durumunu otomatik değiştirmez. Geçişte geri tuşu yalnız üstteki bakım formunu kapatır.
 
 Bu denemeden önceki test arayüzü `a030984` commitidir. Kullanıcı isterse yalnız bu arayüz değişikliği geri alınabilir; test verileri silinmez. Kullanıcının açık onayı olmadan ana uygulamaya veya main dalına taşıma yapılmaz.
+
+Yeni vagon girişinde de Bakım ekle kullanılabilir: vagon alanları doldurulduktan sonra bakım formuna geçilir, Vagon ve bakımı kaydet ile tek API işlemi içinde iki kayıt oluşturulur. İlk forma geri dönmek girilen vagon bilgilerini korur. Bakım formundan vazgeçmek hiçbir kaydı oluşturmaz. Sunucuda vagon ve bakım doğrulaması birlikte yapılır; geçersiz bakımda vagon da yazılmaz. Bakım ekle seçilmeden normal Kaydet yalnız vagon oluşturur. Bu akış da yalnız pilot ortamındadır.

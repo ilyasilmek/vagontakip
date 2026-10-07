@@ -458,6 +458,19 @@ describe('isolated maintenance pilot', () => {
     }
     expect((await (await call(object,'/api/maintenance','GET',undefined,session)).json() as {operations:unknown[]}).operations).toHaveLength(0);
   });
+  it('creates a new wagon and its maintenance atomically, without partial records on validation errors',async()=>{
+    const storage=new MemoryStorage();const env=makeEnv({MAINTENANCE_ENABLED:'true'});const object=makeObject(env,storage);const session=await login(object);
+    const wagon={number:fields.wagonNumber,wagonType:'Sgss-w',entryDate:'2026-10-07',channelDate:'',completedDate:'',status:'Bekliyor',notes:''};
+    const before=await (await call(object,'/api/data','GET',undefined,session)).json() as {wagons:unknown[]};
+    for(const maintenance of [{...fields,wagonNumber:'OTHER'},{...fields,waits:[{reason:'Malzeme/Valf Tedarik',minutes:121,note:''}]},{...fields,jobs:[{jobTypeId:999,quantity:1}]}]) expect((await call(object,'/api/maintenance/with-wagon','POST',{wagon,maintenance},session)).status).toBe(400);
+    const unchanged=await (await call(object,'/api/data','GET',undefined,session)).json() as {wagons:unknown[]};expect(unchanged.wagons).toHaveLength(before.wagons.length);
+    expect((await (await call(object,'/api/maintenance','GET',undefined,session)).json() as {operations:unknown[]}).operations).toHaveLength(0);
+    expect((await call(object,'/api/maintenance/with-wagon','POST',{wagon,maintenance:fields},session)).status).toBe(201);
+    const restarted=makeObject(env,storage);
+    const data=await (await call(restarted,'/api/data','GET',undefined,session)).json() as {wagons:unknown[]};expect(data.wagons).toHaveLength(before.wagons.length+1);
+    expect((await (await call(restarted,'/api/maintenance','GET',undefined,session)).json() as {operations:unknown[]}).operations).toHaveLength(1);
+    expect((await call(makeObject(),'/api/maintenance/with-wagon','POST',{wagon,maintenance:fields})).status).toBe(404);
+  });
   it('allows ordinary users to record work but restricts deletion and protects same-origin writes', async () => {
     const object=makeObject(makeEnv({MAINTENANCE_ENABLED:'true'}));const admin=await login(object);
     await call(object,'/api/admin/users','POST',{username:'maintenance-user',displayName:'User',password:USER_PASSWORD,role:'user'},admin);
