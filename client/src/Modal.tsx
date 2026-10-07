@@ -1,7 +1,9 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useModalHistory } from './navigation';
 
-export default function Modal({ title, subtitle, onClose, children, footer }: { title: string; subtitle?: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
+export default function Modal({ title, subtitle, onClose, children, footer, canClose = true }: { title: string; subtitle?: string; onClose: () => void; children: ReactNode; footer?: ReactNode; canClose?: boolean }) {
+  useModalHistory(onClose, canClose);
   const dialog = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;

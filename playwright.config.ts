@@ -8,6 +8,7 @@ if (!['127.0.0.1', 'localhost', '[::1]'].includes(new URL(baseURL).hostname)) {
 
 export default defineConfig({
   testDir: './tests',
+  testMatch: '**/*.spec.ts',
   fullyParallel: false,
   workers: 1,
   timeout: 90_000,

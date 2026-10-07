@@ -26,6 +26,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     for (const item of [{ button: 'Vagonlar', heading: 'Vagonlar' }, { button: 'Parçalar', heading: 'Parçalar' }, { button: 'Demirbaş', heading: 'Demirbaşlar' }]) {
       await navigation.getByRole('button', { name: item.button, exact: true }).click();
       await expect(page.getByRole('heading', { name: item.heading, exact: true })).toBeVisible();
+      await expect(page.getByLabel(`${item.heading} sıralaması`, { exact: true })).toHaveValue('created-desc');
       await expectNoHorizontalOverflow(page);
     }
 
@@ -40,12 +41,16 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     await userEditor.getByRole('button', { name: 'Vazgeç', exact: true }).click();
 
     await navigation.getByRole('button', { name: 'Vagonlar', exact: true }).click();
-    await page.getByRole('button', { name: 'Vagon ekle', exact: true }).click();
+    const sort = page.getByLabel('Vagonlar sıralaması', { exact: true });
+    await sort.selectOption('updated-desc');
+    await expect(sort).toHaveValue('updated-desc');
+    await sort.selectOption('created-desc');
+    await page.locator('.page-heading').getByRole('button', { name: 'Vagon ekle', exact: true }).click();
     const wagonName = uniqueName('mobilewagon');
     const editor = page.getByRole('dialog', { name: 'Yeni vagon ekle' });
     await editor.getByLabel('Vagon numarası', { exact: false }).fill(wagonName);
-    await expect(editor.getByLabel('Vagon tipi', { exact: true }).locator('option')).toHaveCount(21);
-    await editor.getByLabel('Vagon tipi', { exact: true }).selectOption('Hbbills');
+    await expect(editor.getByLabel('Vagon tipi', { exact: true }).locator('option')).toHaveCount(22);
+    await editor.getByLabel('Vagon tipi', { exact: true }).selectOption('Sgss-w');
     await editor.getByLabel(/^Giriş tarihi/).fill('2026-10-06');
     await editor.getByLabel(/^Açıklama/).fill('Created on a phone.');
     await expectNoHorizontalOverflow(page);
@@ -60,7 +65,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     await page.getByRole('textbox', { name: 'Vagonlar içinde ara' }).fill(wagonName);
     const row = page.getByRole('button', { name: `Vagon ${wagonName} ayrıntıları`, exact: true });
     await expect(row).toBeVisible();
-    await expect(row).toContainText('Hbbills');
+    await expect(row).toContainText('Sgss-w');
     await expect(page.locator('.record-card')).toHaveCount(1);
     await row.click();
     const details = page.getByRole('dialog', { name: 'Vagon ayrıntıları' });
@@ -102,13 +107,13 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     expect((await data(admin)).wagons.find(wagon => wagon.id === record.id)?.notes).toBe('Ordinary user edited on another phone.');
     await expectNoHorizontalOverflow(page);
     await navigation.getByRole('button', { name: 'Hesabım', exact: true }).click();
-    await expect(page.getByLabel('Postası', { exact: true }).locator('option')).toHaveCount(7);
-    await page.getByLabel('Postası', { exact: true }).selectOption('Hava-Fren');
+    await expect(page.getByLabel('Postası', { exact: true }).locator('option')).toHaveCount(8);
+    await page.getByLabel('Postası', { exact: true }).selectOption('Torna');
     await page.getByRole('button', { name: 'Postayı kaydet', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('Postanız kaydedildi.');
     await page.reload();
     await page.getByRole('navigation', { name: 'Mobil gezinme' }).getByRole('button', { name: 'Hesabım', exact: true }).click();
-    await expect(page.getByLabel('Postası', { exact: true })).toHaveValue('Hava-Fren');
+    await expect(page.getByLabel('Postası', { exact: true })).toHaveValue('Torna');
     await page.getByRole('button', { name: 'Çıkış yap', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Giriş yap', exact: true })).toBeVisible();
     const clearedSnapshot = await page.evaluate(async () => new Promise<boolean>(resolve => {

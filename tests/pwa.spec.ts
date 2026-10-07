@@ -74,7 +74,7 @@ test('installable manifest, static-only service worker cache and offline read-on
     await context.setOffline(true);
     await expect(page.getByText('Son alınan kayıtları görüntülüyorsunuz.', { exact: false })).toBeVisible();
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Vagon ekle', exact: true })).toBeDisabled();
     await navigation.getByRole('button', { name: 'Vagonlar', exact: true }).click();
     await page.getByRole('textbox', { name: 'Vagonlar içinde ara' }).fill(name);

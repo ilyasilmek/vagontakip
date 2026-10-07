@@ -79,3 +79,7 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 :root[data-theme=dark] .record-history {color:#B4C4CF}
 
 .startup-overlay[data-ready=false] :is(.startup-train,.startup-letter) {animation-play-state:paused}
+
+.sort-control {display:flex;align-items:center;gap:12px;margin:0 0 18px;color:var(--muted);font-size:13px;min-width:0}
+.sort-control select {width:auto;max-width:100%;min-width:0;flex:1;max-width:300px}
+@media(max-width:700px) {.sort-control {gap:8px}.sort-control select {font-size:14px}}

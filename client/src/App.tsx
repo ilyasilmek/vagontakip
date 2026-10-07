@@ -12,7 +12,7 @@ import Install, { useInstall } from './Install';
 import Startup from './Startup';
 import { useTheme } from './theme';
 
-type Page = 'dashboard' | CollectionName | 'admin' | 'account';
+import { usePageNavigation } from './navigation';
 const navigation = [
   { page: 'dashboard', label: 'Genel bakış', mobile: 'Özet', Icon: LayoutDashboard },
   { page: 'wagons', label: 'Vagonlar', mobile: 'Vagonlar', Icon: TrainFront },
@@ -27,7 +27,7 @@ export default function App() {
   const [booting, setBooting] = useState(true);
   const [user, setUser] = useState<SafeUser | null>(null);
   const [data, setData] = useState<DataResponse | null>(null);
-  const [page, setPage] = useState<Page>('dashboard');
+  const { page, navigate: setPage, reset: resetNavigation } = usePageNavigation();
   const [connected, setConnected] = useState(navigator.onLine);
   const [remote, setRemote] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -43,10 +43,10 @@ export default function App() {
   const online = connected && remote;
   const notify = useCallback((message: string) => setToast(message), []);
   const expired = useCallback(() => {
-    epoch.current += 1; setUser(null); setData(null); snapshot.current = null; setEditor(null); setRemote(false); setPage('dashboard');
+    epoch.current += 1; setUser(null); setData(null); snapshot.current = null; setEditor(null); setRemote(false); resetNavigation();
     void cacheClear().catch(() => {});
     setError('Oturumunuz sona erdi. Lütfen tekrar giriş yapın.');
-  }, []);
+  }, [resetNavigation]);
 
   const refresh = useCallback(async (announce = false) => {
     if (inflight.current === epoch.current || !navigator.onLine) return;
@@ -105,11 +105,11 @@ export default function App() {
   }, [user?.id, refresh]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(''), 4500); return () => window.clearTimeout(timer); }, [toast]);
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [page]);
-  useEffect(() => { if (page === 'admin' && user?.role !== 'admin') setPage('account'); }, [page, user?.role]);
+  useEffect(() => { if (page === 'admin' && user?.role !== 'admin') setPage('account'); }, [page, user?.role, setPage]);
 
   async function login(nextUser: SafeUser) {
     epoch.current += 1; await cacheClear().catch(() => {}); snapshot.current = null;
-    setUser(nextUser); setData(null); setPage('dashboard'); setError(''); setBooting(true);
+    setUser(nextUser); setData(null); resetNavigation(); setError(''); setBooting(true);
     await refresh(); setBooting(false);
   }
   async function logout() {
@@ -117,7 +117,7 @@ export default function App() {
     try {
       await api('/logout', 'POST', {}); epoch.current += 1;
       await cacheClear().catch(() => {}); snapshot.current = null;
-      setUser(null); setData(null); setEditor(null); setRemote(false); setPage('dashboard'); setError('');
+      setUser(null); setData(null); setEditor(null); setRemote(false); resetNavigation(); setError('');
     } catch (reason) { if (reason instanceof ApiError && reason.status === 401) expired(); else notify('Çıkış yapılamadı. Bağlantınızı kontrol edin.'); }
   }
   async function saved(message: string) { setEditor(null); await refresh(); notify(message); }
