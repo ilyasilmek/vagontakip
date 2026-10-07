@@ -52,3 +52,35 @@ test('records the agreed workload, persists edits, exports reports and separates
   await admin.dispose();
  }
 });
+
+test('starts maintenance from wagon details, prefills its number and returns to the wagon', async ({page,playwright})=>{
+ const admin=await apiContext(playwright);const wagon=uniqueName('linkedwagon');let wagonId='';let operationId='';
+ try {
+  await login(admin,await credentials());
+  const response=await admin.post('/api/wagons',{data:{number:wagon,wagonType:'Sgss-w',status:'Bekliyor',entryDate:'2026-10-07',channelDate:'',completedDate:'',notes:''}});
+  expect(response.status()).toBe(201);wagonId=(await response.json()).record.id;
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());
+  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Vagonlar',exact:true}).click();
+  await page.getByRole('textbox',{name:'Vagonlar içinde ara'}).fill(wagon);await page.getByRole('button',{name:`Vagon ${wagon} ayrıntıları`,exact:true}).click();
+  const details=page.getByRole('dialog',{name:'Vagon ayrıntıları',exact:true});
+  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();
+  const form=page.getByRole('dialog',{name:'Yeni bakım operasyonu',exact:true});
+  await expect(form.getByLabel('Vagon numarası',{exact:true})).toHaveValue(wagon);
+  await page.goBack();await expect(form).toHaveCount(0);await expect(details).toBeVisible();
+  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();
+  await expect(form).toBeVisible();await page.keyboard.press('Escape');await expect(form).toHaveCount(0);await expect(details).toBeVisible();
+  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();
+  const day=new Date().toISOString().slice(0,10);
+  await form.getByLabel('Başlangıç tarih ve saati').fill(day+'T09:00');await form.getByLabel('Bitiş tarih ve saati').fill(day+'T11:00');
+  await form.getByRole('combobox',{name:'Vardiya',exact:true}).selectOption('2. Vardiya');await form.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');
+  await form.getByRole('checkbox',{name:/^Sabo sök-tak/}).check();await expectNoHorizontalOverflow(page);
+  const saved=page.waitForResponse(r=>r.url().endsWith('/api/maintenance')&&r.request().method()==='POST');await form.getByRole('button',{name:'Kaydet',exact:true}).click();
+  const result=await saved;expect(result.status()).toBe(201);const operation=(await result.json()).operation;operationId=operation.id;expect(operation.wagonNumber).toBe(wagon);expect(operation.shift).toBe('2. Vardiya');
+  await expect(form).toHaveCount(0);await expect(details).toBeVisible();await details.getByRole('button',{name:'Kapat',exact:true}).click();
+  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Bakım',exact:true}).click();await expect(page.getByRole('button',{name:new RegExp(wagon)})).toBeVisible();
+ }finally{
+  if(operationId){const listing=await (await admin.get('/api/maintenance')).json();const o=listing.operations.find((r:{id:string})=>r.id===operationId);if(o)expect((await admin.delete('/api/maintenance/'+operationId,{data:{revision:o.revision}})).status()).toBe(200);}
+  if(wagonId){const data=await (await admin.get('/api/data')).json();const w=data.wagons.find((r:{id:string})=>r.id===wagonId);if(w)expect((await admin.delete('/api/wagons/'+wagonId,{data:{revision:w.revision}})).status()).toBe(200);}
+  await admin.dispose();
+ }
+});

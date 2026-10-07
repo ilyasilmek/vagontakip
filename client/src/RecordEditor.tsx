@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
-import { AlertTriangle, Check, Pencil, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, Pencil, RefreshCw, Trash2, Wrench } from 'lucide-react';
 import type { CollectionName, OperationalRecord, RecordResponse, SafeUser } from '../../shared/types';
 import { api, ApiError } from './api';
 import Modal from './Modal';
 import { dateToday, fields, formatDate, rowStatus, rowTitle, rowValue, singularNames, statusColor } from './records';
 
-export default function RecordEditor({ collection, record, user, online, onClose, onSaved, onExpired, onConflict }: { collection: CollectionName; record: OperationalRecord | null; user: SafeUser; online: boolean; onClose: () => void; onSaved: (message: string) => Promise<void>; onExpired: () => void; onConflict: () => Promise<void> }) {
+export default function RecordEditor({ collection, record, user, online, onClose, onSaved, onExpired, onConflict, onAddMaintenance, maintenanceLoading = false }: { collection: CollectionName; record: OperationalRecord | null; user: SafeUser; online: boolean; onClose: () => void; onSaved: (message: string) => Promise<void>; onExpired: () => void; onConflict: () => Promise<void>; onAddMaintenance?: () => void; maintenanceLoading?: boolean }) {
   const [editing, setEditing] = useState(!record);
   const [values, setValues] = useState<Record<string, string>>(() => Object.fromEntries(fields[collection].map(field => [field.key, record ? rowValue(record, field.key) : field.key === 'quantity' ? '1' : field.key === 'status' ? 'Bekliyor' : field.key === 'entryDate' ? dateToday() : ''])));
   const [pending, setPending] = useState(false);
@@ -42,7 +42,7 @@ export default function RecordEditor({ collection, record, user, online, onClose
     catch (reason) { handleError(reason); }
     finally { setPending(false); }
   }
-  const footer = editing ? <><button type="button" className="secondary" onClick={onClose} disabled={pending}>Vazgeç</button><button type="submit" form="record-form" className="primary" disabled={pending || !online || conflict}>{pending ? <RefreshCw className="spin" /> : <Check />} {pending ? 'Kaydediliyor' : 'Kaydet'}</button></> : <><button type="button" className="secondary" onClick={onClose}>Kapat</button>{user.role === 'admin' && <button className="danger-button" onClick={() => setDeleting(true)} disabled={!online || pending || conflict}><Trash2 /> Sil</button>}<button className="primary" onClick={() => setEditing(true)} disabled={!online || pending || conflict}><Pencil /> Düzenle</button></>;
+  const footer = editing ? <><button type="button" className="secondary" onClick={onClose} disabled={pending}>Vazgeç</button><button type="submit" form="record-form" className="primary" disabled={pending || !online || conflict}>{pending ? <RefreshCw className="spin" /> : <Check />} {pending ? 'Kaydediliyor' : 'Kaydet'}</button></> : <><button type="button" className="secondary" onClick={onClose}>Kapat</button>{user.role === 'admin' && <button className="danger-button" onClick={() => setDeleting(true)} disabled={!online || pending || conflict}><Trash2 /> Sil</button>}{collection === 'wagons' && onAddMaintenance && <button type="button" className="secondary" disabled={!online || pending || maintenanceLoading} onClick={onAddMaintenance}><Wrench />{maintenanceLoading ? 'Bakım formu açılıyor…' : 'Bakım ekle'}</button>}<button className="primary" onClick={() => setEditing(true)} disabled={!online || pending || conflict}><Pencil /> Düzenle</button></>;
   return <Modal title={record ? (editing ? `${name} kaydını düzenle` : `${name} ayrıntıları`) : `Yeni ${name.toLocaleLowerCase('tr-TR')} ekle`} subtitle={record ? rowTitle(record, collection) : 'Kaydedilen bilgiler ekibinizle paylaşılır.'} onClose={() => { if (!pending) onClose(); }} canClose={!pending} footer={footer}>
     {!online && <div className="notice"><AlertTriangle /><span>Çevrimdışı görünüm. Değişiklik yapmak için internete bağlanın.</span></div>}
     {error && <div className="notice error form-error" role="alert"><AlertTriangle /><span>{error}</span></div>}

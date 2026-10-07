@@ -42,3 +42,9 @@ Aylık rapor ayı bakımın İstanbul saatine göre başlangıç ayıdır; ay s�
 Bekleme toplamı gerçek süreyi aşamaz; bitiş başlangıçtan sonra olmalı, ekip ve iş adetleri pozitif tam sayı olmalıdır. Kaydetme sırasında kimlik, standart süre veya hesaplanmış toplamlar istemciden kabul edilmez. Düzenlemede revision kontrolü yapılır. Kullanıcılar kayıt ekleyip düzenleyebilir; yalnız yöneticiler silebilir.
 
 Aylık özet, operasyonlar, yapılan işler ve beklemeler Excel'e indirilir. Detay kartındaki Yazdır / PDF düğmesi sistem yazdırma ekranını açar; PDF olarak kaydedilebilir. Mobil tarayıcıdaki sistem yazdırma desteği cihaza bağlıdır. Canlı giriş ve canlı veriler test için kullanılmaz.
+
+## Vagon detayından bakım girişi denemesi
+
+Yalnız test ortamında Vagonlar → vagon ayrıntıları → Bakım ekle, vagon numarası hazır gelen bakım formunu açar. Kaydet veya vazgeç sonrasında vagon detayına dönülür; bakım operasyonları ve rapor bölümü ayrı kalır. Bakım kaydı vagonun durumunu otomatik değiştirmez. Geçişte geri tuşu yalnız üstteki bakım formunu kapatır.
+
+Bu denemeden önceki test arayüzü `a030984` commitidir. Kullanıcı isterse yalnız bu arayüz değişikliği geri alınabilir; test verileri silinmez. Kullanıcının açık onayı olmadan ana uygulamaya veya main dalına taşıma yapılmaz.
