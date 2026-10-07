@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { maintenanceInputSchema, maintenanceRecordSchema, resolveJobs } from './maintenance';
+import { JOB_TYPES } from '../shared/maintenance';
 import type { CollectionName, Inventory, OperationalRecord, Part, Wagon } from '../shared/types';
 import { PASSWORD_ITERATIONS, createPasswordHash, signSession, verifyPassword, verifySession, type SessionClaims } from './crypto';
 import { DatabaseEngine, assertActor, audit, type DatabaseEnvironment } from './database';
@@ -212,6 +214,51 @@ export class VagonDatabase {
           return user;
         });
         return json({ ok: true }, 200, { 'Set-Cookie': await this.session(user, request) });
+      }
+
+      const maintenanceRoute = /^\/api\/maintenance(?:\/([^/]+))?$/.exec(pathname);
+      if (maintenanceRoute) {
+        if (this.env.MAINTENANCE_ENABLED !== 'true') throw new ApiError(404, 'NOT_FOUND', 'Bu bölüm bu ortamda etkin değil.');
+        const id = maintenanceRoute[1];
+        const claims = await this.requireClaims(request, method === 'DELETE');
+        if (method === 'GET' && !id) {
+          const database = await this.engine.load();
+          return json({ operations: database.maintenanceOperations ?? [], jobTypes: database.jobTypes ?? JOB_TYPES });
+        }
+        if ((method === 'POST' && !id) || (method === 'PATCH' && id)) {
+          const raw = await body(request);
+          const revision = method === 'PATCH' ? parseInput(z.number().int().positive(), raw.revision) : undefined;
+          const { revision: _ignored, ...values } = raw;
+          const input = parseInput(maintenanceInputSchema, method === 'PATCH' ? values : raw);
+          const { result: operation, version } = await this.engine.mutate(database => {
+            const actor = assertActor(database, claims);
+            const operations = database.maintenanceOperations ??= [];
+            const existing = id ? operations.find(o => o.id === id) : undefined;
+            if (id && !existing) throw new ApiError(404, 'NOT_FOUND', 'Bakım operasyonu bulunamadı.');
+            if (existing && revision !== existing.revision) throw new ApiError(409, 'REVISION_CONFLICT', 'Operasyon değişmiş. Güncel kaydı yeniden açın.');
+            const now = new Date().toISOString();
+            const candidate = { ...input, jobs: resolveJobs(input.jobs, database.jobTypes ?? JOB_TYPES), id: existing?.id ?? crypto.randomUUID(), revision: (existing?.revision ?? 0) + 1, createdAt: existing?.createdAt ?? now, updatedAt: now, updatedBy: actor.id };
+            const operation = parseInput(maintenanceRecordSchema, candidate);
+            if (existing) operations[operations.indexOf(existing)] = operation; else operations.push(operation);
+            audit(database, actor, existing ? 'Bakım operasyonu düzenlendi' : 'Bakım operasyonu eklendi', 'maintenance', operation.id);
+            return operation;
+          });
+          return json({ operation, version }, method === 'POST' ? 201 : 200);
+        }
+        if (method === 'DELETE' && id) {
+          const input = parseInput(z.object({revision:z.number().int().positive()}).strict(), await body(request));
+          const { version } = await this.engine.mutate(database => {
+            const actor = assertActor(database, claims, true);
+            const operations = database.maintenanceOperations ??= [];
+            const operation = operations.find(o => o.id === id);
+            if (!operation) throw new ApiError(404, 'NOT_FOUND', 'Bakım operasyonu bulunamadı.');
+            if (input.revision !== operation.revision) throw new ApiError(409, 'REVISION_CONFLICT', 'Operasyon değişmiş. Güncel kaydı yeniden açın.');
+            operations.splice(operations.indexOf(operation), 1);
+            audit(database, actor, 'Bakım operasyonu silindi', 'maintenance', id);
+          });
+          return json({version});
+        }
+        throw new ApiError(405, 'METHOD_NOT_ALLOWED', 'Bu işlem desteklenmiyor.');
       }
 
       const collectionRoute = /^\/api\/(wagons|parts|inventory)(?:\/([^/]+))?$/.exec(pathname);

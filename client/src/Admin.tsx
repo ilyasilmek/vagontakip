@@ -7,7 +7,7 @@ import Modal from './Modal';
 import { formatDate } from './records';
 
 export function initials(name: string): string { return name.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]).join('').toLocaleUpperCase('tr-TR'); }
-const entityNames: Record<string, string> = { wagon: 'Vagon', part: 'Parça', inventory: 'Demirbaş', user: 'Kullanıcı', system: 'Sistem' };
+const entityNames: Record<string, string> = { wagon: 'Vagon', part: 'Parça', inventory: 'Demirbaş', user: 'Kullanıcı', system: 'Sistem', maintenance: 'Bakım operasyonu' };
 const actionNames: Record<string, string> = { create: 'eklendi', update: 'güncellendi', delete: 'silindi', login: 'giriş yaptı', password_change: 'şifre değiştirildi', password: 'şifre değiştirildi', bootstrap: 'kurulum tamamlandı' };
 
 export default function Admin({ online, onExpired, notify }: { online: boolean; onExpired: () => void; notify: (message: string) => void }) {

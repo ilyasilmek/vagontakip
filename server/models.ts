@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { JobType, MaintenanceOperation } from '../shared/maintenance';
+import { jobTypeSchema, maintenanceRecordSchema } from './maintenance';
 import { WAGON_STATUSES, WAGON_TYPES, POSTS, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
 import type { PasswordHash } from './crypto';
 import { ApiError } from './errors';
@@ -17,6 +19,8 @@ export interface DatabaseDocument {
   inventory: Inventory[];
   users: StoredUser[];
   audit: AuditEvent[];
+  jobTypes?: JobType[];
+  maintenanceOperations?: MaintenanceOperation[];
 }
 
 const shortText = z.string().trim().max(200);
@@ -95,11 +99,12 @@ export function assertDatabase(database: unknown): asserts database is DatabaseD
   const document = z.object({
     formatVersion: z.literal(1), version: z.number().int().nonnegative(), updatedAt: z.string(),
     wagons: z.array(wagonFields.merge(metadata)), parts: z.array(partFields.merge(metadata)), inventory: z.array(inventoryFields.merge(metadata)),
-    users: z.array(user), audit: z.array(z.object({ id: z.string(), at: z.string(), actorId: z.string(), actorName: z.string(), action: z.string(), entity: z.enum(['wagon', 'part', 'inventory', 'user', 'system']), entityId: z.string().optional(), details: z.string().optional() })),
+    jobTypes: z.array(jobTypeSchema).optional(), maintenanceOperations: z.array(maintenanceRecordSchema).optional(),
+    users: z.array(user), audit: z.array(z.object({ id: z.string(), at: z.string(), actorId: z.string(), actorName: z.string(), action: z.string(), entity: z.enum(['wagon', 'part', 'inventory', 'user', 'system', 'maintenance']), entityId: z.string().optional(), details: z.string().optional() })),
   });
   if (!document.safeParse(database).success) throw new ApiError(503, 'INVALID_DATABASE', 'Ortak veritabanının yapısı geçersiz.');
   const value = database as DatabaseDocument;
-  for (const records of [value.wagons, value.parts, value.inventory, value.users]) {
+  for (const records of [value.wagons, value.parts, value.inventory, value.users, value.maintenanceOperations ?? []]) {
     if (new Set(records.map(r => r.id)).size !== records.length) throw new ApiError(503, 'INVALID_DATABASE', 'Veritabanında yinelenen kimlikler var.');
   }
   if (new Set(value.users.map(u => u.username.toLowerCase())).size !== value.users.length) throw new ApiError(503, 'INVALID_DATABASE', 'Veritabanında yinelenen kullanıcılar var.');

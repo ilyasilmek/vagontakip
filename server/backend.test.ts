@@ -424,3 +424,47 @@ describe('encrypted GitHub canonical storage', () => {
     await expect(unavailable.read()).rejects.toMatchObject({ code: 'GITHUB_UNAVAILABLE' });
   });
 });
+
+describe('isolated maintenance pilot', () => {
+  const fields = { wagonNumber: '247-9', startedAt: '2026-10-07T06:00:00Z', finishedAt: '2026-10-07T08:00:00Z', shift: 'Gündüz', supervisor: 'Test Amir', personnel: 3, jobs: [{ jobTypeId:48,quantity:1 },{ jobTypeId:32,quantity:2 },{ jobTypeId:41,quantity:1 },{ jobTypeId:49,quantity:1 }], waits: [{reason:'Malzeme/Valf Tedarik',minutes:30,note:''}], notes:'' };
+  it('keeps the feature disabled in the production configuration', async () => {
+    const object=makeObject();
+    const session=await login(object);
+    expect((await call(object,'/api/maintenance','GET',undefined,session)).status).toBe(404);
+    expect((await call(object,'/api/maintenance','POST',fields,session)).status).toBe(404);
+  });
+  it('persists operation snapshots, checks revisions, and records separate visits to the same wagon', async () => {
+    const storage=new MemoryStorage();const env=makeEnv({MAINTENANCE_ENABLED:'true'});const object=makeObject(env,storage);
+    expect((await call(object,'/api/maintenance')).status).toBe(401);
+    const session=await login(object);
+    const initial=await (await call(object,'/api/maintenance','GET',undefined,session)).json() as {jobTypes:unknown[]};
+    expect(initial.jobTypes).toHaveLength(49);
+    const response=await call(object,'/api/maintenance','POST',fields,session);expect(response.status).toBe(201);
+    const saved=await response.json() as {operation:{id:string;revision:number;jobs:{standardMinutes:number}[]}};
+    expect(saved.operation.jobs[0].standardMinutes).toBe(180);
+    expect((await call(object,'/api/maintenance','POST',fields,session)).status).toBe(201);
+    const patch=await call(object,`/api/maintenance/${saved.operation.id}`,'PATCH',{...fields,notes:'Changed',revision:1},session);expect(patch.status).toBe(200);
+    expect((await call(object,`/api/maintenance/${saved.operation.id}`,'PATCH',{...fields,revision:1},session)).status).toBe(409);
+    const restarted=makeObject(env,storage);
+    const list=await (await call(restarted,'/api/maintenance','GET',undefined,session)).json() as {operations:{id:string;notes:string}[]};
+    expect(list.operations).toHaveLength(2);expect(list.operations.find(o=>o.id===saved.operation.id)?.notes).toBe('Changed');
+    expect((await call(restarted,`/api/maintenance/${saved.operation.id}`,'DELETE',{revision:1},session)).status).toBe(409);
+    expect((await call(restarted,`/api/maintenance/${saved.operation.id}`,'DELETE',{revision:2},session)).status).toBe(200);
+  });
+  it('rejects bad dates, invalid workloads and waiting longer than the operation', async () => {
+    const object=makeObject(makeEnv({MAINTENANCE_ENABLED:'true'}));const session=await login(object);
+    for(const bad of [{personnel:0},{finishedAt:fields.startedAt},{jobs:[]},{jobs:[{jobTypeId:999,quantity:1}]},{jobs:[{jobTypeId:48,quantity:0}]},{jobs:[{jobTypeId:48,quantity:1},{jobTypeId:48,quantity:1}]},{jobs:[{jobTypeId:48,quantity:1,standardMinutes:1}]},{waits:[{reason:'Malzeme/Valf Tedarik',minutes:121,note:''}]}]){
+      expect((await call(object,'/api/maintenance','POST',{...fields,...bad},session)).status).toBe(400);
+    }
+    expect((await (await call(object,'/api/maintenance','GET',undefined,session)).json() as {operations:unknown[]}).operations).toHaveLength(0);
+  });
+  it('allows ordinary users to record work but restricts deletion and protects same-origin writes', async () => {
+    const object=makeObject(makeEnv({MAINTENANCE_ENABLED:'true'}));const admin=await login(object);
+    await call(object,'/api/admin/users','POST',{username:'maintenance-user',displayName:'User',password:USER_PASSWORD,role:'user'},admin);
+    const session=await login(object,'maintenance-user',USER_PASSWORD);
+    const response=await call(object,'/api/maintenance','POST',fields,session);expect(response.status).toBe(201);
+    const saved=await response.json() as {operation:{id:string;revision:number}};
+    expect((await call(object,`/api/maintenance/${saved.operation.id}`,'DELETE',{revision:1},session)).status).toBe(403);
+    expect((await call(object,'/api/maintenance','POST',fields,session,'https://other.example')).status).toBe(403);
+  });
+});

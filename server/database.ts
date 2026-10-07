@@ -1,3 +1,4 @@
+import { JOB_TYPES } from '../shared/maintenance';
 import { createPasswordHash, fromBase64, type SessionClaims } from './crypto';
 import { ApiError } from './errors';
 import { GitHubConflict, GitHubStore, type GitHubConfig } from './github';
@@ -6,6 +7,7 @@ import type { AuditEvent } from '../shared/types';
 
 export interface DatabaseEnvironment extends GitHubConfig {
   STORAGE_MODE?: string;
+  MAINTENANCE_ENABLED?: string;
   LOCAL_SEED_JSON?: string;
   LOCAL_SEED_BASE64?: string;
   ADMIN_USERNAME?: string;
@@ -111,6 +113,7 @@ export class DatabaseEngine {
       if (this.local) {
         const stored = await this.storage.get<Snapshot>('snapshot');
         const database = stored?.database ?? this.seed();
+        if(this.env.MAINTENANCE_ENABLED === 'true') { database.jobTypes ??= structuredClone(JOB_TYPES); database.maintenanceOperations ??= []; }
         assertDatabase(database);
         await this.bootstrap(database);
         await this.save({ database, sha: null, syncedAt: Date.now() });
@@ -176,6 +179,6 @@ export class DatabaseEngine {
 
   async data(claims: SessionClaims) {
     const database = await this.load();
-    return { version: database.version, updatedAt: database.updatedAt, wagons: database.wagons, parts: database.parts, inventory: database.inventory, user: safeUser(assertActor(database, claims)) };
+    return { maintenanceEnabled: this.env.MAINTENANCE_ENABLED === 'true', version: database.version, updatedAt: database.updatedAt, wagons: database.wagons, parts: database.parts, inventory: database.inventory, user: safeUser(assertActor(database, claims)) };
   }
 }

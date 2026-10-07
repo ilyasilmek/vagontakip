@@ -60,12 +60,13 @@ export interface AuditEvent {
   actorId: string;
   actorName: string;
   action: string;
-  entity: 'wagon' | 'part' | 'inventory' | 'user' | 'system';
+  entity: 'wagon' | 'part' | 'inventory' | 'user' | 'system' | 'maintenance';
   entityId?: string;
   details?: string;
 }
 
 export interface DataResponse {
+  maintenanceEnabled?: boolean;
   version: number;
   updatedAt: string;
   wagons: Wagon[];

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CollectionName } from '../../shared/types';
 
-export type Page = 'dashboard' | CollectionName | 'admin' | 'account';
-const pages: Page[] = ['dashboard', 'wagons', 'parts', 'inventory', 'admin', 'account'];
+export type Page = 'dashboard' | CollectionName | 'admin' | 'account' | 'maintenance';
+const pages: Page[] = ['dashboard', 'wagons', 'parts', 'inventory', 'admin', 'account', 'maintenance'];
 const key = 'vagonNavigation';
 interface NavigationState { page: Page; modal?: string; }
 

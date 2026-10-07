@@ -1,0 +1,34 @@
+name: Maintenance pilot checks
+on:
+  push:
+    branches: [maintenance-test]
+    paths-ignore: ['data/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run setup:local
+      - run: npm run build:test
+      - run: npx playwright install --with-deps chromium
+      - name: Verify the isolated maintenance Worker and PWA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run dev:maintenance > /tmp/maintenance-worker.log 2>&1 &
+          maintenance_api_pid=$!
+          trap 'kill "$maintenance_api_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8788/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+          E2E_BASE_URL=http://127.0.0.1:8788 E2E_MAINTENANCE=true npm run test:e2e

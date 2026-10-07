@@ -10,11 +10,12 @@ import Admin, { initials } from './Admin';
 import Account from './Account';
 import Install, { useInstall } from './Install';
 import Startup from './Startup';
+import Maintenance from './Maintenance';
 import { useTheme } from './theme';
 import { useStartupAnimation } from './startupPreference';
 
 import { usePageNavigation } from './navigation';
-const navigation = [
+const primaryNavigation = [
   { page: 'dashboard', label: 'Genel bakış', mobile: 'Özet', Icon: LayoutDashboard },
   { page: 'wagons', label: 'Vagonlar', mobile: 'Vagonlar', Icon: TrainFront },
   { page: 'parts', label: 'Parçalar', mobile: 'Parçalar', Icon: Package },
@@ -124,19 +125,22 @@ export default function App() {
   }
   async function saved(message: string) { setEditor(null); await refresh(); notify(message); }
   const edit = (collection: CollectionName, record: OperationalRecord | null) => setEditor({ collection, record });
+  const navigation = data?.maintenanceEnabled ? [...primaryNavigation, { page: 'maintenance' as const, label: 'Bakım operasyonları', mobile: 'Bakım', Icon: Wrench }] : primaryNavigation;
   const currentName = page === 'admin' ? 'Yönetim' : page === 'account' ? 'Hesabım' : navigation.find(item => item.page === page)?.label || 'Genel bakış';
 
   if (intro && startupAnimation) return <Startup onDone={finishIntro} />;
   if (booting) return <div className="loading-screen"><Brand /><div className="spinner" /><p>Kayıtlar yükleniyor…</p></div>;
-  if (!user) return <>{error && <div className="login-session-notice" role="status">{error}</div>}<Login onLogin={login} /></>;
+  if (!user) return <>{import.meta.env.VITE_TEST_ENVIRONMENT === 'true' && <div className="notice test-notice">TEST ORTAMI · Kullanıcı adı: testadmin. Canlı girişten ayrıdır.</div>}{error && <div className="login-session-notice" role="status">{error}</div>}<Login onLogin={login} /></>;
   if (!data) return <div className="loading-screen"><Brand /><div className="notice error"><TriangleAlert /><span>{error || 'Kayıtlar alınamadı. İnternet bağlantınızı kontrol edin.'}</span></div><button className="primary" onClick={() => void refresh()} disabled={syncing}><RefreshCw className={syncing ? 'spin' : ''} /> Tekrar dene</button><button className="secondary" onClick={async () => { try { await api('/logout', 'POST', {}); } finally { expired(); } }}>Giriş ekranına dön</button></div>;
 
   return <div className="app-shell"><aside className="sidebar"><Brand /><div className="nav-caption">ÇALIŞMA ALANI</div><nav className="side-nav" aria-label="Ana gezinme">{navigation.map(({ page: target, label, Icon }) => <button key={target} className={`nav-button ${page === target ? 'active' : ''}`} onClick={() => setPage(target)} aria-current={page === target ? 'page' : undefined}><Icon /> {label}</button>)}{user.role === 'admin' && <button className={`nav-button ${page === 'admin' ? 'active' : ''}`} onClick={() => setPage('admin')} aria-current={page === 'admin' ? 'page' : undefined}><ShieldCheck /> Yönetim</button>}<button className={`nav-button ${page === 'account' ? 'active' : ''}`} onClick={() => setPage('account')} aria-current={page === 'account' ? 'page' : undefined}><CircleUserRound /> Hesabım</button></nav><div className="sidebar-bottom"><div className="sidebar-tip"><Smartphone size={23} /><h3>Telefona kurulum</h3><p>Ana ekrandan kayıtlara erişin.</p><button className="secondary" onClick={() => setInstallOpen(true)}><ArrowDownToLine /> {install.installed ? 'Yükleme bilgisi' : 'Telefona yükle'}</button></div><div className="profile"><div className="avatar">{initials(user.displayName)}</div><div className="profile-name">{user.displayName}<small>{user.role === 'admin' ? 'Yönetici hesabı' : 'Ekip hesabı'}</small></div><button className="icon-button" aria-label="Çıkış yap" disabled={!online} onClick={() => void logout()}><LogOut size={15} /></button></div></div></aside><div className="main-shell"><header className="topbar"><div className="breadcrumb"><House /> <span>/</span> <strong>{currentName}</strong></div><div className="mobile-brand"><Brand /></div><div className="topbar-right"><span className="topbar-date">{new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul' }).format(new Date())}</span><span className={`sync-state ${online ? '' : 'offline'}`}>{syncing ? <RefreshCw className="spin" /> : online ? <Cloud /> : <CloudOff />}{syncing ? 'Eşitleniyor' : online ? 'Veriler güncel' : 'Çevrimdışı'}</span><button className="mobile-account-icon" onClick={() => setPage('account')} aria-label="Hesabımı aç"><div className="avatar">{initials(user.displayName)}</div></button></div></header><main className="content">
+    {data.maintenanceEnabled && <div className="notice test-notice">TEST ORTAMI · Canlı kayıtlarınız etkilenmez. <a href="https://vagontakip.ilyasilmek.workers.dev">Canlı siteye dön</a></div>}
     {!online && <div className="notice" role="status"><CloudOff /><span>Son alınan kayıtları görüntülüyorsunuz. Ekleme ve düzenleme için internet bağlantısı gerekiyor.</span>{connected && <button onClick={() => void refresh()} disabled={syncing}>Yenile</button>}</div>}
     {error && data && connected && <div className="notice error" role="alert"><TriangleAlert /><span>{error}</span><button onClick={() => void refresh()} disabled={syncing}>Tekrar dene</button></div>}
     {updated && <div className="notice update-banner" role="status"><Check /><span>Ekibin son değişiklikleri alındı. Kayıtlarınız güncel.</span><button onClick={() => setUpdated(false)}>Tamam</button></div>}
     {page === 'dashboard' && <Dashboard data={data} online={online} onNavigate={setPage} onEdit={edit} notify={notify} />}
     {(page === 'wagons' || page === 'parts' || page === 'inventory') && <Collection key={page} collection={page} rows={data[page]} online={online} onEdit={record => edit(page, record)} updatedAt={data.updatedAt} />}
+    {page === 'maintenance' && data.maintenanceEnabled && <Maintenance user={user} online={online} onExpired={expired} notify={notify} />}
     {page === 'admin' && user.role === 'admin' && <Admin online={online} onExpired={expired} notify={notify} />}
     {page === 'account' && <Account startupAnimation={startupAnimation} onStartupAnimationChange={changeStartupAnimation} theme={theme} onThemeChange={changeTheme} onUpdated={setUser} user={user} online={online} onLogout={logout} onExpired={expired} notify={notify} />}
   </main></div><nav className="mobile-bottom" aria-label="Mobil gezinme">{navigation.map(({ page: target, mobile, Icon }) => <button key={target} className={`mobile-nav-button ${page === target ? 'active' : ''}`} onClick={() => setPage(target)} aria-current={page === target ? 'page' : undefined}><Icon /><span>{mobile}</span></button>)}<button className={`mobile-nav-button ${page === 'admin' || page === 'account' ? 'active' : ''}`} onClick={() => setPage(user.role === 'admin' ? 'admin' : 'account')} aria-current={page === 'admin' || page === 'account' ? 'page' : undefined}>{user.role === 'admin' ? <ShieldCheck /> : <CircleUserRound />}<span>{user.role === 'admin' ? 'Yönetim' : 'Hesabım'}</span></button></nav>{editor && <RecordEditor {...editor} user={user} online={online} onClose={() => setEditor(null)} onSaved={saved} onExpired={expired} onConflict={() => refresh()} />}{installOpen && <Install {...install} onClose={() => setInstallOpen(false)} />}{toast && <div className="toast" role="status"><Check /><span>{toast}</span></div>}</div>;
