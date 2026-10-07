@@ -1,3 +1,4 @@
+import ExcelJS from 'exceljs';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Plus, RefreshCw, FileDown, Printer, Pencil, Trash2 } from 'lucide-react';
 import { api, ApiError } from './api';
@@ -41,7 +42,6 @@ export default function Maintenance({ user, online, onExpired, notify }: { user:
  }
  async function exportReport() {
   try {
-   const ExcelJS=(await import('exceljs')).default;
    const workbook=new ExcelJS.Workbook();
    const overview=workbook.addWorksheet('Aylık özet');
    overview.addRows([['Ay',month],['Bakım operasyonu',summary.count],['Benzersiz vagon',summary.wagonCount],['Üretilen A/S',summary.workload],['Ortalama A/S / bakım',summary.average],['Fiili toplam A/S',summary.actualLabor],['Net çalışma A/S',summary.workingLabor],['Bekleme kaybı A/S',summary.waitingLabor],['Net verimlilik %',summary.netEfficiency],['Beklemeler dahil verimlilik %',summary.grossEfficiency]]);

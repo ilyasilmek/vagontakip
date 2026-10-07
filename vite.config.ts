@@ -5,7 +5,7 @@ export default defineConfig({
   root: 'client',
   publicDir: '../public',
   plugins: [react()],
-  build: { outDir: '../dist/client', emptyOutDir: true, manifest: true },
+  build: { outDir: '../dist/client', emptyOutDir: true, manifest: true, rollupOptions: { output: { manualChunks: { exceljs: ['exceljs'] } } } },
   server: {
     port: 5173,
     strictPort: true,

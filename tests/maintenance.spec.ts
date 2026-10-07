@@ -2,6 +2,8 @@ import ExcelJS from 'exceljs';
 import { test, expect } from '@playwright/test';
 import { apiContext, credentials, login, loginThroughPage, uniqueName, expectNoHorizontalOverflow } from './helpers';
 
+test.use({serviceWorkers:'block'});
+
 test.skip(process.env.E2E_MAINTENANCE !== 'true', 'Requires the isolated maintenance Worker; never run against production.');
 
 test('records the agreed workload, persists edits, exports reports and separates repeat visits', async ({page,playwright})=>{
@@ -37,7 +39,10 @@ test('records the agreed workload, persists edits, exports reports and separates
   await expect(details).toContainText('3,75 A/S');await expect(details).toContainText('1,5 A/S');await expect(details).toContainText('83,33 / 62,5 %');await expect(details).toContainText('tahminen 75 dakikada');
   await page.emulateMedia({media:'print'});await expect(page.locator('.maintenance-report')).toBeVisible();await expect(page.locator('.topbar')).toBeHidden();const pdf=await page.pdf({format:'A4',printBackground:true});expect(pdf.subarray(0,4).toString()).toBe('%PDF');expect(pdf.length).toBeGreaterThan(5000);await page.emulateMedia({media:'screen'});
   await page.goBack();await expect(details).toHaveCount(0);await expect(page.getByRole('heading',{name:'Bakım operasyonları',exact:true})).toBeVisible();
+  // An open page must export even when a later deployment removes its old Excel asset.
+  await page.route(/\/assets\/exceljs[^/]*\.js$/,route=>route.abort());
   const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Aylık Excel raporu',exact:true}).click();const download=await downloadPromise;const workbook=new ExcelJS.Workbook();await workbook.xlsx.readFile((await download.path())!);expect(workbook.worksheets.map(s=>s.name)).toEqual(['Aylık özet','Bakım operasyonları','Yapılan işler','Beklemeler']);expect(workbook.getWorksheet('Aylık özet')!.getCell('B4').value).toBe(3.75);
+  await page.unroute(/\/assets\/exceljs[^/]*\.js$/);
   const second=await admin.post('/api/maintenance',{data:payload});expect(second.status()).toBe(201);created.push((await second.json()).operation.id);
   await page.getByRole('button',{name:'Yenile',exact:true}).click();await expect(page.locator('.maintenance-row')).toHaveCount(2);await expect(page.locator('.maintenance-metric').filter({hasText:'Benzersiz vagon'})).toContainText('1');
   await page.locator('.maintenance-row').first().click();await page.getByRole('dialog').getByRole('button',{name:'Düzenle',exact:true}).click();await page.getByRole('dialog').getByLabel('Açıklama',{exact:true}).fill('Updated test notes');await page.getByRole('dialog').getByRole('button',{name:'Kaydet',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);

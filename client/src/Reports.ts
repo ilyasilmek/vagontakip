@@ -1,9 +1,8 @@
+import ExcelJS from 'exceljs';
 import type { CollectionName, DataResponse, OperationalRecord } from '../../shared/types';
 import { collectionNames, dateToday, fields, formatDate, rowValue } from './records';
 
 export async function exportExcel(data: DataResponse): Promise<void> {
-  const module = await import('exceljs');
-  const ExcelJS = module.default;
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'Vagon Takip';
   workbook.created = new Date();
