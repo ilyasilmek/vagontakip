@@ -13,11 +13,11 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | Arka plan görseli denemesi; yayın kaydı aşağıda |
+| Son özellik commit'i | `6096db4` | `af96372` |
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
-Son doğrulanan test Worker yayın kimliği: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
+Son doğrulanan test Worker yayın kimliği: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
 ## Kurulum ve canlı uygulamada tamamlanan işler
 
@@ -74,7 +74,7 @@ Açık temada opaklık %5,5, koyu temada %8'dir. Menü, üst/alt gezinme, giriş
 
 Doğrulama: TypeScript/Vite derlemesi başarılı. Yerel Chromium'da 390×844 telefon görünümü açık/koyu temalarda, 1440×900 masaüstü görünümü kontrol edildi. Tek görsel, kare oran, düşük opaklık ve yatay taşma olmaması doğrulandı. Bakım formu açıldı, alanına yazılıp vazgeçildi; kayıt oluşturulmadı. Yazdırma görünümünde arka planın gizlendiği doğrulandı. Telefon ekran görüntüleri görsel olarak incelendi. Bu yalnız arayüz değişikliği olduğundan hesaplama/API paketi yeniden çalıştırılmadı; önceki sonuçlar yukarıda korunur.
 
-Yayın hedefi yalnız `vagontakip-test`tir. Yeni test yayınının sonuç ve sürüm kimliği dağıtım sonrası bu bölüme kaydedilir. Kullanıcı onayı olmadan `main` ve canlı Worker değiştirilmez.
+Yayın tamamlandı: özellik commit’i `af96372`, hedef yalnız `vagontakip-test`, sürüm `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Uzak sayfanın yeni arayüz dosyası, görselin orijinal dosyayla aynı olduğu ve arka plan CSS’si doğrulandı. Test sağlık kontrolü `ok: true`, `storage: local`; canlı sağlık kontrolü `ok: true`, `storage: github` döndü. Kullanıcı onayı olmadan `main` ve canlı Worker değiştirilmez.
 
 ## Güncel kullanıcı akışları
 
@@ -97,7 +97,7 @@ Bakım operasyonları bölümü ayrı kalır. Ay, arama ve sıralama kontrolleri
 
 ## Son doğrulamalar ve sınırlar
 
-Son özellik değişikliği `d2e4c96` için:
+Son veri kaydetme değişikliği `d2e4c96` için (arka plan denemesinin ayrı doğrulamaları yukarıda):
 
 - TypeScript kontrolü ve test arayüzü derlemesi başarılı.
 - 44 birim/sunucu testi başarılı: hesap kuralları, yetki, kayıt doğrulaması, birlikte kayıtta hata halinde hiçbir kayıt oluşmaması ve kalıcılık dahil.
