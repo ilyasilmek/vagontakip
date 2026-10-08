@@ -1,5 +1,7 @@
 # Doğrulama
 
+Bu belge ilk kurulumun tarihsel doğrulama sonuçlarını içerir. Güncel bakım pilotu ve yayın durumu için [geliştirme raporuna](gelistirme-raporu.md) bakın.
+
 6 Ekim 2026 tarihinde Node.js 24, yerel Cloudflare Workers runtime ve Chromium üzerinde doğrulandı.
 
 - Üretim TypeScript/Vite derlemesi tamamlandı.

@@ -1,5 +1,7 @@
 # Vagon Takip
 
+Güncel değişiklikler, test sonuçları ve test/canlı yayın durumu: [Geliştirme raporu](docs/gelistirme-raporu.md).
+
 Vagon, parça ve demirbaş kayıtlarını telefondan yönetmek için Türkçe PWA. Aynı uygulama Android, iPhone ve masaüstü tarayıcılarında açılır; destekleyen telefonlarda ana ekrana kurulabilir. Windows programından aktarılan başlangıç verisinde 128 vagon, 2 parça ve 7 demirbaş bulunur.
 
 Uygulama React ve TypeScript ile hazırlanmıştır. Cloudflare Worker giriş işlemlerini ve API'yi sağlar. Ortak veritabanı bu GitHub deposundaki **şifreli** `data/database.enc.json` dosyasıdır; tüm cihazlar veriye aynı Worker üzerinden erişir.
