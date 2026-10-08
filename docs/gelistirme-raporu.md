@@ -13,11 +13,11 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `d2e4c96` |
+| Son özellik commit'i | `6096db4` | Arka plan görseli denemesi; yayın kaydı aşağıda |
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
-Son doğrulanan test Worker yayın kimliği: `2ddcf0ea-9962-4154-9437-370aba01a278`. Bu raporun eklenmesi ayrı bir dokümantasyon değişikliğidir; yeni uygulama yayını değildir.
+Son doğrulanan test Worker yayın kimliği: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
 ## Kurulum ve canlı uygulamada tamamlanan işler
 
@@ -65,6 +65,16 @@ Aynı vagonun her bakım ziyareti ayrı operasyondur. Ekip sayısı varsayılan 
 | `a030984` | Güncellemeden sonra Excel raporunun eski dinamik dosyayı araması düzeltildi; Excel bileşeni açılışta yükleniyor | Sonradan Excel dosyasına erişim engellendiğinde açık sayfadan rapor indirildi. Bakım, genel Excel ve PWA testleri geçti. Kullanıcı Excel'in düzeldiğini bildirdi. |
 | `c145368` | Vagon detayına Bakım ekle; numara hazır geliyor; kaydetme/vazgeçme vagon detayına dönüyor; üst form için geri tuşu, odak ve kapatma yönetimi | 4 bakım/gezinme testi geçti. Test yayını doğrulandı. Bakım bölümü ayrı tutuldu. |
 | `d2e4c96` | Yeni Vagon ekle formuna Bakım ekle; vagon ve bakım tek son kaydetmede birlikte oluşturuluyor | 44 hesaplama/API testi ve 5 bakım/gezinme testi geçti. Uzak testte iki kayıt oluşturulup tekrar okundu; yalnız geçici kontrol kayıtları silindi. |
+
+## Tek arka plan görseli denemesi
+
+Kullanıcının sağladığı kulüp görseli, yalnız test uygulamasının oturum açılmış çalışma sayfalarında tek bir dekoratif arka plan olarak eklendi. Döşeme veya tekrar yoktur; görsel ekranın içerik alanına ortalanır ve oranı korunarak sığdırılır. Görsele dokunmak kontrolleri engellemez. Orijinal JPEG değiştirilmedi; kareli köşeler CSS ile dairesel sınırın dışında gizlenir.
+
+Açık temada opaklık %5,5, koyu temada %8'dir. Menü, üst/alt gezinme, giriş formu ve modal yüzeyleri korunur. Arka plan yazdırma/PDF çıktısında gösterilmez. Dosya `public/images/club-watermark.jpg` olarak repoda tutulur ve PWA statik önbelleğine dahil edilir.
+
+Doğrulama: TypeScript/Vite derlemesi başarılı. Yerel Chromium'da 390×844 telefon görünümü açık/koyu temalarda, 1440×900 masaüstü görünümü kontrol edildi. Tek görsel, kare oran, düşük opaklık ve yatay taşma olmaması doğrulandı. Bakım formu açıldı, alanına yazılıp vazgeçildi; kayıt oluşturulmadı. Yazdırma görünümünde arka planın gizlendiği doğrulandı. Telefon ekran görüntüleri görsel olarak incelendi. Bu yalnız arayüz değişikliği olduğundan hesaplama/API paketi yeniden çalıştırılmadı; önceki sonuçlar yukarıda korunur.
+
+Yayın hedefi yalnız `vagontakip-test`tir. Yeni test yayınının sonuç ve sürüm kimliği dağıtım sonrası bu bölüme kaydedilir. Kullanıcı onayı olmadan `main` ve canlı Worker değiştirilmez.
 
 ## Güncel kullanıcı akışları
 
