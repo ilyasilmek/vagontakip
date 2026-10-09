@@ -8,6 +8,9 @@ import { ApiError } from './errors';
 import { fieldSchemas, parseInput, validateWagonWorkflow } from './models';
 import { activityInputSchema, dayInputSchema, operationInputSchema, personInputSchema, resolveStandardLines, shiftSchema, standardInputSchema } from './workshop';
 
+const workEntryInput=z.object({wagonNumber:z.string().trim().min(1).max(200),startedAt:z.string().datetime({offset:true}),finishedAt:z.string().datetime({offset:true}),jobs:z.array(z.object({jobTypeId:z.number().int().positive(),quantity:z.number().int().positive().max(1000)}).strict()).min(1,'En az bir yapılan iş seçin.').max(100),notes:z.string().trim().max(1000)}).strict().refine(v=>Date.parse(v.finishedAt)>Date.parse(v.startedAt),'Bitiş zamanı başlangıçtan sonra olmalı.');
+function workCatalog(data:WorkshopData,post:string){return data.standards.filter(s=>s.active&&isFrenPostasiJob(s.id)&&post==='Hava-Fren'&&!data.standards.some(other=>other.id===s.id&&other.validFrom>s.validFrom));}
+
 function metadata(actorId:string,existing?:RecordMetadata):RecordMetadata { const now=new Date().toISOString();return {id:existing?.id??crypto.randomUUID(),revision:(existing?.revision??0)+1,createdAt:existing?.createdAt??now,updatedAt:now,updatedBy:actorId}; }
 function existingRecord<T extends RecordMetadata>(rows:T[],id:string|undefined,revision:unknown):T|undefined {
  if(!id)return;
@@ -23,11 +26,27 @@ function createOperation(data:WorkshopData,input:z.infer<typeof operationInputSc
 const fullDaySchema=dayInputSchema.extend({fullNoWagon:z.boolean()});
 export async function workshopRequest(engine:DatabaseEngine,claims:SessionClaims,path:string,method:string,raw?:Record<string,unknown>):Promise<Response> {
  const parts=path.slice('/api/workshop'.length).split('/').filter(Boolean),[resource,id]=parts;
- if(method==='GET'&&!resource){const database=await engine.load();return Response.json({...(database.workshop??emptyWorkshop()),legacyOperations:database.maintenanceOperations??[],version:database.version});}
+ if(method==='GET'&&resource==='work-catalog'&&!id){const db=await engine.load(),actor=assertActor(db,claims);return Response.json({standards:workCatalog(db.workshop??emptyWorkshop(),actor.post??'')});}
+ if(method==='GET'&&resource==='wagon-jobs'&&id){const db=await engine.load(),actor=assertActor(db,claims),admin=actor.role==='admin';const wagon=decodeURIComponent(id);return Response.json({operations:(db.workshop?.operations??[]).filter(o=>o.wagonNumber===wagon).map(o=>({id:o.id,startedAt:o.startedAt,finishedAt:o.finishedAt,jobs:o.jobs.map(j=>({name:j.name,quantity:j.quantity})),...(admin?{workers:[...new Set(o.participation.flatMap(p=>p.personIds))].map(personId=>db.workshop?.people.find(p=>p.id===personId)?.name??'Bilinmeyen personel')}: {})})),entries:(db.workEntries??[]).filter(e=>e.wagonNumber===wagon).map(e=>({id:e.id,startedAt:e.startedAt,finishedAt:e.finishedAt,jobs:e.jobs.map(j=>({name:j.name,quantity:j.quantity})),...(admin?{workers:[e.actorName]}:{})}))});}
+ if(method==='GET'&&resource==='work-entries'&&!id){const db=await engine.load(),actor=assertActor(db,claims,true);return Response.json({entries:db.workEntries??[]});}
+ if(method==='POST'&&resource==='work-entries'&&(!id||id==='with-wagon')){
+  const parsed=id==='with-wagon'?parseInput(z.object({wagon:fieldSchemas.wagons,entry:workEntryInput}).strict(),raw):null;
+  const input=parsed?.entry??parseInput(workEntryInput,raw);if(parsed){validateWagonWorkflow(parsed.wagon);if(parsed.wagon.number!==input.wagonNumber)throw new ApiError(400,'WAGON_MISMATCH','Vagon ve bakım numarası aynı olmalı.');}
+  const {result,version}=await engine.mutate(db=>{const actor=assertActor(db,claims),data=db.workshop??=emptyWorkshop();
+   if(!actor.post)throw new ApiError(400,'POST_REQUIRED','İş akışı girişi yapabilmek için Hesabım menüsünden Posta belirlemesi yapmanız gerekiyor!');
+   if(!parsed&&!db.wagons.some(w=>w.number===input.wagonNumber))throw new ApiError(404,'WAGON_NOT_FOUND','Vagon kaydı bulunamadı.');
+   if(parsed&&db.wagons.some(w=>w.number===parsed.wagon.number))throw new ApiError(409,'DUPLICATE_WAGON','Bu vagon numarası zaten kayıtlı.');
+   const allowed=workCatalog(data,actor.post);const jobs=input.jobs.map(job=>{const standard=allowed.find(s=>s.id===job.jobTypeId);if(!standard)throw new ApiError(403,'POST_JOB_FORBIDDEN','Bu iş hesabınızın postası için tanımlı değil.');return{id:standard.id,name:standard.name,category:standard.category,quantity:job.quantity};});
+   if(new Set(jobs.map(j=>j.id)).size!==jobs.length)throw new ApiError(400,'DUPLICATE_JOB','Aynı iş iki kez seçilemez.');
+   const entry={id:crypto.randomUUID(),wagonNumber:input.wagonNumber,actorId:actor.id,actorName:actor.displayName,post:actor.post,startedAt:input.startedAt,finishedAt:input.finishedAt,jobs,notes:input.notes,createdAt:new Date().toISOString()};
+   (db.workEntries??=[]).push(entry);if(parsed){const wagon={...parsed.wagon,...metadata(actor.id)} as Wagon;db.wagons.push(wagon);audit(db,actor,'Vagon eklendi','wagon',wagon.id);}
+   audit(db,actor,'Yapılan işler kaydedildi','maintenance',entry.id);return entry;});return Response.json({record:result,version},{status:201});
+ }
+ if(method==='GET'&&!resource){const database=await engine.load();assertActor(database,claims,true);return Response.json({...(database.workshop??emptyWorkshop()),legacyOperations:database.maintenanceOperations??[],workEntries:database.workEntries??[],version:database.version});}
  if(method==='POST'&&resource==='operations'&&id==='with-wagon'){
   const input=parseInput(z.object({wagon:fieldSchemas.wagons,operation:operationInputSchema}).strict(),raw);validateWagonWorkflow(input.wagon);
   if(input.wagon.number!==input.operation.wagonNumber)throw new ApiError(400,'WAGON_MISMATCH','Vagon ve bakım numarası aynı olmalı.');
-  const {result,version}=await engine.mutate(db=>{const actor=assertActor(db,claims),data=db.workshop??=emptyWorkshop();const operation=createOperation(data,input.operation,actor.id,actor.post??'');const wagon={...input.wagon,...metadata(actor.id)} as Wagon;
+  const {result,version}=await engine.mutate(db=>{const actor=assertActor(db,claims,true),data=db.workshop??=emptyWorkshop();const operation=createOperation(data,input.operation,actor.id,actor.post??'');const wagon={...input.wagon,...metadata(actor.id)} as Wagon;
    data.operations.push(operation);db.wagons.push(wagon);audit(db,actor,'Vagon ve sürüm 2 bakım birlikte eklendi','wagon',wagon.id);audit(db,actor,'Bakım operasyonu eklendi (formül 2)','maintenance',operation.id);return {wagon,record:operation};});
   return Response.json({...result,version},{status:201});
  }
@@ -44,7 +63,7 @@ export async function workshopRequest(engine:DatabaseEngine,claims:SessionClaims
  const {revision,...input}=raw??{};
  if(method!=='POST')parseInput(z.number().int().positive(),revision);
  const {result,version}=await engine.mutate(db=>{
-  const actor=assertActor(db,claims,resource==='people'||method==='DELETE'),data=db.workshop??=emptyWorkshop();
+  const actor=assertActor(db,claims,true),data=db.workshop??=emptyWorkshop();
   const rows=data[resource as 'people'|'days'|'operations'|'activities'] as RecordMetadata[];
   const existing=existingRecord(rows,id,revision);
   if(method==='DELETE'){

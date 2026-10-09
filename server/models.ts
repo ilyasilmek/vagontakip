@@ -24,7 +24,10 @@ export interface DatabaseDocument {
   jobTypes?: JobType[];
   maintenanceOperations?: MaintenanceOperation[];
   workshop?: WorkshopData;
+  workEntries?: WorkEntry[];
 }
+
+export interface WorkEntry { id:string; wagonNumber:string; actorId:string; actorName:string; post:string; startedAt:string; finishedAt:string; jobs:{id:number;name:string;category:string;quantity:number}[]; notes:string; createdAt:string; }
 
 const shortText = z.string().trim().max(200);
 const requiredText = shortText.min(1);
@@ -105,6 +108,7 @@ export function assertDatabase(database: unknown): asserts database is DatabaseD
     wagons: z.array(wagonFields.merge(metadata)), parts: z.array(partFields.merge(metadata)), inventory: z.array(inventoryFields.merge(metadata)),
     jobTypes: z.array(jobTypeSchema).optional(), maintenanceOperations: z.array(maintenanceRecordSchema).optional(),
     workshop: workshopSchema.optional(),
+    workEntries: z.array(z.object({id:z.string(),wagonNumber:z.string(),actorId:z.string(),actorName:z.string(),post:z.string(),startedAt:z.string().datetime(),finishedAt:z.string().datetime(),jobs:z.array(z.object({id:z.number().int().positive(),name:z.string(),category:z.string(),quantity:z.number().int().positive()})).min(1),notes:z.string(),createdAt:z.string().datetime()})).optional(),
     users: z.array(user), audit: z.array(z.object({ id: z.string(), at: z.string(), actorId: z.string(), actorName: z.string(), action: z.string(), entity: z.enum(['wagon', 'part', 'inventory', 'user', 'system', 'maintenance']), entityId: z.string().optional(), details: z.string().optional() })),
   });
   if (!document.safeParse(database).success) throw new ApiError(503, 'INVALID_DATABASE', 'Ortak veritabanının yapısı geçersiz.');

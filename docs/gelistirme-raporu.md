@@ -13,11 +13,21 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `190e0f2` |
+| Son özellik commit'i | `6096db4` | Bu değişiklik tamamlandığında aşağıdaki yeni kayıtla güncellenecek |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
+
+## Kullanıcı iş girişi ve yönetici görünümü (9 Ekim 2026)
+
+Normal kullanıcının Bakım ekranı ve Vagonlar → Bakım ekle penceresi sadeleştirildi. Kullanıcı vagon numarasını, başlangıç/bitiş tarih ve saatlerini, yalnız hesabının postasına tanımlı yapılan işleri ve isteğe bağlı açıklamayı girer. Personel/vardiya seçimi, bekleme ve A/S hesapları kullanıcı formunda gösterilmez. İşi yapan kişinin adı istemciden alınmaz; sunucu oturumundaki hesap adından kaydedilir. Yeni vagonla iş birlikte kaydedilebilir.
+
+Yönetici mevcut ayrıntılı bakım operasyonu formunu ve raporlarını kullanır. Kullanıcıların iş girişleri yönetici Bakım ekranında vagon, işi yapan hesap, saat ve iş kalemleriyle listelenir; vagon ayrıntısında geçmiş işleri yapan adlar yalnız yöneticiye gönderilir. Kullanıcıların iş girişleri, personel ve vardiya katılımı doğrulanmadan fiilî A/S hesabına katılmaz; kayıtlar yöneticiye görünür durumda kalır. Bu ilk adımda kullanıcı iş girişini yönetici operasyonuna dönüştüren ayrı bir onay iş akışı bulunmuyor.
+
+Sunucu, kullanıcıların personel ve vardiya içeren tam atölye verisini ya da yönetici operasyonu oluşturma/düzenleme uçlarını kullanmasını engeller. Vagon bakım özeti kullanıcıya iş ve saatleri gösterir, kişi adlarını sunucu tarafında çıkarır. Eski operasyonlar ve ayrı test verisi korunur.
+
+Doğrulama: TypeScript/Vite/PWA derlemesi ve 73 birim/API testi geçti. Yeni API testi oturum adının kullanılması, sahte aktör bilgisinin reddi, yeni vagonla atomik kayıt, yöneticiye özel liste ve A/S hesabına otomatik eklenmeme davranışını kapsar. Test Worker yayın sonucu aşağıdaki dağıtım kaydıyla eklenecek. Canlı Worker'a yayın yapılmadı.
 
 Son doğrulanan etkin test Worker yayın kimliği: `e0abf178-772c-46f2-aeba-493cf63a4a14`. Önceki yayın: `0a68b05b-9948-4f11-acf3-cd782324e8b9`; daha önceki yayın: `7b2bf0d8-5014-4074-84b5-9df79b0b9048`; daha önceki yayın: `65dc0336-4370-4206-bd39-ccab7d3a9506`; daha önceki yayın: `bec32b59-0f6a-419b-883c-fe1f0852c88e`; daha önceki yayın: `7b0715ac-d447-4a73-99ee-38bc5abffd9f`; daha önceki yayın: `72866bf7-dac9-4241-a5ae-6b4d434c8f6c`. Önceki açıklayıcı çakışma mesajı yayını: `f399663b-311e-49d4-915c-ad89cb01cdbb`. Önceki bakım formu yayını: `65422038-79fd-493b-a45e-5d3d9d66589e`. Önceki koyu tema düzeltmesi yayını: `4c61aaed-0775-4179-9cdf-91a62ee4be6e`. Önceki vagon bakım listesi yayını: `8e07aa16-bf40-459a-a8d6-eb42c8c1ed54`. Önceki vardiya saati yayını: `6eabd70e-64c5-4ee9-83fc-4cab6b28e8fc`. Önceki personel açılır liste yayını: `be18b336-2af7-457c-bb69-cf6e4ef832bf`. Önceki günlük varsayılan personel yayını: `448ec45f-84de-4ccb-a29a-126f82c7379b`. Önceki tek son hane yayını: `061faf71-1c14-44c1-8aa0-2b1fb103ec38`. Önceki 13 rakam yayını: `96037ab9-7f1e-4a69-bccb-76d76b04647f`. Önceki alan doğrulama yayını: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
