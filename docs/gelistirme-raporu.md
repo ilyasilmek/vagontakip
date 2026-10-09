@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `08e84d0` |
+| Son özellik commit'i | `6096db4` | `59be8c2` |
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
@@ -156,6 +156,8 @@ Kullanıcı uygun bulmazsa arayüz değişikliği yeni bir geri alma commit'iyle
 Bu rapor repoya eklendi; README üzerinden bağlantı verildi. Kök `AGENTS.md`, sonraki her anlamlı kod, yapılandırma, yayın veya kullanıcı akışı değişikliğinde raporun aynı commit içinde güncellenmesini zorunlu kılar. Her yeni kayıtta ne değiştiği, doğrulamanın gerçekten çalıştırılan kapsamı, yayın ortamı ve kalan sınırlamalar belirtilir. Güncel durum ve kullanıcı akışı değişmişse ilgili bölümler de yenilenir. Canlıya geçiş onayı verilmedikçe test aşaması uyarısı korunur.
 
 ## 9 Ekim 2026 — Eksik seçimlerin alan üzerinde Türkçe gösterilmesi
+
+Özellik ve doğrulama kaydı: `59be8c2` (`maintenance-test`).
 
 Kullanıcının bildirdiği `Array must contain at least 1 element(s)` mesajı, bakım formundaki boş iş veya personel dizileri için genel Zod doğrulamasından geliyordu. Test arayüzü artık kaydetmeden önce yapılan işler, personel/vardiya katılımı, her katılımın görevli personeli, her beklemenin personeli ve faaliyet personelini kontrol eder. Eksik bölüm kırmızı çerçeveyle işaretlenir ve kendi altında Türkçe açıklama gösterilir. İlk eksik bölüm kaydırılıp odaklanır; doğru seçim yapıldığında o bölümün uyarısı kaldırılır. Kontrol başarısızsa sunucuya kayıt isteği gönderilmez ve form içeriği korunur. Hiç katılım yoksa Kaydet düğmesi de açıklamayı gösterebilmek için kullanılabilir.
 
