@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `47eb367` |
+| Son özellik commit'i | `6096db4` | `be4d7f7` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -317,6 +317,8 @@ Doğrulama: `npm run build:test` geçti. `npm test`: **69/69 geçti**. Ayrı yer
 Yalnız `vagontakip-test` yayımlandı. Etkin Cloudflare sürümü **%100 `72866bf7-dac9-4241-a5ae-6b4d434c8f6c`** olarak doğrulandı. Test girişi, önceki kayıt kimliklerinin korunması ve yayımlanan istemcinin yerel derlemeyle eşleşmesi doğrulandı. Canlı sayfanın içerik özeti değişmedi; `main` ve canlı Worker güncellenmedi.
 
 ## 9 Ekim 2026 — Hava-Fren iş kataloğu (test)
+
+Özellik commit’i: `be4d7f7`.
 
 Kullanıcının verdiği Fren Postası listesindeki 11 kategori ve 52 iş satırı bakım formuna eklendi. İki kategoride tekrarlanan iş adları, ayrı satırlar olarak korundu. İş adlarının sonundaki `(adet)` kaldırıldı; adet seçimi form alanında kaldı. Yeni katalog yalnız hesabında **Hava-Fren** postası seçili olan kullanıcının iş seçiminde görünür. Diğer postalar için iş seçimi, kendilerine ait katalog eklenene kadar boş görünür. Sunucu da Hava-Fren dışı hesapların bu yeni iş kimlikleriyle kayıt yapmasını engeller.
 
