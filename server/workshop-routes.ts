@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isFrenPostasiJob } from '../shared/fren-postasi';
 import { emptyWorkshop, type ActivityInput, type WorkshopActivity, type WorkshopData, type WorkshopOperation } from '../shared/workshop';
 import type { RecordMetadata, Wagon } from '../shared/types';
 import { assertActor, audit, type DatabaseEngine } from './database';
@@ -14,7 +15,8 @@ function existingRecord<T extends RecordMetadata>(rows:T[],id:string|undefined,r
  if(row.revision!==revision)throw new ApiError(409,'REVISION_CONFLICT','Kayıt değişmiş. Güncel kaydı yeniden açın.');return row;
 }
 function activePeople(data:WorkshopData,ids:string[],previous:string[]=[]){if(ids.some(id=>!previous.includes(id)&&!data.people.some(p=>p.id===id&&p.active)))throw new ApiError(400,'INACTIVE_PERSON','Yeni seçimlerde yalnız aktif personel kullanılabilir.');}
-function createOperation(data:WorkshopData,input:z.infer<typeof operationInputSchema>,actorId:string,existing?:WorkshopOperation):WorkshopOperation {
+function createOperation(data:WorkshopData,input:z.infer<typeof operationInputSchema>,actorId:string,actorPost:string,existing?:WorkshopOperation):WorkshopOperation {
+ if(actorPost!=='Hava-Fren'&&input.jobs.some(job=>isFrenPostasiJob(job.jobTypeId)))throw new ApiError(403,'POST_JOB_FORBIDDEN','Bu işler yalnız Hava-Fren postası için tanımlandı. Hesabım bölümünden postanızı kontrol edin.');
  activePeople(data,input.participation.flatMap(p=>p.personIds),existing?.participation.flatMap(p=>p.personIds));
  return {...input,...metadata(actorId,existing),formulaVersion:2,jobs:resolveStandardLines(input.jobs,data.standards,input.finishedAt,existing)};
 }
@@ -25,7 +27,7 @@ export async function workshopRequest(engine:DatabaseEngine,claims:SessionClaims
  if(method==='POST'&&resource==='operations'&&id==='with-wagon'){
   const input=parseInput(z.object({wagon:fieldSchemas.wagons,operation:operationInputSchema}).strict(),raw);validateWagonWorkflow(input.wagon);
   if(input.wagon.number!==input.operation.wagonNumber)throw new ApiError(400,'WAGON_MISMATCH','Vagon ve bakım numarası aynı olmalı.');
-  const {result,version}=await engine.mutate(db=>{const actor=assertActor(db,claims),data=db.workshop??=emptyWorkshop();const operation=createOperation(data,input.operation,actor.id);const wagon={...input.wagon,...metadata(actor.id)} as Wagon;
+  const {result,version}=await engine.mutate(db=>{const actor=assertActor(db,claims),data=db.workshop??=emptyWorkshop();const operation=createOperation(data,input.operation,actor.id,actor.post??'');const wagon={...input.wagon,...metadata(actor.id)} as Wagon;
    data.operations.push(operation);db.wagons.push(wagon);audit(db,actor,'Vagon ve sürüm 2 bakım birlikte eklendi','wagon',wagon.id);audit(db,actor,'Bakım operasyonu eklendi (formül 2)','maintenance',operation.id);return {wagon,record:operation};});
   return Response.json({...result,version},{status:201});
  }
@@ -65,7 +67,7 @@ export async function workshopRequest(engine:DatabaseEngine,claims:SessionClaims
    if(fullNoWagon){if(day.wagonAvailable)throw new ApiError(400,'NO_WAGON_STATUS','Tam vagonsuzluk için vagon yok seçilmeli.');
     for(const a of day.attendance){const activity:WorkshopActivity={...metadata(actor.id),id:`${day.id}:full:${a.personId}`,dayId:day.id,operationId:null,startedAt:a.startedAt,finishedAt:a.finishedAt,personIds:[a.personId],kind:'no-wagon',reason:day.noWagonReason,notes:'Günlük durumdan oluşturulan tam vardiya kaybı.'};data.activities.push(activity);}
    }
-  }else if(resource==='operations')record=createOperation(data,parseInput(operationInputSchema,input),actor.id,existing as WorkshopOperation|undefined);
+  }else if(resource==='operations')record=createOperation(data,parseInput(operationInputSchema,input),actor.id,actor.post??'',existing as WorkshopOperation|undefined);
   else {const values:ActivityInput=parseInput(activityInputSchema,input);activePeople(data,values.personIds,(existing as WorkshopActivity|undefined)?.personIds);record={...values,...metadata(actor.id,existing)};}
   // A daily save can replace auto-created loss activities. Read the destination
   // after that replacement so an array reference cannot silently lose updates.

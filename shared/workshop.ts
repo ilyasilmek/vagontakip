@@ -1,4 +1,5 @@
 import { JOB_TYPES, type JobType, type WorkItem } from './maintenance';
+import { ensureFrenPostasiStandards } from './fren-postasi';
 import type { RecordMetadata } from './types';
 
 export const FORMULA_VERSION = 2 as const;
@@ -32,7 +33,9 @@ export type OperationInput = Omit<WorkshopOperation,keyof RecordMetadata|'jobs'|
 export type DayInput = Omit<WorkshopDay,keyof RecordMetadata|'shiftName'>;
 export type ActivityInput = Omit<WorkshopActivity,keyof RecordMetadata>;
 export function emptyWorkshop(): WorkshopData {
- return {formulaVersion:2,people:[],shifts:structuredClone(DEFAULT_SHIFTS),standards:JOB_TYPES.map(j=>({...j,versionId:`initial-${j.id}`,validFrom:'1970-01-01T00:00:00.000Z',validUntil:null,active:true})),days:[],operations:[],activities:[]};
+ const standards:Standard[]=JOB_TYPES.map(j=>({...j,versionId:`initial-${j.id}`,validFrom:'1970-01-01T00:00:00.000Z',validUntil:null,active:true}));
+ ensureFrenPostasiStandards(standards);
+ return {formulaVersion:2,people:[],shifts:structuredClone(DEFAULT_SHIFTS),standards,days:[],operations:[],activities:[]};
 }
 export function turkeyTime(date:string,clock:string):string { return new Date(`${date}T${clock}:00+03:00`).toISOString(); }
 export function turkeyDate(iso:string):string { return new Date(Date.parse(iso)+3*3600000).toISOString().slice(0,10); }
@@ -72,9 +75,10 @@ export function calculateOperation(operation:WorkshopOperation,days:WorkshopDay[
  const standardMinutes=operation.jobs.reduce((n,j)=>n+j.quantity*j.standardMinutes,0);
  const workload=inRange?standardMinutes/60:0,actualLabor=actualMilliseconds/3600000,waitingLabor=waitingMilliseconds/3600000,workingLabor=(actualMilliseconds-waitingMilliseconds)/3600000;
  const personnel=new Set(operation.participation.flatMap(p=>p.personIds)).size;
+ const hasUntimedJobs=operation.jobs.some(job=>job.standardMinutes===0);
  const stableCrew=operation.participation.every(p=>p.personIds.length===personnel);
  return {workload,standardMinutes,elapsedMinutes:minutes(operation),actualLabor,waitingLabor,workingLabor,waitingMinutes:unionMinutes(waitPieces),personnel,
-  estimatedMinutes:stableCrew&&personnel>0?standardMinutes/personnel:null,netEfficiency:ratio(workload,workingLabor),grossEfficiency:ratio(workload,actualLabor)};
+  estimatedMinutes:!hasUntimedJobs&&stableCrew&&personnel>0?standardMinutes/personnel:null,netEfficiency:hasUntimedJobs?null:ratio(workload,workingLabor),grossEfficiency:hasUntimedJobs?null:ratio(workload,actualLabor)};
 }
 export interface LedgerEntry extends Interval { personId:string; kind:'maintenance'|'waiting'|ActivityKind; sourceId:string; dayId:string; }
 export function ledger(data:WorkshopData):LedgerEntry[] {
@@ -92,6 +96,7 @@ export function summarizeWorkshop(data:WorkshopData,range:Interval) {
  const capacity=data.days.reduce((n,d)=>n+d.attendance.reduce((sum,a)=>sum+netMilliseconds(a,d.breaks,range),0),0)/3600000;
  const ops=data.operations.map(o=>({operation:o,values:calculateOperation(o,data.days,range)}));
  const sum=(key:'workload'|'actualLabor'|'waitingLabor'|'workingLabor')=>ops.reduce((n,v)=>n+v.values[key],0);
+ const hasUntimedCompleted=data.operations.some(o=>o.jobs.some(j=>j.standardMinutes===0)&&Date.parse(o.finishedAt)>=Date.parse(range.startedAt)&&Date.parse(o.finishedAt)<Date.parse(range.finishedAt));
  const workload=sum('workload'),actualLabor=sum('actualLabor'),waitingLabor=sum('waitingLabor'),workingLabor=sum('workingLabor');
  const events=ledger(data);const categories=Object.fromEntries(['maintenance','waiting',...ACTIVITY_KINDS].map(kind=>[kind,events.filter(e=>e.kind===kind).reduce((n,e)=>n+netMilliseconds(e,[],range),0)/3600000])) as Record<LedgerEntry['kind'],number>;
  const used=Object.values(categories).reduce((a,b)=>a+b,0),unexplained=capacity-used;
@@ -108,7 +113,7 @@ export function summarizeWorkshop(data:WorkshopData,range:Interval) {
  const jobTypes:Record<string,{quantity:number;workload:number}>={};for(const {operation:o,values:v}of ops)if(v.workload)for(const j of o.jobs){const value=jobTypes[j.name]??={quantity:0,workload:0};value.quantity+=j.quantity;value.workload+=j.quantity*j.standardMinutes/60;}
  return {capacity,workload,actualLabor,waitingLabor,workingLabor,noWagonLabor:categories['no-wagon'],auxiliaryLabor:categories.preparation+categories.cleaning+categories.auxiliary+categories.other,
   unexplained:capacity>0?unexplained:null,categories,fullNoWagonDays,reasons,performances,jobTypes,
-  capacityUse:ratio(workload,capacity),noWagonRate:ratio(categories['no-wagon'],capacity),waitingRate:ratio(waitingLabor,capacity),netEfficiency:ratio(workload,completedWorkingLabor),grossEfficiency:ratio(workload,completedActualLabor),
+  capacityUse:ratio(workload,capacity),noWagonRate:ratio(categories['no-wagon'],capacity),waitingRate:ratio(waitingLabor,capacity),netEfficiency:hasUntimedCompleted?null:ratio(workload,completedWorkingLabor),grossEfficiency:hasUntimedCompleted?null:ratio(workload,completedActualLabor),
   operationCount:ops.filter(o=>o.values.workload||o.values.actualLabor).length,
-  warning:capacity===0?'Planlı vardiya kaydı yok veya kapasite sıfır; oranlar hesaplanamadı.':Math.abs(unexplained)>1e-7?unexplained<0?'Negatif kapasite bakiyesi: kayıtları kontrol edin.':'Açıklanamayan kapasite var; personelin faaliyet kayıtlarını tamamlayın.':null};
+  warning:hasUntimedCompleted?'Bazı işlerin standart süresi tanımlı değil; iş yükü eksik ve verimlilik hesaplanamaz.':capacity===0?'Planlı vardiya kaydı yok veya kapasite sıfır; oranlar hesaplanamadı.':Math.abs(unexplained)>1e-7?unexplained<0?'Negatif kapasite bakiyesi: kayıtları kontrol edin.':'Açıklanamayan kapasite var; personelin faaliyet kayıtlarını tamamlayın.':null};
 }

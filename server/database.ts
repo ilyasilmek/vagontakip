@@ -5,6 +5,7 @@ import { GitHubConflict, GitHubStore, type GitHubConfig } from './github';
 import { assertDatabase, parseInput, passwordSchema, safeUser, usernameSchema, type DatabaseDocument, type StoredUser } from './models';
 import type { AuditEvent } from '../shared/types';
 import { emptyWorkshop } from '../shared/workshop';
+import { ensureFrenPostasiStandards } from '../shared/fren-postasi';
 
 export interface DatabaseEnvironment extends GitHubConfig {
   STORAGE_MODE?: string;
@@ -114,7 +115,7 @@ export class DatabaseEngine {
       if (this.local) {
         const stored = await this.storage.get<Snapshot>('snapshot');
         const database = stored?.database ?? this.seed();
-        if(this.env.MAINTENANCE_ENABLED === 'true') { database.jobTypes ??= structuredClone(JOB_TYPES); database.maintenanceOperations ??= []; database.workshop ??= emptyWorkshop(); }
+        if(this.env.MAINTENANCE_ENABLED === 'true') { database.jobTypes ??= structuredClone(JOB_TYPES); database.maintenanceOperations ??= []; database.workshop ??= emptyWorkshop(); ensureFrenPostasiStandards(database.workshop.standards); }
         assertDatabase(database);
         await this.bootstrap(database);
         await this.save({ database, sha: null, syncedAt: Date.now() });

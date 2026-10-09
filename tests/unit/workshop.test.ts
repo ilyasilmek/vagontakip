@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { FREN_POSTASI_JOBS, ensureFrenPostasiStandards } from '../../shared/fren-postasi';
 import { JOB_TYPES } from '../../shared/maintenance';
 import { calculateOperation, emptyWorkshop, netMinutes, ratio, summarizeWorkshop, turkeyTime, type WorkshopData, type WorkshopDay, type WorkshopOperation } from '../../shared/workshop';
 import { resolveStandardLines, validateWorkshop } from '../../server/workshop';
@@ -36,4 +37,19 @@ describe('real person-time validation and period boundaries',()=>{
  it('keeps historical standards when later catalog versions change',()=>{const {data,operation}=fixture();const old=operation.jobs[0].standardMinutes;data.standards.find(s=>s.id===48)!.validUntil='2026-10-10T00:00:00.000Z';data.standards.push({...data.standards.find(s=>s.id===48)!,versionId:'new',standardMinutes:200,validFrom:'2026-10-10T00:00:00.000Z',validUntil:null});expect(resolveStandardLines([{jobTypeId:48,quantity:3}],data.standards,'2026-10-11T00:00:00Z')[0].standardMinutes).toBe(200);expect(resolveStandardLines([{jobTypeId:48,quantity:4}],data.standards,'2026-10-11T00:00:00Z',operation)[0].standardMinutes).toBe(old);expect(calculateOperation(operation,data.days).workload).toBe(9.5);});
  it('attributes standard output at completion and clips actual time to the report range',()=>{const {data,operation}=fixture();const early={startedAt:at('08:00'),finishedAt:at('10:00')},s=summarizeWorkshop(data,early);expect(s.workload).toBe(0);expect(s.actualLabor).toBe(6);expect(s.waitingLabor).toBe(0);expect(s.capacity).toBe(6);expect(s.unexplained).toBe(0);const late={startedAt:at('13:00'),finishedAt:at('14:00')};expect(calculateOperation(operation,data.days,late).workload).toBe(9.5);expect(calculateOperation(operation,data.days,late).actualLabor).toBe(1.6);});
  it('starts with two shifts, each with 450 net minutes, and never includes absent staff',()=>{const data=emptyWorkshop();expect(data.shifts.map(s=>s.id)).toEqual(['1','2']);for(const s of data.shifts){expect(netMinutes({startedAt:at(s.start),finishedAt:at(s.end)},[{startedAt:at(s.breakStart),finishedAt:at(s.breakEnd)}])).toBe(450);}const {data:d,day}=fixture();d.operations=[];day.attendance=day.attendance.filter(a=>a.personId!=='c');expect(summarizeWorkshop(d,month).capacity).toBe(15);expect(JOB_TYPES).toHaveLength(49);});
+});
+
+describe('Hava-Fren catalog migration',()=>{
+ it('keeps 52 categorized rows and preserves historical standards',()=>{
+  const data=emptyWorkshop();expect(FREN_POSTASI_JOBS).toHaveLength(52);expect(new Set(FREN_POSTASI_JOBS.map(([category])=>category)).size).toBe(11);expect(FREN_POSTASI_JOBS.every(([,name])=>!name.includes('(adet)'))).toBe(true);
+  expect(data.standards.filter(s=>s.id<1000)).toHaveLength(49);expect(data.standards.filter(s=>s.id>=1001)).toHaveLength(52);
+  const initial=data.standards.length;ensureFrenPostasiStandards(data.standards);expect(data.standards).toHaveLength(initial);
+  expect(data.standards.find(s=>s.name==='Sabo değişti')?.standardMinutes).toBe(data.standards.find(s=>s.id===1)?.standardMinutes);
+  expect(data.standards.find(s=>s.name==='Sensör hortumları söküldü')?.standardMinutes).toBe(0);
+ });
+ it('marks an operation with untimed work as incomplete for efficiency',()=>{
+  const {data,operation}=fixture();operation.jobs=resolveStandardLines([{jobTypeId:1007,quantity:1},{jobTypeId:1035,quantity:1}],data.standards,operation.finishedAt);
+  const result=calculateOperation(operation,data.days);expect(result.estimatedMinutes).toBeNull();expect(result.netEfficiency).toBeNull();expect(result.grossEfficiency).toBeNull();
+  const monthResult=summarizeWorkshop(data,month);expect(monthResult.netEfficiency).toBeNull();expect(monthResult.warning).toContain('standart süresi');
+ });
 });
