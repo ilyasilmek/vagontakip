@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `a64e357` |
+| Son özellik commit'i | `6096db4` | `e11d926` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -214,6 +214,8 @@ Doğrulama:
 İlk test sonucunu değerlendirmeden başlayan yayın yardımcı süreci sonlandırıldı; zaten başlamış alt süreç yalnız test Worker'ını yükledi. Son dört kontrol geçtikten sonra standart test yayın yardımcı süreci yeniden çalıştırılarak yayın tamamlandı. Canlı yayın izni kullanılmadı, `main` değişmedi. Cloudflare API üzerinden etkin sürüm **%100 `061faf71-1c14-44c1-8aa0-2b1fb103ec38`** olarak doğrulandı. Uzak giriş, yayımlanan JavaScript ile doğrulanan yerel derlemenin birebir eşleşmesi, önceki personel/vagon/parça/demirbaş/günlük/bakım/faaliyet/eski bakım kayıt kimliklerinin korunması ve canlı sayfanın içerik özetinin değişmediği kontrol edildi. Uzak doğrulama yeni kayıt oluşturmadı.
 
 ## 9 Ekim 2026 — Günlük atölyede aktif personelin otomatik seçilmesi
+
+Özellik ve doğrulama kaydı: `e11d926` (`maintenance-test`).
 
 Yeni günlük atölye formunda tüm aktif personel, vardiyanın başlangıç/bitiş saatleriyle otomatik seçili gelir ve personel listesi doğrudan görünür. Kullanıcı o vardiyada çalışmayan kişilerin seçimini kaldırabilir veya geri ekleyebilir; kapasite önizlemesi buna göre güncellenir. Tarih/vardiya değişince kullanıcının kaldırdığı kişiler tekrar seçilmez, kalan kişilerin saatleri yeni vardiyaya taşınır. Pasif personel yeni kayda otomatik alınmaz. Mevcut günlük kayıt düzenlenirken kayıtlı katılım listesi korunur; geçmiş kayıtlar veya personel verileri topluca değiştirilmez. Bakım formundan açılan yeni günlük kayıt aynı varsayılanı kullanır. Kullanım kılavuzu buna göre güncellendi.
 
