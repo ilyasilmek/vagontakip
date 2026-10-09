@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `bd5ef22` |
+| Son özellik commit'i | `6096db4` | `7bfa358` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -240,6 +240,8 @@ Doğrulama: `npm run build:test` TypeScript/Vite/PWA üretimi geçti. Ayrı yere
 Yalnız `vagontakip-test` yayımlandı. Gizli anahtar bağı işleminden sonra etkin test sürümü Cloudflare API üzerinden **%100 `be18b336-2af7-457c-bb69-cf6e4ef832bf`** olarak doğrulandı. Uzak giriş ve yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle eşleşmesi kontrol edildi. Önceki personel/vagon/parça/demirbaş/günlük/bakım/faaliyet/eski bakım kayıt kimlikleri korundu; uzak doğrulama yeni kayıt oluşturmadı. Canlı sayfanın içerik özeti yayın öncesiyle aynı kaldı; `main` veya canlı Worker güncellenmedi.
 
 ## 9 Ekim 2026 — İş emri saatlerinin seçili vardiyalara göre güncellenmesi
+
+Özellik ve doğrulama kaydı: `7bfa358` (`maintenance-test`).
 
 Vardiya kaydı seçiminde ekip katılımı değişirken üstteki iş emri saatleri aynı kaldığından, yeni katılım iş emrinin dışında kalabiliyordu. Artık günlük vardiya kaydı seçme, ekip/vardiya aralığı ekleme ve kaldırma işlemleri, iş emri başlangıcını seçili günlük kayıtların en erken başlangıcına ve bitişini en geç bitişine ayarlar. Aynı gün yalnız 1. vardiya **08:00–16:00**, yalnız 2. vardiya **13:30–21:30**, ikisi birlikte **08:00–21:30** olur; ekleme sırası sonucu değiştirmez. Sınırlar sabit saatlerden değil kayıtlı günlük vardiyanın gerçek tarih/saatlerinden alınır.
 
