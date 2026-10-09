@@ -19,6 +19,8 @@ Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon
 
 Son doğrulanan test Worker yayın kimliği: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
+9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Yeni kurallar henüz uygulamaya veya test sitesine aktarılmadı; aşağıdaki mevcut pilot hesapları eski sürümün davranışını anlatır. Kişi bazında seçim kullanıcı tarafından onaylandı; vardiya saatleri alındı, net süre ve mola bilgisi netleştiriliyor.
+
 ## Kurulum ve canlı uygulamada tamamlanan işler
 
 | Değişiklik | Sonuç | Kaynak |
@@ -75,6 +77,16 @@ Açık temada opaklık %5,5, koyu temada %8'dir. Menü, üst/alt gezinme, giriş
 Doğrulama: TypeScript/Vite derlemesi başarılı. Yerel Chromium'da 390×844 telefon görünümü açık/koyu temalarda, 1440×900 masaüstü görünümü kontrol edildi. Tek görsel, kare oran, düşük opaklık ve yatay taşma olmaması doğrulandı. Bakım formu açıldı, alanına yazılıp vazgeçildi; kayıt oluşturulmadı. Yazdırma görünümünde arka planın gizlendiği doğrulandı. Telefon ekran görüntüleri görsel olarak incelendi. Bu yalnız arayüz değişikliği olduğundan hesaplama/API paketi yeniden çalıştırılmadı; önceki sonuçlar yukarıda korunur.
 
 Yayın tamamlandı: özellik commit’i `af96372`, hedef yalnız `vagontakip-test`, sürüm `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Uzak sayfanın yeni arayüz dosyası, görselin orijinal dosyayla aynı olduğu ve arka plan CSS’si doğrulandı. Test sağlık kontrolü `ok: true`, `storage: local`; canlı sağlık kontrolü `ok: true`, `storage: github` döndü. Kullanıcı onayı olmadan `main` ve canlı Worker değiştirilmez.
+
+## 9 Ekim 2026 — yeni şartname analizi
+
+Kullanıcının verdiği nihai yazılım şartnamesi mevcut hesap, API, veri saklama ve bakım arayüzüyle karşılaştırıldı. Kaynak metin ve ayrıntılı [analiz belgesi](bakim-sartname-analizi.md) repoya eklendi. Yeni kapsam; ayrı günlük vardiya kapasitesi, gerçek kişiler ve katılım aralıkları, bekleyen kişi seçimi, tam/kısmi vagonsuzluk, yardımcı faaliyetler, dört ayrı KPI, açıklanamayan kapasite, ilişkisel veri yapısı ve tarih aralığı raporlarıdır. Standart iş yükü, gerçek personel-zaman kategorileriyle aynı toplama katılmaz.
+
+Kullanıcı ayrı personel listesinden tek tek seçimi ve hafta sonunun aynı vardiya düzeninde çalışmasını onayladı. 1. vardiya 08:00–16:00, 3. vardiya 00:00–08:00; yemek molası 30 dakika, başka mola yok. 2. vardiyanın bitişi ve mola başlangıçları netleştiriliyor. Yanlış varsayımın özellikle kısmi kayıp hesabını etkilemesi nedeniyle bu saatler uydurulmadı.
+
+Bağımsız aritmetik kontrolünde şartnamedeki sayısal örnekler doğru çıktı: 1,33; 15,10; 1,55; 13,55 A/S, %70,11 ve %62,91 verimlilik; 22,50 ve 90,00 A/S vagonsuzluk; 495,00 A/S kapasite; %18,18, %25,25 ve %3,74 oranlar. Bu sonuçlar yeni uygulama kabul testlerinin geçtiği anlamına gelmez. Belge bağlantıları, kaynak metin aktarımı ve Git diff kontrol edildi; yalnız dokümantasyon değiştiğinden uygulama testleri/derlemesi çalıştırılmadı.
+
+Eski test kayıtlarında gerçek kişi kimlikleri ve bekleme saatleri yoktur. Geçişte bunlar tahmin edilmeyecek, eski hesap sonuçları sessizce değiştirilmeyecek; analiz belgesinde sürümlü geçiş planı kaydedildi. Uygulama kodu ve çalışan test sürümü bu analiz kaydında değiştirilmedi; yeni dağıtım yapılmadı. Hedef yalnız `maintenance-test`; `main` ve canlı Worker değiştirilmedi.
 
 ## Güncel kullanıcı akışları
 

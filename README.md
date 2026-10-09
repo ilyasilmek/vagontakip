@@ -2,6 +2,8 @@
 
 Güncel değişiklikler, test sonuçları ve test/canlı yayın durumu: [Geliştirme raporu](docs/gelistirme-raporu.md).
 
+Yeni bakım/adam-saat şartnamesinin mevcut test sürümüyle karşılaştırması ve açık konular: [Şartname analizi](docs/bakim-sartname-analizi.md).
+
 Vagon, parça ve demirbaş kayıtlarını telefondan yönetmek için Türkçe PWA. Aynı uygulama Android, iPhone ve masaüstü tarayıcılarında açılır; destekleyen telefonlarda ana ekrana kurulabilir. Windows programından aktarılan başlangıç verisinde 128 vagon, 2 parça ve 7 demirbaş bulunur.
 
 Uygulama React ve TypeScript ile hazırlanmıştır. Cloudflare Worker giriş işlemlerini ve API'yi sağlar. Ortak veritabanı bu GitHub deposundaki **şifreli** `data/database.enc.json` dosyasıdır; tüm cihazlar veriye aynı Worker üzerinden erişir.
@@ -83,6 +85,6 @@ Cloudflare hesabı ve güvenli erişim bağları hazır olduğunda `npm run depl
 
 ## Verinin korunması ve sınırlar
 
-Bu depo herkese açıktır. Operasyon kayıtları, kullanıcı parola özetleri ve işlem geçmişi AES-256-GCM şifreli dosyanın içinde tutulur. GitHub erişim tokenı, yönetici şifresi, oturum anahtarı ve veritabanı anahtarı yalnız sunucu secrets ayarlarında bulunur; tarayıcı koduna veya Git'e eklenmez. Yerel `.local/` ve `.dev.vars` dosyaları izlenmez. Veritabanı anahtarını güvenli ve kalıcı olarak yedekleyin; kaybolursa GitHub'daki şifreli veri kurtarılamaz.
+Bu depo kullanıcı tarafından private yapılmıştır. Operasyon kayıtları, kullanıcı parola özetleri ve işlem geçmişi AES-256-GCM şifreli dosyanın içinde tutulur. GitHub erişim tokenı, yönetici şifresi, oturum anahtarı ve veritabanı anahtarı yalnız sunucu secrets ayarlarında bulunur; tarayıcı koduna veya Git'e eklenmez. Yerel `.local/` ve `.dev.vars` dosyaları izlenmez. Veritabanı anahtarını güvenli ve kalıcı olarak yedekleyin; kaybolursa GitHub'daki şifreli veri kurtarılamaz.
 
 GitHub ortak veritabanının kalıcı kaynağıdır; Cloudflare Durable Object yazmaları sıraya koyar ve sunucu kopyasını tutar. Tek şifreli dosya, küçük ekiplerin iş akışına uygundur. Her değişiklik GitHub API ve commit gerektirir; API/hizmet limitleri veya kesintileri kayıt işlemlerini etkiler. Güncellemeler periyodik yenilemeyle gelir. Görünen işlem geçmişi son 5.000 olayı tutar; eski şifreli sürümler Git geçmişinde kalır. Telefonun tuttuğu çevrimdışı operasyon kopyası cihazın tarayıcı depolamasındadır ve cihaz güvenliğiyle korunmalıdır.

@@ -1,0 +1,496 @@
+VAGON BAKIM VE ADAM-SAAT (A/S) TAKİP SİSTEMİ
+NİHAİ YAZILIM ŞARTNAMESİ
+
+Konu: Vagon Bakım, Adam-Saat (A/S), Atölye Kapasite ve Verimlilik Takip Modülü
+
+Platform: Web ve mobil uyumlu uygulama
+
+Amaç: Atölyede gerçekleştirilen vagon bakım işlerinin standart iş yükünü, fiilî işçilik sürelerini, bakım sırasındaki beklemeleri ve vagon gelmeyen günlerdeki kapasite kayıplarını hesaplamak; raporlamada çift sayımı önlemek ve yönetim için güvenilir performans göstergeleri üretmek.
+
+1. TEMEL TANIMLAR VE İŞ KURALLARI
+1.1. Standart Birim Dakika
+
+İş kalemleri sözlüğündeki birim dakika, bir personelin ilgili işi tek başına tamamlaması için belirlenen standart süredir.
+
+Birden fazla adet yapılan işlerde birim dakika, yapılan adetle çarpılır.
+
+1.2. Net Vardiya Saati
+
+Kapasite ve kayıp hesaplarında mola süreleri düşülmüş net çalışma süresi kullanılacaktır.
+
+Varsayılan net vardiya süresi: 7,5 saat.
+Varsayılan dakika karşılığı: 450 dakika.
+Farklı vardiya süreleri sistem üzerinden tanımlanabilecektir.
+1.3. Personel Sayısı
+
+Kapasite hesaplarında ilgili vardiyada fiilen sahada bulunan ve çalışması planlanan personel sayısı esas alınacaktır.
+
+İzinli, raporlu veya vardiyada bulunmayan personel kapasite hesabına dahil edilmeyecektir.
+
+1.4. Çift Sayımı Önleme Kuralı
+
+Aynı personelin aynı zaman dilimi birden fazla faaliyet veya kayıp kategorisine yazılamaz.
+
+Örnek kategoriler:
+
+Fiilî bakım çalışması
+Bakım içi bekleme
+Vagonsuzluk kaynaklı kayıp
+Hazırlık ve güvenlik
+Temizlik ve 5S
+Yardımcı atölye faaliyetleri
+Diğer kayıtlı faaliyetler
+
+Vagonsuzluk ve bakım içi bekleme kayıtları zaman aralığı ve personel bazında kontrol edilecektir.
+
+Vagon gelmeyen bir vardiyada bakım içi bekleme kaydı oluşturulamayacaktır. Vagonun günün bir bölümünde gelmesi durumunda yalnızca ilgili zaman aralıkları uygun kategoriye atanacaktır.
+
+1.5. Zaman ve İşçilik Ayrımı
+
+Sistem aşağıdaki iki kavramı birbirinden ayrı tutacaktır:
+
+Standart iş yükü (A/S): Tamamlanan bakım işlerinin standart sürelerinden hesaplanır.
+Fiilî işçilik (A/S): Personelin gerçekten harcadığı çalışma süresinden hesaplanır.
+
+Standart iş yükü ile fiilî işçilik birbirinin yerine kullanılmayacaktır.
+
+2. TEMEL MATEMATİKSEL FORMÜLLER
+2.1. Standart İş Yükü (A/S)
+
+Formül:
+
+Standart A/S = Σ(İş Adedi × Birim Dakika) / 60
+
+Örnek:
+
+16 adet × 5 dakika = 80 dakika
+
+80 / 60 = 1,33 A/S
+
+Tüm iş kalemleri için bu işlem yapılacak ve sonuçlar toplanacaktır.
+
+2.2. Fiilî Toplam İşçilik (A/S)
+
+Fiilî İşçilik A/S = Fiilî Çalışma Dakikası × Çalışan Personel Sayısı / 60
+
+Örnek:
+
+302 dakika × 3 kişi / 60 = 15,10 A/S
+
+Bu hesap, ilgili süre boyunca üç kişinin tamamının işçilik hesabına dahil olduğu varsayımına dayanır.
+
+Personel sayısı zaman içinde değişiyorsa hesap, personel-zaman kayıtlarından yapılacaktır.
+
+2.3. Bakım İçi Bekleme Kaybı (A/S)
+
+Bekleme A/S = Σ(Bekleme Dakikası × Bekleyen Personel Sayısı) / 60
+
+Örnek:
+
+30 dakika boyunca 3 kişi beklemişse:
+
+30 × 3 / 60 = 1,50 A/S
+
+Bekleme kayıtlarında bekleyen personel sayısı ayrıca tutulacaktır.
+
+2.4. Net İşçilik (A/S)
+
+Net İşçilik A/S = Fiilî Toplam İşçilik A/S − Bakım İçi Bekleme A/S
+
+Örnek:
+
+15,10 − 1,55 = 13,55 A/S
+
+Bu değer, fiilî toplam işçilikten kaydedilmiş bakım içi bekleme işçiliği çıkarıldıktan sonra kalan işçilik süresini gösterir.
+
+Net işçilik, standart iş yükü ile aynı kavram değildir.
+
+2.5. Standart Hedef Süre (Dakika)
+
+Standart Hedef Süre = Standart A/S × 60 / Çalışan Personel Sayısı
+
+Örnek:
+
+9,50 × 60 / 3 = 190 dakika
+
+Bu süre, işin belirtilen personel sayısıyla ve standartlara uygun şekilde tamamlanacağı varsayımına dayanır.
+
+2.6. Vagonsuz Gün İş Gücü Kaybı (A/S)
+
+Tam vardiya boyunca vagon gelmediğinde:
+
+Vagonsuz Gün Kaybı A/S = Sahadaki Personel Sayısı × Net Vardiya Saati
+
+Örnek:
+
+3 kişi × 7,5 saat = 22,50 A/S
+
+Dört tam vagonsuz gün için:
+
+3 kişi × 7,5 saat × 4 gün = 90,00 A/S
+
+Kısmi Vagonsuzluk
+
+Vagonun vardiyanın yalnızca bir bölümünde gelmemesi durumunda kayıp, personel sayısı ve ilgili zaman aralığı üzerinden hesaplanacaktır.
+
+Kısmi kayıp hesabında:
+
+Vagonsuzluk Kaybı A/S = Σ(Personel Sayısı × Vagonsuz Geçen Net Saat)
+
+Aynı süre başka bir faaliyet veya kayıp kategorisine atanmayacaktır.
+
+2.7. Toplam Planlı Atölye Kapasitesi (A/S)
+
+Toplam Planlı Kapasite A/S = Σ(Günlük Fiilî Planlı Personel Sayısı × Net Vardiya Saati)
+
+Örnek:
+
+3 kişi × 22 gün × 7,5 saat = 495,00 A/S
+
+Hesap, seçilen raporlama dönemindeki bütün gün ve vardiyalar üzerinden yapılacaktır.
+
+Resmî tatiller, vardiya değişiklikleri, izinler ve planlı çalışma dışı günler ilgili takvime göre dikkate alınacaktır.
+
+3. VERİTABANI MİMARİSİ
+
+Veritabanı ilişkisel yapıda oluşturulacak ve kayıtlar benzersiz kimliklerle ilişkilendirilecektir.
+
+3.1. İş Kalemleri Standart Sözlüğü — IsKalemleri
+
+Alanlar:
+
+kalem_id: Birincil anahtar
+is_tanimi: İş tanımı
+birim_dakika: Bir personel için standart dakika
+aktif_mi: İş kaleminin kullanım durumu
+gecerlilik_baslangici: Standardın geçerlilik başlangıcı
+gecerlilik_bitisi: Varsa standardın geçerlilik bitişi
+
+Standart süreler geçmiş bakım kayıtlarını bozmayacak şekilde tarihsel olarak saklanmalıdır. İş kaleminin standart süresi değiştiğinde önceki kayıtların standart iş yükü geriye dönük olarak otomatik değiştirilmemelidir.
+
+3.2. Atölye Günlük Durum Kaydı — GunlukAtolyeStatu
+
+Alanlar:
+
+statu_id: Birincil anahtar
+tarih: Kayıt tarihi
+vardiya: Vardiya numarası
+sahadaki_personel_sayisi: İlgili vardiyadaki fiilî planlı personel sayısı
+net_vardiya_saati: Net çalışma süresi; varsayılan 7,5 saat
+vagon_geldi_mi: Vagon gelip gelmediğini belirten Boolean alan
+vagonsuzluk_nedeni: Manevra iptali, hat işgali, lojistik eksiklik vb.
+aciklama: Serbest açıklama
+kaydi_olusturan: Kaydı oluşturan kullanıcı
+kayit_zamani: Kayıt oluşturulma zamanı
+
+Aynı tarih ve vardiya için mükerrer günlük durum kaydı oluşturulması engellenmelidir.
+
+Bir vardiyada farklı zamanlarda farklı durumlar oluşabiliyorsa sistem bu durumları ayrı zaman aralıklarıyla kaydedebilmelidir.
+
+3.3. Bakım Operasyon Kartı — BakimIsEmri
+
+Alanlar:
+
+is_emri_id: Birincil anahtar
+vagon_no: Vagon numarası
+tarih_giris: İş emri başlangıç zamanı
+tarih_cikis: İş emri bitiş zamanı
+gerceklesen_dakika: İş emrinin toplam geçen süresi
+personel_sayisi: İş emrine katılan personel sayısı
+vardiya_amiri: Sorumlu vardiya amiri
+statu_id: İlgili atölye vardiya kaydına bağlantı
+aciklama: Ek bilgiler
+
+İş emri başlangıç ve bitiş zamanları, fiilî çalışma süresi ve bekleme süreleri birbirinden ayrı alanlar olarak değerlendirilmelidir.
+
+Birden fazla iş emrinin aynı personel ve aynı zaman diliminde çakışıp çakışmadığı kontrol edilmelidir.
+
+3.4. Bakım İş Kalemleri — BakimIsKalemleri
+
+Alanlar:
+
+kayit_id: Birincil anahtar
+is_emri_id: Bakım iş emri bağlantısı
+kalem_id: Standart iş kalemi bağlantısı
+adet: Gerçekleştirilen iş adedi
+birim_dakika_snapshot: İşlem sırasında geçerli olan standart dakika
+standart_toplam_dakika: Adet × birim dakika
+
+Bir iş emrinde birden fazla iş kalemi bulunabilecektir.
+
+Standart iş yükü, bu tablodaki standart toplam dakika değerlerinin toplamından hesaplanacaktır.
+
+3.5. Bakım İçi Beklemeler — BakimBeklemeleri
+
+Alanlar:
+
+bekleme_id: Birincil anahtar
+is_emri_id: İş emri bağlantısı
+bekleme_nedeni: Manevra, malzeme, teknik destek vb.
+baslangic_zamani: Beklemenin başlangıcı
+bitis_zamani: Beklemenin bitişi
+bekleme_dakika: Hesaplanan bekleme süresi
+bekleyen_personel: Bekleme sırasında işi durduğu için bekleyen personel sayısı
+aciklama: Ek açıklama
+
+Bekleme kaydı oluşturulurken iş emri personel sayısı varsayılan değer olarak getirilebilir; ancak kullanıcı gerçek bekleyen personel sayısını değiştirebilmelidir.
+
+Aynı personelin aynı zaman aralığına ait çakışan bekleme kayıtları engellenmelidir.
+
+3.6. Faaliyet ve İşçilik Kayıtları — AtolyeFaaliyetKayitlari
+
+Alanlar:
+
+faaliyet_id: Birincil anahtar
+tarih: Faaliyet tarihi
+vardiya: Vardiya numarası
+is_emri_id: Varsa ilgili iş emri
+faaliyet_turu: Bakım, hazırlık, temizlik, 5S, yardımcı faaliyet vb.
+baslangic_zamani: Faaliyet başlangıcı
+bitis_zamani: Faaliyet bitişi
+personel_sayisi: Faaliyete katılan personel sayısı
+aciklama: Ek bilgiler
+
+Bu tablo, fiilî personel-zaman dağılımının raporlanması ve kapasite hesabında açıklanamayan sürelerin belirlenmesi için kullanılacaktır.
+
+Aynı personel aynı zaman aralığında birden fazla faaliyet kaydına atanamayacaktır.
+
+4. YÖNETİM RAPORLARI VE KPI'LAR
+
+Aylık, haftalık ve istenen tarih aralığına göre rapor alınabilecektir.
+
+KPI 1 — Toplam Atölye Kapasite Kullanım Oranı
+
+Kapasite Kullanım Oranı (%) = Üretilen Standart İş Yükü A/S / Toplam Planlı Kapasite A/S × 100
+
+Bu gösterge, gerçekleştirilen standart bakım iş yükünün toplam planlı atölye kapasitesine oranını ifade eder.
+
+Bu oran, personelin zamanının aynı oranda fiilen kullanıldığını tek başına kanıtlamaz; standart iş yükü ile kapasite farklı ölçümlerdir.
+
+KPI 2 — Vagonsuzluk Kaynaklı Kapasite Kaybı
+
+Vagonsuzluk Kaybı Oranı (%) = Vagonsuzluk Kaybı A/S / Toplam Planlı Kapasite A/S × 100
+
+Bu gösterge, vagon sevk edilmemesi nedeniyle kaybedilen planlı iş gücü kapasitesini gösterecektir.
+
+KPI 3 — Bakım İçi Operasyonel Bekleme Kaybı
+
+Bakım İçi Bekleme Oranı (%) = Bakım İçi Bekleme Kaybı A/S / Toplam Planlı Kapasite A/S × 100
+
+Bu gösterge, bakım operasyonları sırasında kaydedilen beklemelerin toplam planlı kapasiteye oranını gösterecektir.
+
+KPI 4 — Fiilî İşçilik Verimliliği
+
+Net Verimlilik (%) = Standart İş Yükü A/S / Net İşçilik A/S × 100
+
+Beklemeler Dahil Verimlilik (%) = Standart İş Yükü A/S / Fiilî Toplam İşçilik A/S × 100
+
+Bu göstergeler, iş emri veya seçilen bakım grubu düzeyinde hesaplanacaktır.
+
+Sıfıra bölme durumunda sonuç yüzde olarak gösterilmeyecek; “Hesaplanamadı” uyarısı verilecektir.
+
+4.1. Genel Atölye ve Yardımcı Faaliyetler
+
+Yardımcı faaliyetler, yalnızca standart iş yükü ve kayıplar arasındaki farktan doğrudan türetilmeyecektir.
+
+Öncelikle gerçek personel-zaman kayıtları esas alınacaktır.
+
+Yardımcı Faaliyet A/S = Σ(Yardımcı Faaliyet Dakikası × Katılan Personel Sayısı) / 60
+
+Örnek yardımcı faaliyetler:
+
+Atölye hazırlığı
+Temizlik ve 5S
+Küçük ekipman bakımı
+İş güvenliği hazırlıkları
+Diğer kayıtlı atölye faaliyetleri
+4.2. Açıklanamayan Kapasite
+
+Açıklanamayan Kapasite A/S = Toplam Planlı Kapasite − Birbirini Dışlayan Fiilî İşçilik ve Kayıp Kategorilerinin Toplamı
+
+Bu değer, yalnızca bütün faaliyet ve kayıp kategorileri aynı personel-zaman esasına göre kaydedilmişse hesaplanacaktır.
+
+Negatif sonuç veya açıklanamayan süre tespit edilirse sistem veri kontrolü uyarısı gösterecektir. Açıklanamayan süre otomatik olarak yardımcı faaliyet kabul edilmeyecektir.
+
+Önemli: Standart bakım iş yükü, fiilî personel-zaman kategorilerinden farklı bir ölçüdür. Bu nedenle standart iş yükü; vagonsuzluk kaybı, bekleme kaybı ve fiilî faaliyet süreleriyle aynı toplama doğrudan dahil edilerek kapasite mutabakatı yapılmayacaktır.
+
+5. ÖRNEK AYLIK RAPOR
+
+Örnek değerler:
+
+Toplam planlı kapasite: 495,00 A/S
+Üretilen standart bakım iş yükü: 125,00 A/S
+Bakım içi bekleme kaybı: 18,50 A/S
+Vagonsuz gün sayısı: 4
+Tam vagonsuz gün kaybı: 90,00 A/S
+Hesaplanan KPI'lar
+
+Kapasite kullanım oranı:
+
+125 / 495 × 100 = %25,25
+
+Vagonsuzluk kaynaklı kapasite kaybı:
+
+90 / 495 × 100 = %18,18
+
+Bakım içi bekleme kaybı oranı:
+
+18,50 / 495 × 100 = %3,74
+
+Bu yüzdeler birbirinden bağımsız KPI'lardır. Toplanmaları, bütün kategorilerin aynı zaman ve işçilik esasına göre birbirini dışladığı doğrulanmadıkça toplam kayıp veya kullanım oranı olarak sunulmayacaktır.
+
+Yönetim raporu açıklaması
+
+“Atölyenin ilgili dönemdeki toplam planlı kapasitesi 495,00 A/S olarak hesaplanmıştır. Tam vagonsuz geçen dört gün nedeniyle 90,00 A/S kapasite kaybı oluşmuştur. Vagonsuzluk kaynaklı kayıp oranı %18,18'dir. Gerçekleştirilen standart bakım iş yükü 125,00 A/S olup toplam planlı kapasitenin %25,25'ine karşılık gelmektedir. Bakım içi bekleme kaybı 18,50 A/S olarak kaydedilmiştir.”
+
+Bu açıklama, ölçülen göstergeleri birbirine karıştırmadan raporlayacaktır.
+
+6. ARAYÜZ VE PDF ÇIKTILARI
+6.1. Vagon Bakım Detay Kartı
+
+PDF ve yazdırma çıktısında aşağıdaki alanlar bulunacaktır:
+
+Vagon numarası
+İş emri numarası
+Giriş ve çıkış tarih-saatleri
+Vardiya bilgisi
+Vardiya amiri
+Çalışan personel sayısı
+Yapılan iş kalemleri ve adetleri
+Standart iş yükü (A/S)
+Gerçekleşen geçen süre (dakika)
+Fiilî toplam işçilik (A/S)
+Bakım içi bekleme süresi (dakika)
+Bekleme kaybı (A/S)
+Net işçilik (A/S)
+Net verimlilik (%)
+Beklemeler dahil verimlilik (%)
+6.2. Atölye Günlük Durum Ekranı
+
+Ekranda şu alanlar bulunacaktır:
+
+Tarih ve vardiya
+Sahadaki personel sayısı
+Net vardiya süresi
+Vagon geldi mi?
+Vagonsuzluk nedeni
+Vagonsuz geçen süre
+Hesaplanan kayıp A/S
+Açıklama
+
+“Vagon Gelmedi” seçildiğinde neden alanı zorunlu olacaktır.
+
+Tam vardiya vagonsuzluğu ile kısmi vagonsuzluk birbirinden ayrılacaktır.
+
+6.3. Aylık Yönetim Paneli
+
+Panelde şu göstergeler bulunacaktır:
+
+Toplam planlı kapasite (A/S)
+Standart bakım iş yükü (A/S)
+Kapasite kullanım oranı (%)
+Vagonsuzluk kaybı (A/S ve %)
+Bakım içi bekleme kaybı (A/S ve %)
+Yardımcı faaliyetler (A/S)
+Açıklanamayan kapasite (A/S)
+Vagonsuz gün sayısı ve neden dağılımı
+Bakım türüne ve vagona göre performans
+
+Raporlar PDF, yazdırılabilir çıktı ve mümkünse Excel formatında alınabilecektir.
+
+7. VERİ DOĞRULAMA VE HATA KONTROLLERİ
+
+Sistem aşağıdaki kontrolleri uygulayacaktır:
+
+Personel sayısı negatif olamaz.
+Birim dakika ve adet negatif olamaz.
+Vardiya süresi sıfırdan büyük olmalıdır.
+İş emri bitiş zamanı başlangıç zamanından önce olamaz.
+Bekleme süresi iş emrinin geçerli zaman aralığını aşamaz.
+Aynı personelin aynı zaman diliminde çakışan faaliyet kayıtları engellenmelidir.
+Tam vagonsuz gün kaybı, ilgili vardiyanın planlı kapasitesini aşamaz.
+Bekleme kaybı, ilgili personel-zaman kayıtlarıyla doğrulanmalıdır.
+Net işçilik sıfır veya negatifse verimlilik hesaplanmamalıdır.
+Toplam planlı kapasite sıfırsa kapasite oranları hesaplanmamalıdır.
+Mükerrer tarih-vardiya kayıtları engellenmelidir.
+Açıklanamayan veya negatif kapasite bakiyesi oluşursa kullanıcıya uyarı gösterilmelidir.
+Yuvarlama yalnızca gösterim aşamasında yapılmalı; ara hesaplamalarda hassasiyet korunmalıdır.
+İş kalemlerinin standart süre değişiklikleri geçmiş kayıtları geriye dönük değiştirmemelidir.
+Kısmi vagonsuzluk, bekleme ve faaliyet kayıtları aynı personel-zaman aralığı için çift sayıma neden olmamalıdır.
+8. TEKNİK VE KULLANILABİLİRLİK GEREKSİNİMLERİ
+Web ve mobil ekranlarla uyumlu tasarım yapılacaktır.
+Kullanıcı yetkilendirmesi ve rol bazlı erişim sağlanacaktır.
+Veri girişleri ve düzeltmeleri denetim kaydında tutulacaktır.
+Tarih ve saatler tutarlı bir zaman dilimi standardıyla saklanacaktır.
+Raporlar seçilen tarih aralığına göre üretilecektir.
+Hesaplama mantığı tek bir ortak servis veya modül üzerinden çalıştırılacaktır.
+PDF ve ekran değerleri aynı hesaplama kaynağını kullanacaktır.
+Formül değişiklikleri test edilebilir ve sürümlenebilir olacaktır.
+9. KABUL TESTLERİ
+
+Yazılım teslim edilmeden önce aşağıdaki örnekler doğrulanacaktır.
+
+Test 1 — Standart iş yükü
+
+16 adet × 5 dakika = 80 dakika = 1,33 A/S.
+
+Test 2 — Fiilî toplam işçilik
+
+302 dakika × 3 kişi / 60 = 15,10 A/S.
+
+Test 3 — Bakım içi bekleme
+
+31 dakika × 3 kişi / 60 = 1,55 A/S.
+
+Test 4 — Net işçilik
+
+15,10 − 1,55 = 13,55 A/S.
+
+Test 5 — Net verimlilik
+
+9,50 / 13,55 × 100 = %70,11.
+
+Test 6 — Beklemeler dahil verimlilik
+
+9,50 / 15,10 × 100 = %62,91.
+
+Test 7 — Tam vagonsuz gün
+
+3 kişi × 7,5 saat = 22,50 A/S.
+
+Test 8 — Dört tam vagonsuz gün
+
+3 kişi × 7,5 saat × 4 gün = 90,00 A/S.
+
+Test 9 — Aylık planlı kapasite
+
+3 kişi × 22 gün × 7,5 saat = 495,00 A/S.
+
+Test 10 — Vagonsuzluk kayıp oranı
+
+90 / 495 × 100 = %18,18.
+
+Test 11 — Kapasite kullanım oranı
+
+125 / 495 × 100 = %25,25.
+
+Test 12 — Çakışan personel-zaman kayıtları
+
+Aynı personelin aynı zaman diliminde iki farklı kayıp veya faaliyet kategorisine yazılması sistem tarafından engellenmelidir.
+
+Test 13 — Sıfıra bölünme
+
+Payda sıfır olduğunda sistem hata üretmemeli; ilgili göstergeyi “Hesaplanamadı” olarak sunmalıdır.
+
+10. SONUÇ VE TESLİM KRİTERİ
+
+Geliştirilecek sistem aşağıdaki hedefleri karşılamalıdır:
+
+Standart iş yükü ve fiilî işçiliği ayrı hesaplamak.
+Bakım içi beklemeleri personel sayısına göre hesaplamak.
+Vagonsuzluk kaynaklı kapasite kaybını ayrı raporlamak.
+Aynı personelin aynı süre için çift sayılmasını önlemek.
+Kapasite kullanımını, bekleme kayıplarını ve vagonsuzluk kayıplarını ayrı KPI'lar olarak sunmak.
+Açıklanamayan süreleri otomatik olarak yardımcı faaliyetlere atamamak.
+PDF, ekran ve yönetim raporlarında tutarlı sonuçlar üretmek.
+Kabul testlerindeki örnek hesapları doğru sonuçlandırmak.
