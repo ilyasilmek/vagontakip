@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `c2901f2` |
+| Son özellik commit'i | `6096db4` | `c938194` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -294,6 +294,8 @@ Yalnız `vagontakip-test` yayımlandı. Etkin Cloudflare sürümü **%100 `65422
 
 
 ## 9 Ekim 2026 — Personel zaman çakışması için açıklayıcı hata raporu
+
+Özellik ve doğrulama kaydı: `c938194` (`maintenance-test`).
 
 Bakım, bakım içi bekleme, vagonsuzluk veya diğer faaliyetlerde aynı personelin saatleri çakışırsa, sunucu artık ilk çakışma grubundaki personel adlarını (en fazla beş ad), çakışan Türkiye saati aralığını ve iki ilgili kayıt türünü bildirir. Bakım veya bekleme kaydında vagon numarası da görünür. Örneğin iki bakım çakışıyorsa her iki vagon numarası gösterilir. Başka kayıt çiftlerinde de çakışma varsa mesaj bunu belirtir. Mesaj mevcut kaydın gerçekten “aktif” olduğunu iddia etmez; geçmiş kayıt saatleri de çakışabileceğinden önce gerçek bitiş saatlerinin doğrulanmasını, ardından personel veya saatlerin düzeltilmesini ister. İşlem yine sunucuda engellenir; veri/hesaplama kuralları değişmedi. Yeni kişi veya saat bilgileri rapora yazılmadı.
 
