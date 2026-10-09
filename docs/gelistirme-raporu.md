@@ -13,11 +13,11 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `af96372` |
+| Son özellik commit'i | `6096db4` | `08e84d0` |
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
-Son doğrulanan test Worker yayın kimliği: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
+Son doğrulanan etkin test Worker yayın kimliği: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
 9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Kullanıcının son cevabıyla iki vardiya ve yemek molaları kesinleşti; sürüm 2 geliştirmesi aşağıda kayıtlıdır. İlk pilotun hesap tablosu tarihsel sürüm 1 davranışını anlatır. Güncel yayın durumu sürüm 2 bölümünde belirtilir.
 
@@ -108,7 +108,9 @@ Doğrulama: TypeScript ve test arayüzü derlemesi başarılı. **68 birim/sunuc
 
 Ek görsel kontrol: 390×844 açık/koyu tema günlük kayıt ekranları incelendi; Kaydet düğmesinin üstte ve tıklanabilir olduğu doğrulandı. Bu görüntülerde yalnız GET yanıtına üç örnek personel eklendi; bu görsel kontrol yeni kayıt yazmadı. Gerçek kayıt akışları yukarıdaki tarayıcı testlerinde ayrıca sınandı.
 
-Yayın hedefi yalnız `vagontakip-test`. Bu geliştirme kaydı hazırlanırken yeni uzak dağıtım henüz yapılmadı; doğrulama sonrası test yayını ayrıca kaydedilecek. `main`, canlı Worker ve canlı kayıtlar değiştirilmedi. Geri dönüş eski KV snapshot'ını güncel veri yerine koyarak yapılmaz; SQL okuyucusunu koruyan yeni geri alma commit'i gerekir.
+Yayın tamamlandı: özellik commit'i `08e84d0`, hedef yalnız `vagontakip-test`. Kod dağıtım kimliği `b03d90c3-65a9-4f34-809a-020c64e7d2ef`; mevcut güvenli yönetici parola bağı güncellendikten sonra Cloudflare API üzerinden %100 etkin olduğu doğrulanan son sürüm `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Uzak test hesabı girişi, formül sürümü 2, iki vardiya ve mola saatleri, mevcut vagon/parça/demirbaş ve eski bakım kayıtlarının korunması doğrulandı. Uzak arayüz dosyası doğrulanan yerel derlemeyle birebir aynı. Test sağlığı `ok: true`, `storage: local`; canlı sağlığı `ok: true`, `storage: github`. Canlı sayfanın yayın öncesi/sonrası özeti aynı kaldı. Uzak doğrulama yeni personel veya operasyon kaydı oluşturmadı.
+
+Kod ve bu rapor `maintenance-test` dalında GitHub'a kaydedildi; `main`, canlı Worker ve canlı kayıtlar değiştirilmedi. Geri dönüş eski KV snapshot'ını güncel veri yerine koyarak yapılmaz; SQL okuyucusunu koruyan yeni geri alma commit'i gerekir.
 
 ## Güncel kullanıcı akışları
 
