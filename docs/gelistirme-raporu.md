@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `eb6b152` |
+| Son özellik commit'i | `6096db4` | `190e0f2` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -359,6 +359,8 @@ Kullanıcının görsellerinde **Bakım operasyonunu düzenle** penceresinde 12 
 Düzenleme formunda bu ayrım artık “52 yeni + 12 geçmiş iş” olarak yazılır. Giriş yapan hesabın postası Hava-Fren değilse seçili eski işler korunur ve kısa posta uyarısı bunlar görünürken de gösterilir; önceki davranışta eski seçili işler uyarıyı gizliyordu. Eski işlerin adları ve kayıtlı süreleri değiştirilmedi. Yerel Playwright testi, aynı eski kayıtta hem Hava-Fren postasıyla 64 toplam seçeneği hem başka postayla 12 geçmiş seçeneği ve uyarıyı doğruladı. `vagontakip-test` Worker yayımlandı (`0a68b05b-9948-4f11-acf3-cd782324e8b9`). Yayınlanan dosya doğrulandı; önceki test kayıt kimlikleri korundu, canlı sayfanın özeti değişmedi. Canlıya alınmadı.
 
 ## 9 Ekim 2026 — Türkçe karakterli kullanıcı adları (test)
+
+Özellik commit’i: `190e0f2`.
 
 Yönetim → Kullanıcı oluşturma ekranında “Kaynakçı” gibi Türkçe harf içeren kullanıcı adları sunucu kuralı yüzünden reddediliyordu. Kullanıcı adı kuralı Türkçe ve İngilizce harfleri, rakamı, nokta, tireyi ve alt çizgiyi kabul edecek şekilde güncellendi. Kullanıcı adı Türkçe büyük/küçük harf kurallarıyla normalize edilir. Girişte mevcut ASCII hesapların eski büyük harfli kullanımına öncelik verilerek uyumluluk korundu. Ad soyad alanı zaten Türkçe karakterleri kabul ediyordu; formda kullanıcı adı için kısa bir açıklama eklendi.
 
