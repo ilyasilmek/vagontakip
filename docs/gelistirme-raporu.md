@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `9a29c61` |
+| Son özellik commit'i | `6096db4` | `c2901f2` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -281,6 +281,8 @@ Yalnız `vagontakip-test` yayımlandı. Etkin Cloudflare sürümü **%100 `4c61a
 
 
 ## 9 Ekim 2026 — Yeni bakımda 1. Vardiya ve isteğe bağlı iş listesi
+
+Özellik ve doğrulama kaydı: `c2901f2` (`maintenance-test`).
 
 Yeni bakım operasyonu formunda, uygun günlük kayıtlar arasında **1. Vardiya** varsayılan seçilir. Öncelik bugünün 1. Vardiya kaydındadır; yoksa kayıtlı en son 1. Vardiya, hiç yoksa önce bugünün sonra en son uygun vardiya kullanılır. Böylece yalnız 2. Vardiya bulunan atölyelerde form yine açılabilir. Form içinden yeni günlük atölye kaydı oluşturulduğunda da aynı seçim uygulanır. Kullanıcının seçimi ve mevcut bakım kayıtlarının düzenleme değeri korunur.
 
