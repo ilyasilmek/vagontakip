@@ -170,3 +170,11 @@ Doğrulama:
 - `git diff --check`: geçti.
 
 Yayın yalnız `vagontakip-test` Worker'ına yapıldı. Gizli anahtar bağının korunması sonrasındaki etkin sürüm Cloudflare API üzerinden **%100 `7670d044-683d-430a-b387-dd39e8f57fe4`** olarak doğrulandı. Uzak testte giriş, yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle birebir eşleşmesi ve yayın öncesindeki vagon/parça/demirbaş/personel/günlük/bakım/faaliyet/eski bakım kayıt kimliklerinin korunması kontrol edildi. Uzak doğrulama yeni operasyon kaydı oluşturmadı. Canlı sayfanın yayın öncesi/sonrası içerik özeti aynı kaldı; `main` dalına veya canlı Worker'a yayın yapılmadı.
+
+## 9 Ekim 2026 — Kullanıcının verdiği personel listesinin test verisine eklenmesi
+
+Kullanıcının verdiği **29 personel adı**, yalnız test Worker'ındaki Personel bölümüne mevcut yetkili API üzerinden aktif kayıt olarak eklendi. Eklemeden önce Türkçe büyük/küçük harf ve boşluk farkları dikkate alınarak mevcut isimlerle karşılaştırıldı: **29 yeni kayıt, 0 mevcut eşleşme, 0 yeniden etkinleştirme**. İsimler kullanıcının verdiği biçimde korundu; personel adları, kayıt kimlikleri ve giriş bilgileri bu rapora veya izlenen dosyalara eklenmedi. Manuel personel ekleme/düzenleme/pasifleştirme işlevleri kullanılmaya devam eder. Pasifleştirme geçmiş bakım kayıtlarını silmez.
+
+Uzak API'den liste yeniden okunarak 29 ismin her birinin tek aktif kayıt olarak bulunduğu doğrulandı. Önceden bulunan personel kimlikleri korundu; günlük vardiyalar, operasyonlar, faaliyetler, eski bakım kayıtları, vardiya/standart tanımları ve vagon/parça/demirbaş kayıtları işlem öncesiyle karşılaştırıldı ve değişmediği doğrulandı.
+
+Bu işlem test verisi güncellemesidir; uygulama kodu değiştirilmedi, Worker yayını yapılmadı, canlı veriye dokunulmadı. Kod değişmediği için derleme ve test paketleri tekrar çalıştırılmadı; doğrulama gerçek test API'sindeki kayıt sonrası okuma ve koruma kontrolleridir. Personel verileri ayrı Cloudflare test deposunda kalır; yalnız bu değişiklik raporu GitHub'a kaydedilir.
