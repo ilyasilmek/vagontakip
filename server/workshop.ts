@@ -31,7 +31,7 @@ function conflict(rows:{personId:string;startedAt:string;finishedAt:string}[],la
  for(const entries of grouped.values()){entries.sort((a,b)=>Date.parse(a.startedAt)-Date.parse(b.startedAt));let end=-Infinity;for(const row of entries){requireRule(Date.parse(row.startedAt)>=end,label);end=Math.max(end,Date.parse(row.finishedAt));}}
 }
 const conflictTime=new Intl.DateTimeFormat('tr-TR',{timeZone:'Europe/Istanbul',dateStyle:'short',timeStyle:'short'});
-function ledgerConflictMessage(data:WorkshopData):string|null {
+function ledgerConflict(data:WorkshopData):{message:string;operationIds:string[]}|null {
  const grouped=new Map<string,LedgerEntry[]>();
  for(const entry of ledger(data)){const rows=grouped.get(entry.personId)??[];rows.push(entry);grouped.set(entry.personId,rows);}
  const overlaps:{personId:string;first:LedgerEntry;second:LedgerEntry;startedAt:string;finishedAt:string}[]=[];
@@ -55,7 +55,8 @@ function ledgerConflictMessage(data:WorkshopData):string|null {
  };
  const peopleText=names.slice(0,5).join(', ')+(names.length>5?` ve ${names.length-5} kişi daha`:'');
  const timeText=`${conflictTime.format(new Date(selected.startedAt))} – ${conflictTime.format(new Date(selected.finishedAt))}`;
- return `${peopleText}: ${timeText} aralığında ${describe(selected.first)} ile ${describe(selected.second)} çakışıyor. Önce ilgili kayıtların gerçek bitiş saatlerini doğrulayın; ardından personel veya saat aralığını düzeltin.${overlaps.length>related.length?' Başka çakışmalar da olabilir.':''}`;
+ const operationIds=[selected.first,selected.second].filter(entry=>entry.kind==='maintenance'||entry.kind==='waiting').map(entry=>entry.sourceId);
+ return {message:`${peopleText}: ${timeText} aralığında ${describe(selected.first)} ile ${describe(selected.second)} çakışıyor. Önce ilgili kayıtların gerçek bitiş saatlerini doğrulayın; ardından personel veya saat aralığını düzeltin.${overlaps.length>related.length?' Başka çakışmalar da olabilir.':''}`,operationIds:[...new Set(operationIds)]};
 }
 export function validateWorkshop(data:WorkshopData):void {
  const parsed=workshopSchema.safeParse(data);requireRule(parsed.success,parsed.success?'':parsed.error.issues[0]?.message??'Atölye kayıtları geçersiz.');
@@ -94,7 +95,7 @@ export function validateWorkshop(data:WorkshopData):void {
   if(a.kind==='no-wagon')requireRule(!!a.reason,'Vagonsuzluk nedeni girilmeli.');
   for(const personId of a.personIds){requireRule(people.has(personId),'Personel bulunamadı.');requireRule(covered(a,day.attendance.filter(p=>p.personId===personId)),'Faaliyet personeli ilgili saatlerde vardiyada planlı olmalı.');}
  }
- const overlapMessage=ledgerConflictMessage(data);requireRule(!overlapMessage,overlapMessage??'Aynı personelin aynı saatleri çakışıyor.');
+ const overlap=ledgerConflict(data);if(overlap)throw new ApiError(400,'WORKSHOP_TIME_CONFLICT',overlap.message,{operationIds:overlap.operationIds});
 }
 export function resolveStandardLines(input:{jobTypeId:number;quantity:number}[],standards:Standard[],at:string,existing?:WorkshopOperation) {
  return input.map(j=>{

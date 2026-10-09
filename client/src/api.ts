@@ -1,12 +1,14 @@
 export class ApiError extends Error {
   status: number;
   code?: string;
+  details?: { operationIds: string[] };
 
-  constructor(message: string, status: number, code?: string) {
+  constructor(message: string, status: number, code?: string, details?: { operationIds: string[] }) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -18,8 +20,8 @@ export async function api<T>(path: string, method = 'GET', body?: unknown): Prom
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     cache: 'no-store',
   });
-  const result = await response.json().catch(() => null) as { error?: string; code?: string } | null;
-  if (!response.ok) throw new ApiError(result?.error || 'İşlem tamamlanamadı. Lütfen tekrar deneyin.', response.status, result?.code);
+  const result = await response.json().catch(() => null) as { error?: string; code?: string; details?: { operationIds: string[] } } | null;
+  if (!response.ok) throw new ApiError(result?.error || 'İşlem tamamlanamadı. Lütfen tekrar deneyin.', response.status, result?.code, result?.details);
   return result as T;
 }
 
