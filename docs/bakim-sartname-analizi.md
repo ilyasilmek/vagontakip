@@ -1,23 +1,22 @@
 # Bakım ve adam-saat şartnamesi — uygulama analizi
 
-Tarih: 9 Ekim 2026. Kaynak: [kullanıcının verdiği şartname](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt). Bu belge mevcut pilotla karşılaştırmayı ve geliştirme kararlarını kaydeder; yeni şartnamenin uygulamaya alınmış veya yayımlanmış olduğunu göstermez.
+Tarih: 9 Ekim 2026. Kaynak: [kullanıcının verdiği şartname](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt). Bu belge ilk analizdeki pilotla karşılaştırmayı ve sonradan kesinleşen geliştirme kararlarını kaydeder. Gerçek test/yayın durumu [geliştirme raporundadır](gelistirme-raporu.md).
 
 **Hedef yalnız `maintenance-test` dalı ve `vagontakip-test` Worker'ıdır. Kullanıcı onayı olmadan `main` veya canlı uygulama değiştirilmez.** Mevcut test kayıtları silinmez.
 
-## Onaylanan bilgiler ve açık konu
+## Onaylanan bilgiler
 
 - Personel, ayrı bir listeden **tek tek seçilecek**. Kişi sayısı seçimlerden hesaplanacak. Atölye personeli ile uygulamaya giriş yapan kullanıcılar ayrı kavramlardır; personelin uygulama hesabı olması gerekmez.
 - Hafta sonu çalışma düzeni hafta içindeki vardiya düzeniyle aynı olacak.
-- Kullanıcının ilk bildirdiği saatler, sonraki 1. vardiya düzeltmesiyle aşağıdadır. Saatler Türkiye saatidir; 3. vardiya belirtilen günün 00:00'ında başlar.
-- Kullanıcı, yemek molasının 30 dakika olduğunu ve başka mola bulunmadığını belirtti. Mola başlangıç saatleri henüz verilmedi.
+- Kullanıcının son düzeltmesiyle aşağıdaki iki vardiya geçerlidir. Saatler Türkiye saatidir. 3. vardiya yeni kayıt seçeneklerinden tamamen kaldırılmıştır; eski kayıtların vardiya açıklaması korunur.
+- Yemek molası 30 dakikadır, başka mola yoktur. İki vardiya da 450 dakika / 7,5 net saattir.
 
-| Vardiya | Başlangıç | Bitiş | Molalar düşülmeden geçen süre |
-| --- | --- | --- | --- |
-| 1. Vardiya | 08:00 | 16:00 | 480 dakika / 8 saat |
-| 2. Vardiya | 13:30 | Netleştiriliyor | İlk mesaj 20:50, düzeltme mesajı 14:30 |
-| 3. Vardiya | 00:00 | 08:00 | 480 dakika / 8 saat |
+| Vardiya | Başlangıç | Bitiş | Yemek molası | Net süre |
+| --- | --- | --- | --- | --- |
+| 1. Vardiya | 08:00 | 16:00 | 12:00–12:30 | 450 dakika |
+| 2. Vardiya | 13:30 | 21:30 | 17:00–17:30 | 450 dakika |
 
-**2. vardiyanın bitişi ve mola başlangıç saatleri henüz kesinleşmedi.** İlk bildirilen 13:30–20:50 aralığı 440 dakikaydı ve varsayılan 450 net dakikadan kısaydı. Sonraki düzeltmede 13:30–14:30 yazıldı; bu bir saatlik aralık olduğundan kullanıcının 13:30–21:30 mu kastettiği soruldu, cevap bekleniyor. 1. ve 3. vardiya, 30 dakika yemek molasıyla 450 net dakikadır. Mola başlangıçları uydurulmaz. Sabit mola yoksa günlük kayıtta gerçek mola aralığı seçilebilecek; kısmi kayıplar bu aralıklara göre hesaplanacak.
+Kısmi kayıplar bu gerçek mola aralıklarına göre hesaplanır. Önceki çelişen saatler kullanılmaz. Vardiya ayarları değişse bile daha önce kaydedilmiş günlük durum kendi saat ve molalarını korur.
 
 1. ve 2. vardiyanın saatleri örtüşür. Farklı kişiler bu vardiyalarda çalışabilir; aynı kişi aynı zaman diliminde iki kez planlanamaz veya iki faaliyete atanamaz.
 
@@ -101,13 +100,13 @@ Mevcut kayıtlarda kişi kimlikleri, bekleme başlangıç–bitişleri ve günl�
 - Eski kayıtların günlük kapasiteyle karşılaştırılamayan gerçek süreleri mutabakata dahil edilmez veya eksik kayıt uyarısıyla ayrılır. Bunlardan otomatik faaliyet/personel kaydı üretilmez.
 - Geçiş sırasında veri sıfırlanmaz. Kodun geri dönüşü de geçmiş veritabanını eski bir dosyayla değiştirmek anlamına gelmez.
 
-## Anlamı kesinleştirilecek durumlar
+## Uygulanan anlam ayrımları
 
-Vardiya saatleri ve molalar, yeni zaman hesabı için şu an açık olan temel bilgidir. Ayrıca arayüz/rapor uygulanırken şu ayrımlar görünür hale getirilmelidir:
+Vardiya saatleri ve molalar kesinleşmiştir. Arayüz ve raporda şu ayrımlar görünür tutulur:
 
 - **Yeni vagon gelmedi** ile **bakım yapılabilecek hiçbir vagon yoktu** farklı durumlardır. Önceki günden kalan vagon çalışılabilir durumdaysa, yeni sevk olmaması tek başına bütün vardiyayı vagonsuz kayıp yapmaz. Günlük form gerçek bakım imkânını ve kayıp aralıklarını kaydedecek biçimde adlandırılmalıdır.
 - Tam vardiya boyunca ilgili kişiler vagonsuz kayıp yazıldıysa aynı kişilere aynı vardiyada bakım, bekleme veya yardımcı faaliyet yazılamaz. Bazıları temizlik yapıyorsa onlar için temizlik, diğerleri için gerçek kayıp kaydedilir.
-- Yeni raporda standart **tamamlanan** iş yükünün hangi tarihte döneme yazılacağı kesinleşmelidir. Mevcut pilot başlangıç ayını kullanır. Öneri, tamamlanma tarihinde standart çıktıyı bir kez yazmak; fiilî kişi-zamanı ise rapor aralığıyla kesişen süre kadar dağıtmaktır. Bu yaklaşım burada öneridir, henüz uygulanmış veya kullanıcı tarafından ayrıca onaylanmış kural değildir.
+- Yeni rapor, şartnamedeki **tamamlanan** iş yükü tanımını esas alır: standart çıktı tamamlanma tarihinde bir kez yazılır; fiilî kişi-zaman rapor aralığıyla kesişen süre kadar dağıtılır. Dönemde tamamlanan iş emirlerinin grup verimliliği, bu emirlerin bütün işçiliğini kullanır; yalnız dönemdeki süreye bölünüp yanıltıcı oran üretilmez. Eski pilotun başlangıç ayı davranışı eski kayıt kartlarında korunur.
 
 ## Uygulama sırası ve doğrulama
 
@@ -136,6 +135,6 @@ Vardiya saatleri ve molalar, yeni zaman hesabı için şu an açık olan temel b
 
 Ek gerçek testler: farklı ekip katılımı, yalnız bir kişinin beklemesi, ortak kişi içeren/içermeyen çakışmalar, bitişte başlayan komşu aralıklar, mola ve rapor dönemi sınırları, vardiya değişiklikleri, mükerrer tarih + vardiya, sıfır kapasite/net işçilik, geçmiş standart korunması, aynı anda kayıt istekleri, eksik eski kayıt ve atomik vagon + bakım kaydı. Ekran/Excel/PDF değerlerinin aynı olması ayrıca doğrulanacak.
 
-## Bu analizin yayın durumu
+## Analiz ve uygulama durumu
 
-Uygulama kodu, hesap formülleri ve çalışan test sitesi bu belge hazırlanırken değiştirilmedi. Uygulama testi/derlemesi çalıştırılmadı; kaynak metnin aktarımı, aritmetik örnekler, belge bağlantıları ve Git diff kontrol edildi. Yeni şartname uygulaması, vardiya bilgisi netleştikten sonraki geliştirme işidir. Canlı yayın onayı verilmemiştir.
+İlk analiz commit'i `e72104b` yalnız belge değişikliğiydi; bu aşamada uygulama kodu/yayını değiştirilmedi. Kullanıcının son vardiya cevabından sonra sürüm 2 geliştirmesi başlatıldı. Yeni kaynaklar [ortak hesap](../shared/workshop.ts), [doğrulama](../server/workshop.ts), [ilişkisel saklama](../server/workshop-storage.ts), [API](../server/workshop-routes.ts), [ekran ve rapor](../client/src/Workshop.tsx) dosyalarıdır. Güncel doğrulama/yayın sonuçları geliştirme raporunda tutulur. Canlı yayın onayı verilmemiştir.

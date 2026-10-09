@@ -5,6 +5,8 @@ import type { CollectionName, Inventory, OperationalRecord, Part, Wagon } from '
 import { PASSWORD_ITERATIONS, createPasswordHash, signSession, verifyPassword, verifySession, type SessionClaims } from './crypto';
 import { DatabaseEngine, assertActor, audit, type DatabaseEnvironment } from './database';
 import { ApiError, errorResponse } from './errors';
+import { WorkshopSqlStorage } from './workshop-storage';
+import { workshopRequest } from './workshop-routes';
 import { createUserSchema, fieldSchemas, parseInput, passwordSchema, postSchema, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
 
 export interface Env extends DatabaseEnvironment {
@@ -77,7 +79,7 @@ export class VagonDatabase {
   private revoked: Record<string, number> | undefined;
 
   constructor(private readonly state: DurableObjectState, private readonly env: Env) {
-    this.engine = new DatabaseEngine(state.storage, env);
+    this.engine = new DatabaseEngine(env.STORAGE_MODE==='local'&&env.MAINTENANCE_ENABLED==='true'&&state.storage.sql ? new WorkshopSqlStorage(state.storage) : state.storage, env);
   }
 
   fetch(request: Request): Promise<Response> {
@@ -147,6 +149,12 @@ export class VagonDatabase {
       sameOrigin(request, this.env);
       const { pathname } = new URL(request.url);
       const method = request.method;
+
+      if (pathname.startsWith('/api/workshop')) {
+        if(this.env.MAINTENANCE_ENABLED!=='true'||this.env.STORAGE_MODE!=='local')throw new ApiError(404,'NOT_FOUND','Bu bölüm yalnız test ortamında etkin.');
+        const claims=await this.requireClaims(request);
+        return await workshopRequest(this.engine,claims,pathname,method,method==='GET'?undefined:await body(request));
+      }
 
       if (pathname === '/api/session' && method === 'GET') {
         const claims = await this.claims(request);

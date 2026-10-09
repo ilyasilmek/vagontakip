@@ -1,108 +1,66 @@
 import ExcelJS from 'exceljs';
-import { test, expect } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
 import { apiContext, credentials, login, loginThroughPage, uniqueName, expectNoHorizontalOverflow } from './helpers';
+import { turkeyTime, type Person, type WorkshopData } from '../shared/workshop';
 
 test.use({serviceWorkers:'block'});
-
-test.skip(process.env.E2E_MAINTENANCE !== 'true', 'Requires the isolated maintenance Worker; never run against production.');
-
-test('records the agreed workload, persists edits, exports reports and separates repeat visits', async ({page,playwright})=>{
- const admin=await apiContext(playwright);const created:string[]=[];
- try {
-  await login(admin,await credentials());await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());
-  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Bakım',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Bakım operasyonları',exact:true})).toBeVisible();await expectNoHorizontalOverflow(page);
-  await page.getByRole('button',{name:'Bakım ekle',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'Yeni bakım operasyonu'});const wagon=uniqueName('maintenance');const day=new Date().toISOString().slice(0,10);
-  await dialog.getByLabel('Vagon numarası',{exact:true}).fill(wagon);await dialog.getByLabel('Başlangıç tarih ve saati').fill(day+'T09:00');await dialog.getByLabel('Bitiş tarih ve saati').fill(day+'T11:00');await dialog.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');
-  await expect(dialog.getByLabel('Atanan personel sayısı')).toHaveValue('3');
-  await expect(dialog.getByRole('checkbox')).toHaveCount(49);
-  for(const name of [/^Ağır bakım & Yürüyüş/,/^Akerman sök-tak/,/^Sızdırmazlık testi/,/^Hazırlık & Güvenlik/]) await dialog.getByRole('checkbox',{name}).check();
-  await dialog.getByRole('button',{name:'Seçilenler (4)',exact:true}).click();
-  await expect(dialog.getByRole('checkbox')).toHaveCount(4);
-  await dialog.getByRole('button',{name:'Akerman sök-tak adedini artır',exact:true}).click();
-  await expect(dialog.getByLabel('Akerman sök-tak adedi',{exact:true})).toHaveValue('2');
-  await dialog.getByRole('button',{name:'Akerman sök-tak adedini azalt',exact:true}).click();
-  await expect(dialog.getByLabel('Akerman sök-tak adedi',{exact:true})).toHaveValue('1');
-  await dialog.getByRole('button',{name:'Akerman sök-tak adedini artır',exact:true}).click();
-  const jobLayout=await dialog.locator('.job-check').first().evaluate(label=>{const box=label.querySelector('input')!.getBoundingClientRect(),text=label.querySelector('span')!.getBoundingClientRect();return {inline:box.right<=text.left,height:box.height};});
-  expect(jobLayout.inline).toBe(true);expect(jobLayout.height).toBeLessThan(30);
-  await dialog.getByLabel('İş kalemi ara',{exact:true}).fill('Akerman');await expect(dialog.getByRole('checkbox')).toHaveCount(1);
-  await dialog.getByLabel('İş kalemi ara',{exact:true}).fill('');await expect(dialog.getByRole('checkbox')).toHaveCount(4);
-  await dialog.getByRole('button',{name:'Tüm işler (49)',exact:true}).click();await expect(dialog.getByRole('checkbox')).toHaveCount(49);
-  await dialog.getByRole('button',{name:'Bekleme ekle',exact:true}).click();await dialog.getByLabel('Bekleme sebebi').selectOption('Malzeme/Valf Tedarik');await dialog.getByLabel('Bekleme süresi (dakika)').fill('30');
-  await expect(dialog.getByRole('status')).toContainText('3,75 A/S');await expect(dialog.getByRole('status')).toContainText('75 dakika');await expectNoHorizontalOverflow(page);
-  const responsePromise=page.waitForResponse(r=>r.url().endsWith('/api/maintenance')&&r.request().method()==='POST');await dialog.getByRole('button',{name:'Kaydet',exact:true}).click();const response=await responsePromise;expect(response.status()).toBe(201);
-  const payload=response.request().postDataJSON();const saved=await response.json();created.push(saved.operation.id);
-  await expect(dialog).toHaveCount(0);await page.reload();await expect(page.getByRole('heading',{name:'Bakım operasyonları',exact:true})).toBeVisible();
-  await page.getByRole('button',{name:new RegExp(wagon)}).click();const details=page.getByRole('dialog',{name:'Bakım operasyonu',exact:true});
-  await expect(details).toContainText('3,75 A/S');await expect(details).toContainText('1,5 A/S');await expect(details).toContainText('83,33 / 62,5 %');await expect(details).toContainText('tahminen 75 dakikada');
-  await page.emulateMedia({media:'print'});await expect(page.locator('.maintenance-report')).toBeVisible();await expect(page.locator('.topbar')).toBeHidden();const pdf=await page.pdf({format:'A4',printBackground:true});expect(pdf.subarray(0,4).toString()).toBe('%PDF');expect(pdf.length).toBeGreaterThan(5000);await page.emulateMedia({media:'screen'});
-  await page.goBack();await expect(details).toHaveCount(0);await expect(page.getByRole('heading',{name:'Bakım operasyonları',exact:true})).toBeVisible();
-  // An open page must export even when a later deployment removes its old Excel asset.
-  await page.route(/\/assets\/exceljs[^/]*\.js$/,route=>route.abort());
-  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Aylık Excel raporu',exact:true}).click();const download=await downloadPromise;const workbook=new ExcelJS.Workbook();await workbook.xlsx.readFile((await download.path())!);expect(workbook.worksheets.map(s=>s.name)).toEqual(['Aylık özet','Bakım operasyonları','Yapılan işler','Beklemeler']);expect(workbook.getWorksheet('Aylık özet')!.getCell('B4').value).toBe(3.75);
-  await page.unroute(/\/assets\/exceljs[^/]*\.js$/);
-  const second=await admin.post('/api/maintenance',{data:payload});expect(second.status()).toBe(201);created.push((await second.json()).operation.id);
-  await page.getByRole('button',{name:'Yenile',exact:true}).click();await expect(page.locator('.maintenance-row')).toHaveCount(2);await expect(page.locator('.maintenance-metric').filter({hasText:'Benzersiz vagon'})).toContainText('1');
-  await page.locator('.maintenance-row').first().click();await page.getByRole('dialog').getByRole('button',{name:'Düzenle',exact:true}).click();await page.getByRole('dialog').getByLabel('Açıklama',{exact:true}).fill('Updated test notes');await page.getByRole('dialog').getByRole('button',{name:'Kaydet',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.reload();await page.locator('.maintenance-row').first().click();await expect(page.getByRole('dialog')).toContainText('Updated test notes');await expectNoHorizontalOverflow(page);
- } finally {
-  const response=await admin.get('/api/maintenance');if(response.ok()){const body=await response.json();for(const id of created){const o=body.operations.find((o:{id:string})=>o.id===id);if(o)expect((await admin.delete(`/api/maintenance/${id}`,{data:{revision:o.revision}})).status()).toBe(200);}}
-  await admin.dispose();
- }
-});
-
-test('starts maintenance from wagon details, prefills its number and returns to the wagon', async ({page,playwright})=>{
- const admin=await apiContext(playwright);const wagon=uniqueName('linkedwagon');let wagonId='';let operationId='';
- try {
-  await login(admin,await credentials());
-  const response=await admin.post('/api/wagons',{data:{number:wagon,wagonType:'Sgss-w',status:'Bekliyor',entryDate:'2026-10-07',channelDate:'',completedDate:'',notes:''}});
-  expect(response.status()).toBe(201);wagonId=(await response.json()).record.id;
-  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());
-  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Vagonlar',exact:true}).click();
-  await page.getByRole('textbox',{name:'Vagonlar içinde ara'}).fill(wagon);await page.getByRole('button',{name:`Vagon ${wagon} ayrıntıları`,exact:true}).click();
-  const details=page.getByRole('dialog',{name:'Vagon ayrıntıları',exact:true});
-  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();
-  const form=page.getByRole('dialog',{name:'Yeni bakım operasyonu',exact:true});
-  await expect(form.getByLabel('Vagon numarası',{exact:true})).toHaveValue(wagon);
-  await page.goBack();await expect(form).toHaveCount(0);await expect(details).toBeVisible();
-  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();
-  await expect(form).toBeVisible();await page.keyboard.press('Escape');await expect(form).toHaveCount(0);await expect(details).toBeVisible();
-  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();
-  const day=new Date().toISOString().slice(0,10);
-  await form.getByLabel('Başlangıç tarih ve saati').fill(day+'T09:00');await form.getByLabel('Bitiş tarih ve saati').fill(day+'T11:00');
-  await form.getByRole('combobox',{name:'Vardiya',exact:true}).selectOption('2. Vardiya');await form.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');
-  await form.getByRole('checkbox',{name:/^Sabo sök-tak/}).check();await expectNoHorizontalOverflow(page);
-  const saved=page.waitForResponse(r=>r.url().endsWith('/api/maintenance')&&r.request().method()==='POST');await form.getByRole('button',{name:'Kaydet',exact:true}).click();
-  const result=await saved;expect(result.status()).toBe(201);const operation=(await result.json()).operation;operationId=operation.id;expect(operation.wagonNumber).toBe(wagon);expect(operation.shift).toBe('2. Vardiya');
-  await expect(form).toHaveCount(0);await expect(details).toBeVisible();await details.getByRole('button',{name:'Kapat',exact:true}).click();
-  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Bakım',exact:true}).click();await expect(page.getByRole('button',{name:new RegExp(wagon)})).toBeVisible();
- }finally{
-  if(operationId){const listing=await (await admin.get('/api/maintenance')).json();const o=listing.operations.find((r:{id:string})=>r.id===operationId);if(o)expect((await admin.delete('/api/maintenance/'+operationId,{data:{revision:o.revision}})).status()).toBe(200);}
-  if(wagonId){const data=await (await admin.get('/api/data')).json();const w=data.wagons.find((r:{id:string})=>r.id===wagonId);if(w)expect((await admin.delete('/api/wagons/'+wagonId,{data:{revision:w.revision}})).status()).toBe(200);}
-  await admin.dispose();
- }
-});
-
-test('creates a wagon and maintenance from the new-wagon menu with one final save',async({page,playwright})=>{
- const admin=await apiContext(playwright);const number=uniqueName('combined');let wagonId='';let operationId='';
+test.skip(process.env.E2E_MAINTENANCE!=='true','Requires the isolated local maintenance Worker.');
+const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Istanbul'}).format(new Date());
+interface Created { people:string[];days:string[];operations:string[];activities:string[];wagons:string[];legacy:string[]; }
+const created=():Created=>({people:[],days:[],operations:[],activities:[],wagons:[],legacy:[]});
+async function people(admin:APIRequestContext,own:Created){const rows:Person[]=[];for(let i=0;i<3;i++){const response=await admin.post('/api/workshop/people',{data:{name:uniqueName('person'+i),active:true}});expect(response.status()).toBe(201);const {record}=await response.json();own.people.push(record.id);rows.push(record);}return rows;}
+async function day(admin:APIRequestContext,persons:Person[],own:Created){const date=today(),startedAt=turkeyTime(date,'08:00'),finishedAt=turkeyTime(date,'16:00');const response=await admin.post('/api/workshop/days',{data:{date,shiftId:'1',startedAt,finishedAt,breaks:[{startedAt:turkeyTime(date,'12:00'),finishedAt:turkeyTime(date,'12:30')}],attendance:persons.map(p=>({personId:p.id,startedAt,finishedAt})),wagonAvailable:true,noWagonReason:'',notes:'',fullNoWagon:false}});expect(response.status()).toBe(201);const {record}=await response.json();own.days.push(record.id);return record;}
+async function cleanup(admin:APIRequestContext,own:Created){
+ const r=await admin.get('/api/workshop');if(r.ok()){const data=await r.json() as WorkshopData;for(const resource of ['activities','operations','days'] as const)for(const id of own[resource]){const row=data[resource].find(r=>r.id===id);if(row)expect((await admin.delete(`/api/workshop/${resource}/${id}`,{data:{revision:row.revision}})).status()).toBe(200);}for(const id of own.people){const p=data.people.find(p=>p.id===id);if(p)expect((await admin.patch('/api/workshop/people/'+id,{data:{name:p.name,active:false,revision:p.revision}})).status()).toBe(200);}}
+ if(own.wagons.length){const data=await(await admin.get('/api/data')).json();for(const id of own.wagons){const w=data.wagons.find((w:{id:string})=>w.id===id);if(w)expect((await admin.delete('/api/wagons/'+id,{data:{revision:w.revision}})).status()).toBe(200);}}
+ if(own.legacy.length){const data=await(await admin.get('/api/maintenance')).json();for(const id of own.legacy){const o=data.operations.find((o:{id:string})=>o.id===id);if(o)expect((await admin.delete('/api/maintenance/'+id,{data:{revision:o.revision}})).status()).toBe(200);}}
+ await admin.dispose();
+}
+test('records a daily shift and selected crew, charges only the waiting person, edits and exports consistent reports',async({page,playwright})=>{
+ const admin=await apiContext(playwright),own=created();
  try{
-  await login(admin,await credentials());await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());
-  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Vagonlar',exact:true}).click();
-  await page.getByRole('button',{name:'Vagon ekle',exact:true}).first().click();
-  const wagonForm=page.getByRole('dialog',{name:'Yeni vagon ekle',exact:true});await wagonForm.getByLabel('Vagon numarası *',{exact:true}).fill(number);await wagonForm.getByRole('combobox',{name:'Vagon tipi',exact:true}).selectOption('Sgss-w');
-  await wagonForm.getByRole('button',{name:'Bakım ekle',exact:true}).click();const combined=page.getByRole('dialog',{name:'Vagon ve bakım ekle',exact:true});await expect(combined.getByLabel('Vagon numarası',{exact:true})).toHaveValue(number);
-  let data=await (await admin.get('/api/data')).json();expect(data.wagons.some((w:{number:string})=>w.number===number)).toBe(false);
-  await combined.getByRole('button',{name:'Vazgeç',exact:true}).click();await expect(wagonForm).toBeVisible();await expect(wagonForm.getByLabel('Vagon numarası *',{exact:true})).toHaveValue(number);
-  await wagonForm.getByRole('button',{name:'Bakım ekle',exact:true}).click();
-  const day=new Date().toISOString().slice(0,10);await combined.getByLabel('Başlangıç tarih ve saati').fill(day+'T09:00');await combined.getByLabel('Bitiş tarih ve saati').fill(day+'T11:00');await combined.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');await combined.getByRole('checkbox',{name:/^Sabo sök-tak/}).check();
-  const saved=page.waitForResponse(r=>r.url().endsWith('/api/maintenance/with-wagon')&&r.request().method()==='POST');await combined.getByRole('button',{name:'Vagon ve bakımı kaydet',exact:true}).click();const response=await saved;expect(response.status()).toBe(201);const result=await response.json();wagonId=result.wagon.id;operationId=result.operation.id;
-  expect(result.wagon.number).toBe(number);expect(result.operation.wagonNumber).toBe(number);await expect(combined).toHaveCount(0);await expect(wagonForm).toHaveCount(0);await expectNoHorizontalOverflow(page);
-  data=await (await admin.get('/api/data')).json();expect(data.wagons.filter((w:{number:string})=>w.number===number)).toHaveLength(1);
- }finally{
-  if(operationId){const listing=await (await admin.get('/api/maintenance')).json();const o=listing.operations.find((r:{id:string})=>r.id===operationId);if(o)expect((await admin.delete('/api/maintenance/'+operationId,{data:{revision:o.revision}})).status()).toBe(200);}
-  if(wagonId){const data=await (await admin.get('/api/data')).json();const w=data.wagons.find((r:{id:string})=>r.id===wagonId);if(w)expect((await admin.delete('/api/wagons/'+wagonId,{data:{revision:w.revision}})).status()).toBe(200);}
-  await admin.dispose();
- }
+  await login(admin,await credentials());const persons=await people(admin,own);
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());
+  await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Bakım',exact:true}).click();await expect(page.getByRole('heading',{name:'Bakım operasyonları',exact:true})).toBeVisible();
+  await page.getByRole('tab',{name:'Günlük atölye',exact:true}).click();await page.getByRole('button',{name:'Günlük kayıt ekle',exact:true}).click();const daily=page.getByRole('dialog',{name:'Günlük atölye kaydı',exact:true});
+  await expect(daily.getByRole('combobox',{name:'Vardiya',exact:true}).locator('option')).toHaveText(['1. Vardiya','2. Vardiya']);await expect(daily.getByLabel('Mola 1 başlangıcı')).toHaveValue(today()+'T12:00');await expect(daily.getByLabel('Mola 1 bitişi')).toHaveValue(today()+'T12:30');
+  for(const p of persons)await daily.getByRole('checkbox',{name:p.name,exact:true}).check();await expect(daily.getByRole('status')).toContainText('22,5 A/S');await expectNoHorizontalOverflow(page);
+  const daySaved=page.waitForResponse(r=>r.url().endsWith('/api/workshop/days')&&r.request().method()==='POST');await daily.getByRole('button',{name:'Kaydet',exact:true}).click();const dayResponse=await daySaved;expect(dayResponse.status()).toBe(201);own.days.push((await dayResponse.json()).record.id);await expect(daily).toHaveCount(0);
+  await page.getByRole('tab',{name:'Rapor',exact:true}).click();await page.getByRole('button',{name:'Bakım ekle',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Yeni bakım operasyonu',exact:true}),wagon=uniqueName('maintenance');
+  await dialog.getByLabel('Vagon numarası',{exact:true}).fill(wagon);await dialog.getByLabel('Başlangıç tarih ve saati').fill(today()+'T09:00');await dialog.getByLabel('Bitiş tarih ve saati').fill(today()+'T11:00');await dialog.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');
+  await expect(dialog.locator('.job-check input')).toHaveCount(49);for(const name of [/^Ağır bakım & Yürüyüş/,/^Akerman sök-tak/,/^Sızdırmazlık testi/,/^Hazırlık & Güvenlik/])await dialog.getByRole('checkbox',{name}).check();
+  await dialog.getByRole('button',{name:'Seçilenler (4)',exact:true}).click();await expect(dialog.locator('.job-check input')).toHaveCount(4);await dialog.getByRole('button',{name:'Akerman sök-tak adedini artır',exact:true}).click();await expect(dialog.getByLabel('Akerman sök-tak adedi',{exact:true})).toHaveValue('2');
+  await dialog.getByRole('button',{name:'Bekleme ekle',exact:true}).click();await dialog.getByLabel('Bekleme sebebi').selectOption('Malzeme/Valf Tedarik');await dialog.getByLabel('Bekleme 1 başlangıcı').fill(today()+'T10:00');await dialog.getByLabel('Bekleme 1 bitişi').fill(today()+'T10:30');
+  const waiting=dialog.getByRole('group',{name:/Bekleyen personel 1/});await waiting.getByRole('checkbox',{name:persons[1].name,exact:true}).uncheck();await waiting.getByRole('checkbox',{name:persons[2].name,exact:true}).uncheck();await expect(dialog.getByRole('status')).toContainText('3,75 A/S');await expect(dialog.getByRole('status')).toContainText('Bekleme kaybı: 0,5 A/S');
+  const layout=await dialog.locator('.job-check').first().evaluate(label=>{const b=label.querySelector('input')!.getBoundingClientRect(),t=label.querySelector('span')!.getBoundingClientRect();return b.right<=t.left&&b.height<30;});expect(layout).toBe(true);await expectNoHorizontalOverflow(page);
+  const responsePromise=page.waitForResponse(r=>r.url().endsWith('/api/workshop/operations')&&r.request().method()==='POST');await dialog.getByRole('button',{name:'Kaydet',exact:true}).click();const response=await responsePromise;expect(response.status()).toBe(201);const result=await response.json();own.operations.push(result.record.id);await expect(dialog).toHaveCount(0);
+  await page.reload();await page.getByRole('button',{name:new RegExp(wagon)}).click();const details=page.getByRole('dialog',{name:'Bakım operasyonu',exact:true});await expect(details.locator('.maintenance-metric').filter({hasText:'Net işçilik'})).toContainText('5,5 A/S');await expect(details.locator('.maintenance-metric').filter({hasText:'Net verimlilik'})).toContainText('%68,18');await expect(details.locator('.maintenance-metric').filter({hasText:'Bekleme kaybı'})).toContainText('0,5 A/S');
+  await page.emulateMedia({media:'print'});await expect(page.locator('.maintenance-report')).toBeVisible();await expect(page.locator('.topbar')).toBeHidden();const pdf=await page.pdf({format:'A4',printBackground:true});expect(pdf.subarray(0,4).toString()).toBe('%PDF');await page.emulateMedia({media:'screen'});await page.goBack();await expect(details).toHaveCount(0);
+  await page.route(/\/assets\/exceljs[^/]*\.js$/,route=>route.abort());const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Excel raporu',exact:true}).click();const download=await downloaded,workbook=new ExcelJS.Workbook();await workbook.xlsx.readFile((await download.path())!);expect(workbook.getWorksheet('Yönetim özeti')!.getCell('B5').value).toBe(22.5);expect(workbook.getWorksheet('Yönetim özeti')!.getCell('B6').value).toBe(3.75);expect(workbook.getWorksheet('Yönetim özeti')!.getCell('B10').value).toBe(0.5);expect(workbook.getWorksheet('Bakım operasyonları')!.getCell('K2').value).toBe(0.5);await page.unroute(/\/assets\/exceljs[^/]*\.js$/);
+  await page.getByRole('button',{name:new RegExp(wagon)}).click();await details.getByRole('button',{name:'Düzenle',exact:true}).click();const edit=page.getByRole('dialog',{name:'Bakım operasyonunu düzenle',exact:true});await edit.getByLabel('Açıklama',{exact:true}).fill('Updated test notes');await edit.getByRole('button',{name:'Kaydet',exact:true}).click();await expect(edit).toHaveCount(0);await page.reload();await page.getByRole('button',{name:new RegExp(wagon)}).click();await expect(details).toContainText('Updated test notes');await expectNoHorizontalOverflow(page);
+ }finally{await cleanup(admin,own);}
+});
+test('adds maintenance from an existing wagon and preserves back-button behavior',async({page,playwright})=>{
+ const admin=await apiContext(playwright),own=created();try{
+  await login(admin,await credentials());await day(admin,await people(admin,own),own);const number=uniqueName('linkedwagon');const r=await admin.post('/api/wagons',{data:{number,wagonType:'Sgss-w',entryDate:today(),channelDate:'',completedDate:'',status:'Bekliyor',notes:''}});expect(r.status()).toBe(201);own.wagons.push((await r.json()).record.id);
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Vagonlar',exact:true}).click();await page.getByRole('textbox',{name:'Vagonlar içinde ara'}).fill(number);await page.getByRole('button',{name:`Vagon ${number} ayrıntıları`,exact:true}).click();const details=page.getByRole('dialog',{name:'Vagon ayrıntıları',exact:true});
+  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();const form=page.getByRole('dialog',{name:'Yeni bakım operasyonu',exact:true});await expect(form.getByLabel('Vagon numarası',{exact:true})).toHaveValue(number);await page.goBack();await expect(form).toHaveCount(0);await expect(details).toBeVisible();await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();await expect(form).toBeVisible();await page.keyboard.press('Escape');await expect(form).toHaveCount(0);
+  await details.getByRole('button',{name:'Bakım ekle',exact:true}).click();await form.getByLabel('Başlangıç tarih ve saati').fill(today()+'T09:00');await form.getByLabel('Bitiş tarih ve saati').fill(today()+'T11:00');await form.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');await form.getByRole('checkbox',{name:/^Sabo sök-tak/}).check();const saved=page.waitForResponse(r=>r.url().endsWith('/api/workshop/operations')&&r.request().method()==='POST');await form.getByRole('button',{name:'Kaydet',exact:true}).click();const response=await saved;expect(response.status()).toBe(201);own.operations.push((await response.json()).record.id);await expect(form).toHaveCount(0);await expect(details).toBeVisible();await expectNoHorizontalOverflow(page);
+ }finally{await cleanup(admin,own);}
+});
+test('saves a new wagon and person-time maintenance together and retains drafts when going back',async({page,playwright})=>{
+ const admin=await apiContext(playwright),own=created();try{
+  await login(admin,await credentials());await day(admin,await people(admin,own),own);await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Vagonlar',exact:true}).click();await page.getByRole('button',{name:'Vagon ekle',exact:true}).first().click();const wagonForm=page.getByRole('dialog',{name:'Yeni vagon ekle',exact:true}),number=uniqueName('combined');await wagonForm.getByLabel('Vagon numarası *',{exact:true}).fill(number);await wagonForm.getByRole('button',{name:'Bakım ekle',exact:true}).click();const form=page.getByRole('dialog',{name:'Vagon ve bakım ekle',exact:true});await expect(form.getByLabel('Vagon numarası',{exact:true})).toHaveValue(number);await page.goBack();await expect(form).toHaveCount(0);await expect(wagonForm.getByLabel('Vagon numarası *',{exact:true})).toHaveValue(number);await wagonForm.getByRole('button',{name:'Bakım ekle',exact:true}).click();await form.getByLabel('Başlangıç tarih ve saati').fill(today()+'T09:00');await form.getByLabel('Bitiş tarih ve saati').fill(today()+'T11:00');await form.getByLabel('Vardiya amiri',{exact:true}).fill('Test Amir');await form.getByRole('checkbox',{name:/^Sabo sök-tak/}).check();const saved=page.waitForResponse(r=>r.url().endsWith('/api/workshop/operations/with-wagon')&&r.request().method()==='POST');await form.getByRole('button',{name:'Vagon ve bakımı kaydet',exact:true}).click();const response=await saved;expect(response.status()).toBe(201);const result=await response.json();own.wagons.push(result.wagon.id);own.operations.push(result.record.id);expect(result.wagon.number).toBe(number);expect(result.record.wagonNumber).toBe(number);await expect(form).toHaveCount(0);await expect(wagonForm).toHaveCount(0);await expectNoHorizontalOverflow(page);
+ }finally{await cleanup(admin,own);}
+});
+test('creates personnel through the mobile UI and handles full/partial no-wagon loss and auxiliary activity',async({page,playwright})=>{
+ const admin=await apiContext(playwright),own=created();try{
+  await login(admin,await credentials());await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await loginThroughPage(page,await credentials());await page.getByRole('navigation',{name:'Mobil gezinme'}).getByRole('button',{name:'Bakım',exact:true}).click();await page.getByRole('tab',{name:'Personel',exact:true}).click();await page.getByRole('button',{name:'Personel ekle',exact:true}).click();const personDialog=page.getByRole('dialog',{name:'Personel ekle',exact:true}),name=uniqueName('ui_person');await personDialog.getByLabel('Personel adı').fill(name);const personSaved=page.waitForResponse(r=>r.url().endsWith('/api/workshop/people')&&r.request().method()==='POST');await personDialog.getByRole('button',{name:'Kaydet',exact:true}).click();const personResponse=await personSaved;expect(personResponse.status()).toBe(201);own.people.push((await personResponse.json()).record.id);await expect(personDialog).toHaveCount(0);
+  await page.getByRole('tab',{name:'Günlük atölye',exact:true}).click();await page.getByRole('button',{name:'Günlük kayıt ekle',exact:true}).click();const daily=page.getByRole('dialog',{name:'Günlük atölye kaydı',exact:true});await daily.getByRole('combobox',{name:'Vardiya',exact:true}).selectOption('2');await expect(daily.getByLabel('Vardiya başlangıcı')).toHaveValue(today()+'T13:30');await expect(daily.getByLabel('Vardiya bitişi')).toHaveValue(today()+'T21:30');await expect(daily.getByLabel('Mola 1 başlangıcı')).toHaveValue(today()+'T17:00');await expect(daily.getByLabel('Mola 1 bitişi')).toHaveValue(today()+'T17:30');await daily.getByRole('checkbox',{name,exact:true}).check();await daily.getByRole('combobox',{name:'Bakım yapılacak vagon var mı?',exact:true}).selectOption('false');await daily.getByLabel('Vagonsuzluk nedeni').fill('Manevra iptali');await expect(daily.getByRole('status')).toContainText('Vagonsuzluk kaybı: 7,5 A/S');
+  const saved=page.waitForResponse(r=>r.url().endsWith('/api/workshop/days')&&r.request().method()==='POST');await daily.getByRole('button',{name:'Kaydet',exact:true}).click();const result=await saved;expect(result.status()).toBe(201);const d=(await result.json()).record;own.days.push(d.id);const initial=await(await admin.get('/api/workshop')).json();own.activities.push(...initial.activities.filter((a:{dayId:string})=>a.dayId===d.id).map((a:{id:string})=>a.id));await expect(daily).toHaveCount(0);
+  await page.getByRole('tab',{name:'Rapor',exact:true}).click();await expect(page.locator('.maintenance-metric').filter({hasText:'Vagonsuzluk kaybı'})).toContainText('7,5 A/S · %100');
+  await page.getByRole('tab',{name:'Günlük atölye',exact:true}).click();const dayCard=page.locator('.workshop-block').filter({has:page.getByRole('heading',{name:today()+' · 2. Vardiya',exact:true})});await dayCard.getByRole('button',{name:'Düzenle',exact:true}).click();const edit=page.getByRole('dialog',{name:'Günlük atölye kaydını düzenle',exact:true});await edit.getByRole('combobox',{name:'Bakım yapılacak vagon var mı?',exact:true}).selectOption('true');await edit.getByRole('button',{name:'Kaydet',exact:true}).click();await expect(edit).toHaveCount(0);
+  for(const kind of ['cleaning','no-wagon']){await page.getByRole('button',{name:'Faaliyet / kayıp ekle',exact:true}).click();const form=page.getByRole('dialog',{name:'Faaliyet / kayıp ekle',exact:true});await form.getByRole('combobox',{name:'Faaliyet türü',exact:true}).selectOption(kind);await form.getByLabel('Faaliyet başlangıcı').fill(today()+(kind==='cleaning'?'T13:30':'T16:30'));await form.getByLabel('Faaliyet bitişi').fill(today()+(kind==='cleaning'?'T14:30':'T17:30'));await form.getByRole('checkbox',{name,exact:true}).check();await form.getByLabel('Neden / iş tanımı').fill(kind==='cleaning'?'5S':'Kısmi sevk bekleme');await expect(form.getByRole('status')).toContainText(kind==='cleaning'?'1 A/S':'0,5 A/S');const saved=page.waitForResponse(r=>r.url().endsWith('/api/workshop/activities')&&r.request().method()==='POST');await form.getByRole('button',{name:'Kaydet',exact:true}).click();const response=await saved;expect(response.status()).toBe(201);own.activities.push((await response.json()).record.id);await expect(form).toHaveCount(0);}
+  await page.getByRole('tab',{name:'Rapor',exact:true}).click();await expect(page.locator('.maintenance-metric').filter({hasText:'Vagonsuzluk kaybı'})).toContainText('0,5 A/S');await expect(page.locator('.maintenance-metric').filter({hasText:'Yardımcı faaliyetler'})).toContainText('1 A/S');await expectNoHorizontalOverflow(page);
+ }finally{await cleanup(admin,own);}
 });

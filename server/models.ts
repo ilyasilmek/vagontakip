@@ -4,6 +4,8 @@ import { jobTypeSchema, maintenanceRecordSchema } from './maintenance';
 import { WAGON_STATUSES, WAGON_TYPES, POSTS, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
 import type { PasswordHash } from './crypto';
 import { ApiError } from './errors';
+import type { WorkshopData } from '../shared/workshop';
+import { validateWorkshop, workshopSchema } from './workshop';
 
 export interface StoredUser extends SafeUser {
   password: PasswordHash;
@@ -21,6 +23,7 @@ export interface DatabaseDocument {
   audit: AuditEvent[];
   jobTypes?: JobType[];
   maintenanceOperations?: MaintenanceOperation[];
+  workshop?: WorkshopData;
 }
 
 const shortText = z.string().trim().max(200);
@@ -100,10 +103,12 @@ export function assertDatabase(database: unknown): asserts database is DatabaseD
     formatVersion: z.literal(1), version: z.number().int().nonnegative(), updatedAt: z.string(),
     wagons: z.array(wagonFields.merge(metadata)), parts: z.array(partFields.merge(metadata)), inventory: z.array(inventoryFields.merge(metadata)),
     jobTypes: z.array(jobTypeSchema).optional(), maintenanceOperations: z.array(maintenanceRecordSchema).optional(),
+    workshop: workshopSchema.optional(),
     users: z.array(user), audit: z.array(z.object({ id: z.string(), at: z.string(), actorId: z.string(), actorName: z.string(), action: z.string(), entity: z.enum(['wagon', 'part', 'inventory', 'user', 'system', 'maintenance']), entityId: z.string().optional(), details: z.string().optional() })),
   });
   if (!document.safeParse(database).success) throw new ApiError(503, 'INVALID_DATABASE', 'Ortak veritabanının yapısı geçersiz.');
   const value = database as DatabaseDocument;
+  if (value.workshop) validateWorkshop(value.workshop);
   for (const records of [value.wagons, value.parts, value.inventory, value.users, value.maintenanceOperations ?? []]) {
     if (new Set(records.map(r => r.id)).size !== records.length) throw new ApiError(503, 'INVALID_DATABASE', 'Veritabanında yinelenen kimlikler var.');
   }

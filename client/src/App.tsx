@@ -10,9 +10,8 @@ import Admin, { initials } from './Admin';
 import Account from './Account';
 import Install, { useInstall } from './Install';
 import Startup from './Startup';
-import Maintenance, { OperationForm } from './Maintenance';
+import Maintenance, { WorkshopOperationForm as OperationForm } from './Workshop';
 import { rowValue } from './records';
-import type { JobType } from '../../shared/maintenance';
 import { useTheme } from './theme';
 import { useStartupAnimation } from './startupPreference';
 
@@ -42,7 +41,7 @@ export default function App() {
   const [editor, setEditor] = useState<{ collection: CollectionName; record: OperationalRecord | null } | null>(null);
   const editorRef = useRef(editor);
   editorRef.current = editor;
-  const [maintenanceDraft, setMaintenanceDraft] = useState<{ wagonNumber: string; catalog: JobType[]; newWagon?: Record<string,string|number> } | null>(null);
+  const [maintenanceDraft, setMaintenanceDraft] = useState<{ wagonNumber: string; newWagon?: Record<string,string|number> } | null>(null);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
   const [installOpen, setInstallOpen] = useState(false);
   const install = useInstall();
@@ -64,8 +63,8 @@ export default function App() {
     const sessionEpoch = epoch.current;
     setMaintenanceLoading(true);
     try {
-      const listing = await api<{jobTypes:JobType[]}>('/maintenance');
-      if (epoch.current === sessionEpoch && editorRef.current?.collection === 'wagons' && editorRef.current.record?.id === sourceId) setMaintenanceDraft({wagonNumber,catalog:listing.jobTypes,newWagon});
+      await api('/workshop');
+      if (epoch.current === sessionEpoch && editorRef.current?.collection === 'wagons' && editorRef.current.record?.id === sourceId) setMaintenanceDraft({wagonNumber,newWagon});
     } catch(reason) {
       if(reason instanceof ApiError && reason.status===401) expired();
       else notify('Bakım formu açılamadı. Bağlantınızı kontrol edip tekrar deneyin.');
@@ -164,5 +163,5 @@ export default function App() {
     {page === 'maintenance' && data.maintenanceEnabled && <Maintenance user={user} online={online} onExpired={expired} notify={notify} />}
     {page === 'admin' && user.role === 'admin' && <Admin online={online} onExpired={expired} notify={notify} />}
     {page === 'account' && <Account startupAnimation={startupAnimation} onStartupAnimationChange={changeStartupAnimation} theme={theme} onThemeChange={changeTheme} onUpdated={setUser} user={user} online={online} onLogout={logout} onExpired={expired} notify={notify} />}
-  </main></div><nav className="mobile-bottom" aria-label="Mobil gezinme">{navigation.map(({ page: target, mobile, Icon }) => <button key={target} className={`mobile-nav-button ${page === target ? 'active' : ''}`} onClick={() => setPage(target)} aria-current={page === target ? 'page' : undefined}><Icon /><span>{mobile}</span></button>)}<button className={`mobile-nav-button ${page === 'admin' || page === 'account' ? 'active' : ''}`} onClick={() => setPage(user.role === 'admin' ? 'admin' : 'account')} aria-current={page === 'admin' || page === 'account' ? 'page' : undefined}>{user.role === 'admin' ? <ShieldCheck /> : <CircleUserRound />}<span>{user.role === 'admin' ? 'Yönetim' : 'Hesabım'}</span></button></nav>{editor && <div inert={!!maintenanceDraft}><RecordEditor {...editor} onNewMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && !editor.record ? fields => void startWagonMaintenance(fields) : undefined} maintenanceLoading={maintenanceLoading} onAddMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && editor.record ? () => void startWagonMaintenance() : undefined} user={user} online={online} onClose={() => setEditor(null)} onSaved={saved} onExpired={expired} onConflict={() => refresh()} /></div>}{maintenanceDraft && <OperationForm operation={null} onSubmit={maintenanceDraft.newWagon ? async input => {await api('/maintenance/with-wagon','POST',{wagon:maintenanceDraft.newWagon,maintenance:input});} : undefined} initialWagonNumber={maintenanceDraft.wagonNumber} catalog={maintenanceDraft.catalog} online={online} onExpired={expired} onClose={() => setMaintenanceDraft(null)} onSaved={async () => {setMaintenanceDraft(null); if(maintenanceDraft.newWagon) setEditor(null); await refresh(); notify(maintenanceDraft.newWagon?'Vagon ve bakım operasyonu birlikte kaydedildi.':'Vagon için bakım operasyonu kaydedildi.');}} />}{installOpen && <Install {...install} onClose={() => setInstallOpen(false)} />}{toast && <div className="toast" role="status"><Check /><span>{toast}</span></div>}</div>;
+  </main></div><nav className="mobile-bottom" aria-label="Mobil gezinme">{navigation.map(({ page: target, mobile, Icon }) => <button key={target} className={`mobile-nav-button ${page === target ? 'active' : ''}`} onClick={() => setPage(target)} aria-current={page === target ? 'page' : undefined}><Icon /><span>{mobile}</span></button>)}<button className={`mobile-nav-button ${page === 'admin' || page === 'account' ? 'active' : ''}`} onClick={() => setPage(user.role === 'admin' ? 'admin' : 'account')} aria-current={page === 'admin' || page === 'account' ? 'page' : undefined}>{user.role === 'admin' ? <ShieldCheck /> : <CircleUserRound />}<span>{user.role === 'admin' ? 'Yönetim' : 'Hesabım'}</span></button></nav>{editor && <div inert={!!maintenanceDraft}><RecordEditor {...editor} onNewMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && !editor.record ? fields => void startWagonMaintenance(fields) : undefined} maintenanceLoading={maintenanceLoading} onAddMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && editor.record ? () => void startWagonMaintenance() : undefined} user={user} online={online} onClose={() => setEditor(null)} onSaved={saved} onExpired={expired} onConflict={() => refresh()} /></div>}{maintenanceDraft && <OperationForm operation={null} onSubmit={maintenanceDraft.newWagon ? async input => {await api('/workshop/operations/with-wagon','POST',{wagon:maintenanceDraft.newWagon,operation:input});} : undefined} initialWagonNumber={maintenanceDraft.wagonNumber} online={online} onExpired={expired} onClose={() => setMaintenanceDraft(null)} onSaved={async () => {setMaintenanceDraft(null); if(maintenanceDraft.newWagon) setEditor(null); await refresh(); notify(maintenanceDraft.newWagon?'Vagon ve bakım operasyonu birlikte kaydedildi.':'Vagon için bakım operasyonu kaydedildi.');}} />}{installOpen && <Install {...install} onClose={() => setInstallOpen(false)} />}{toast && <div className="toast" role="status"><Check /><span>{toast}</span></div>}</div>;
 }

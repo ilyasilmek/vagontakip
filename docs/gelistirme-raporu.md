@@ -19,7 +19,7 @@ Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon
 
 Son doğrulanan test Worker yayın kimliği: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
-9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Yeni kurallar henüz uygulamaya veya test sitesine aktarılmadı; aşağıdaki mevcut pilot hesapları eski sürümün davranışını anlatır. Kişi bazında seçim kullanıcı tarafından onaylandı; vardiya saatleri alındı, net süre ve mola bilgisi netleştiriliyor.
+9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Kullanıcının son cevabıyla iki vardiya ve yemek molaları kesinleşti; sürüm 2 geliştirmesi aşağıda kayıtlıdır. İlk pilotun hesap tablosu tarihsel sürüm 1 davranışını anlatır. Güncel yayın durumu sürüm 2 bölümünde belirtilir.
 
 ## Kurulum ve canlı uygulamada tamamlanan işler
 
@@ -38,7 +38,7 @@ Son doğrulanan test Worker yayın kimliği: `1ba71760-265a-4d1a-bdcd-2ffd564e1f
 
 Bu bölüm geçmişte canlıya alınan uygulama özelliklerini özetler. Bakım pilotu için verilen sonraki test izinleri bunlardan ayrı değerlendirilir.
 
-## Bakım pilotu: onaylanan hesap kuralları
+## İlk bakım pilotunun hesap kuralları (sürüm 1)
 
 Kullanıcının verdiği 49 iş kalemi, standart dakika ve kategori değerleri varsayılan katalog olarak eklendi. Standart süreler **tek kişi** içindir. Hesaplar ara aşamalarda yuvarlanmaz; ekranda en fazla iki ondalık gösterilir.
 
@@ -88,13 +88,35 @@ Bağımsız aritmetik kontrolünde şartnamedeki sayısal örnekler doğru çık
 
 Eski test kayıtlarında gerçek kişi kimlikleri ve bekleme saatleri yoktur. Geçişte bunlar tahmin edilmeyecek, eski hesap sonuçları sessizce değiştirilmeyecek; analiz belgesinde sürümlü geçiş planı kaydedildi. Uygulama kodu ve çalışan test sürümü bu analiz kaydında değiştirilmedi; yeni dağıtım yapılmadı. Hedef yalnız `maintenance-test`; `main` ve canlı Worker değiştirilmedi.
 
+## 9 Ekim 2026 — personel-zaman, günlük kapasite ve rapor sürümü 2
+
+Kullanıcının kesinleştirdiği saatler: **1. Vardiya 08:00–16:00, yemek 12:00–12:30; 2. Vardiya 13:30–21:30, yemek 17:00–17:30**. Hafta sonu aynı düzen; iki vardiya da 450 dakika / 7,5 net saattir. 3. vardiya yeni seçeneklerden kaldırıldı; tarihsel kayıtlar korundu.
+
+Personel uygulama hesabından ayrı tanımlanır; vardiya, bakım ve beklemelerde tek tek seçilir. Günlük atölye ekranında sahadaki planlı kişiler, gerçek katılım saatleri, vagon durumu, tam/kısmi vagonsuzluk nedeni ve yardımcı faaliyetler kaydedilir. Bakım formunun içinden de günlük durum oluşturulabilir. Sabit ekip varsayımı kaldırıldı; değişen ekibe ayrı kişi/zaman katılımı yazılabilir. Bekleme kaybı yalnız gerçekten bekleyen kişilere aittir. Yemek molaları kapasite, işçilik ve kayıplardan çıkarılır.
+
+Ortak hesap modülü sürüm 2 olarak eklendi; hesaplar kişi-milisaniye üzerinden toplanıp sonuçta saate çevrilir. Ara yuvarlama yapılmaz. Standart çıktı tamamlanma tarihinde bir kez yazılır; gerçek süre rapor dönemine paylaştırılır. Grup verimliliği dönemde tamamlanan iş emirlerinin bütün işçiliğini kullanır. Kapasite kullanım, vagonsuzluk ve bekleme oranları ayrıdır. Standart iş yükü kapasite mutabakatına gerçek zaman kategorisi gibi katılmaz; açıklanamayan kapasite otomatik yardımcı faaliyet yapılmaz. Sıfır paydada “Hesaplanamadı” gösterilir.
+
+Yeni personel, vardiya, günlük durum, katılım, standart sürümü, iş emri/kalem, bekleme ve faaliyet tabloları ayrı test Durable Object SQL alanında gerçek yabancı anahtarlarla ilişkilendirildi. Başlık/revision alanları ilgili SQL satırlarının JSON sütunlarında, alt kayıt ve personel bağlantıları ayrı tablolardadır. Core vagon/veri bilgisi ile yeni bakım tabloları tek SQL transaction içinde yazılır; vagon + bakım akışı atomik kalır. İlk geçiş eski KV snapshot'ını silmez. Kişi kimliği/bekleme saati bilinmeyen eski kayıtlar ayrı okunabilir bölümde korunur ve yeni kapasite mutabakatına katılmaz.
+
+Sunucu; mükerrer tarih + vardiya, çakışan personel planı, bakım/bekleme/vagonsuzluk/faaliyet çakışması, bekleyen kişinin gerçek iş emri katılımı ve zaman sınırlarını doğrular. Farklı kişiler aynı saatlerde çalışabilir; bitişte başlayan komşu aralıklar çakışmaz. Yetki, aynı-origin, revision ve denetim kayıtları korunur. Personel ve vardiya/standart ayarları yöneticinindir; herkes operasyon kaydı oluşturup düzenleyebilir, silme yöneticinindir. Standart değişikliği tarihsel sürüm oluşturur; eski bakım snapshot'ları değişmez.
+
+Mobil ekranlar, özel tarih aralığı/ay/hafta, yönetim göstergeleri, vagon/iş türü çıktıları, dokuz sayfalı Excel ve yazdırılabilir bakım/yönetim PDF'si eklendi. Arka planın stacking context'i nedeniyle günlük pencerenin Kaydet düğmesinin alt gezinme arkasında kalması mobil kontrolde tespit edilip düzeltildi. Kayıt sürerken Escape, kapat düğmesi ve arka alan tıklaması pencereyi kapatmaz.
+
+Doğrulama: TypeScript ve test arayüzü derlemesi başarılı. **68 birim/sunucu testi geçti** (önceki 44 + yeni 16 hesap/sınır ve 8 SQL/API testi). Şartnamedeki 13 kabul örneği, ek kişi-zaman/mola/dönem sınırları, ilişkisel kalıcılık, eski KV geçişi, SQL hatasında iki kaydın birlikte geri alınması, eşzamanlı çakışma ve yetki kontrolleri kapsam içindedir.
+
+**Dört güncel bakım Playwright testi geçti**: günlük kayıt ve gerçek personel seçimi, tek kişinin beklemesi, düzenleme/kalıcılık, ekran–Excel sayısal eşleşmesi, PDF üretimi, mevcut vagondan bakım, yeni vagon + bakım birlikte kayıt, geri tuşu, personel ekleme, 2. vardiya saatleri ve tam/kısmi vagonsuzluk/yardımcı faaliyet. Geniş pakette diğer **yedi test de geçti**: ortak API/yetki, telefon kayıt/Excel, iki gezinme testi, PWA, animasyon tercihi ve tema. Geniş paketin ilk çalıştırmasında iki yeni bakım testinin hatalı başlık/label seçicileri başarısızdı; seçiciler gerçek arayüz etiketleriyle düzeltildi ve dört bakım testi birlikte tekrar başarıyla çalıştırıldı. Sonuç, tek bir son 11-test koşusu gibi sunulmaz. Yerel kontroller Chromium telefon emülasyonundadır; cihazdaki gerçek kullanıcı denemesi sonraki adımdır.
+
+Ek görsel kontrol: 390×844 açık/koyu tema günlük kayıt ekranları incelendi; Kaydet düğmesinin üstte ve tıklanabilir olduğu doğrulandı. Bu görüntülerde yalnız GET yanıtına üç örnek personel eklendi; bu görsel kontrol yeni kayıt yazmadı. Gerçek kayıt akışları yukarıdaki tarayıcı testlerinde ayrıca sınandı.
+
+Yayın hedefi yalnız `vagontakip-test`. Bu geliştirme kaydı hazırlanırken yeni uzak dağıtım henüz yapılmadı; doğrulama sonrası test yayını ayrıca kaydedilecek. `main`, canlı Worker ve canlı kayıtlar değiştirilmedi. Geri dönüş eski KV snapshot'ını güncel veri yerine koyarak yapılmaz; SQL okuyucusunu koruyan yeni geri alma commit'i gerekir.
+
 ## Güncel kullanıcı akışları
 
 ### Yeni vagon ve bakım birlikte
 
 1. Vagon ekle açılır ve vagon bilgileri girilir.
 2. Aynı giriş akışındaki Bakım ekle düğmesine basılır; vagon numarası hazır gelir.
-3. Ekip, vardiya, başlangıç/bitiş, yapılan işler ve beklemeler doldurulur.
+3. Günlük atölye vardiyası seçilir/oluşturulur; gerçek personel, başlangıç/bitiş, yapılan işler ve bekleyen kişiler doldurulur.
 4. Vagon ve bakımı kaydet ile iki kayıt tek sunucu işlemi içinde oluşturulur.
 
 Önce vagonu kaydedip listeden tekrar seçmek gerekmez. Bakım formundan vazgeçmek henüz kaydedilmemiş vagonu da oluşturmaz; ilk forma dönüldüğünde vagon alanları korunur. Geçersiz bakımda yalnız vagonun yazılması önlenir. Bakım ekle seçilmeden normal Kaydet yalnız vagon kaydı oluşturur.
@@ -105,9 +127,9 @@ Vagonlar → vagon ayrıntıları → Bakım ekle. Vagon numarası hazır gelir.
 
 ### Raporlama
 
-Bakım operasyonları bölümü ayrı kalır. Ay, arama ve sıralama kontrolleri; standart iş yükü, ekip verimliliği ve bekleme dağılımı gösterilir. Aylık Excel dört sayfadır: Aylık özet, Bakım operasyonları, Yapılan işler, Beklemeler. Bakım detay kartı sistem yazdırma ekranından PDF olarak kaydedilebilir. PDF desteği cihazın yazdırma olanaklarına bağlıdır.
+Bakım operasyonları bölümü ayrı kalır. Rapor, Günlük atölye ve Personel sekmeleri vardır. Ay/hafta/özel aralık, arama ve sıralama; standart iş yükü, kapasite, kayıplar, yardımcı faaliyetler ve verimlilik gösterilir. Excel dokuz sayfadır: Yönetim özeti, Günlük atölye, Bakım operasyonları, Yapılan işler, Beklemeler, Personel katılımı, Faaliyet ve kayıplar, Performans, Eski kayıt açıklaması. Bakım detay kartı ve yönetim raporu sistem yazdırma ekranından PDF olarak kaydedilebilir. PDF desteği cihazın yazdırma olanaklarına bağlıdır. İlk sürümün dört sayfalı Excel'i tarihsel davranıştır.
 
-## Son doğrulamalar ve sınırlar
+## Önceki doğrulamalar ve sınırlar (sürüm 1)
 
 Son veri kaydetme değişikliği `d2e4c96` için (arka plan denemesinin ayrı doğrulamaları yukarıda):
 
@@ -119,7 +141,7 @@ Son veri kaydetme değişikliği `d2e4c96` için (arka plan denemesinin ayrı do
 
 Son sürümde tüm tarayıcı paketi yeniden çalıştırılmış gibi yorumlanmamalıdır: 8 testin tamamı ilk pilotta geçti; son değişiklikte ilgili 5 test çalıştırıldı. Mobil kontroller Chromium telefon emülasyonu ile yapıldı. Kullanıcı da gerçek telefonunda görünüm, vardiya ve Excel geri bildirimlerini verdi.
 
-Bu raporu eklemek için uygulama testleri tekrar çalıştırılmadı; yalnız dokümantasyon değişti. Eski [doğrulama belgesi](verification.md) ilk kurulumun tarihsel sonuçlarını içerir; güncel kapsam bu rapordadır.
+Bu raporun ilk eklenmesinde uygulama testleri tekrar çalıştırılmadı; yalnız dokümantasyon değişti. Eski [doğrulama belgesi](verification.md) ilk kurulumun tarihsel sonuçlarını içerir; güncel kapsam bu rapordadır.
 
 ## Geri dönüş ve bekleyen karar
 
