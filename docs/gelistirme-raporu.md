@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `96f6bb9` |
+| Son özellik commit'i | `6096db4` | `0deb110` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -335,6 +335,8 @@ Kullanıcı bakım formunda personel seçmesine rağmen iş adı ve kategori lis
 İş kataloğu boş olduğunda bakım formu artık hesabın mevcut postasını gösteriyor ve **Hesabım → Postası → Hava-Fren → Postayı kaydet** adımlarını açıklıyor. Ayrı postaların işlerini birbirine açmama kuralı korunuyor. Yerel testte posta değiştirildiğinde 11 kategorinin ve 52 işin göründüğü Playwright akışı geçti. `vagontakip-test` Worker yayımlandı (`bec32b59-0f6a-419b-883c-fe1f0852c88e`). Uzaktan girişte test yönetici hesabının postası Hava-Fren olarak doğrulandı. Önceki test kayıt kimlikleri korundu; canlı sayfanın özeti değişmedi. Canlı siteye yayın yapılmadı.
 
 ## 9 Ekim 2026 — İş listesi uyarısının sadeleştirilmesi (test)
+
+Özellik commit’i: `0deb110`.
 
 Kullanıcının isteğiyle, iş kataloğu boş olduğunda gösterilen uzun posta açıklaması tek cümleye indirildi: “İş akışı girişi yapabilmek için Hesabım menüsünden Posta belirlemesi yapmanız gerekiyor!” Aynı durumu tekrar eden ikinci açıklama kaldırıldı. Katalog görünürlüğü ve kayıt hesapları değişmedi.
 
