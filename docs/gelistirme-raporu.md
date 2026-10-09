@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `8eccc83` |
+| Son özellik commit'i | `6096db4` | `eb6b152` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -351,6 +351,8 @@ Kullanıcı 2 kategori ve 12 iş gördüğünü bildirdi. Sunucu kontrolünde Fr
 Formda toplam iş ve kategori sayısı gösterildi. **Tüm işleri göster (52)** düğmesi eklendi; açıldığında 11 kategori ayrı kapalı başlıklar halinde ve her başlıkta iş sayısıyla görünüyor. Arama ve kategori filtresi davranışı korunuyor; form ilk açıldığında uzun liste kendiliğinden görünmüyor. Yerel testte tüm 52 işin ve 11 kategorinin listelendiği, Kol Mekanizmaları kategorisinin 12 iş verdiği doğrulandı. `vagontakip-test` Worker yayımlandı (`7b2bf0d8-5014-4074-84b5-9df79b0b9048`). Yayındaki mobil formda 11 kategori ve 52 işin tamamı sayıldı; önceki test kayıt kimlikleri korundu, canlı sayfa özeti değişmedi. Canlı siteye yayın yapılmadı.
 
 ## 9 Ekim 2026 — Eski bakım kaydını düzenlerken Fren kataloğu (test)
+
+Özellik commit’i: `eb6b152`.
 
 Kullanıcının görsellerinde **Bakım operasyonunu düzenle** penceresinde 12 seçili eski iş ve yalnız iki eski kategori görünüyordu. Görselde son yayında eklenen “Tüm işleri göster” düğmesinin bulunmaması, sekmede eski arayüz sürümünün açık olduğunu da gösterdi. Test yönetici hesabıyla aynı 12 işli kayıt güncel test sitesinde açıldığında 52 yeni Fren işi ve seçili 12 eski iş birlikte görünüyordu.
 
