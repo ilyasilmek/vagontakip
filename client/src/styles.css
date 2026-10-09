@@ -37,7 +37,7 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 
 .account-theme {margin-bottom:24px;padding-bottom:24px;border-bottom:2px solid var(--border)}
 .account-theme select {margin:9px 0}
-:root[data-theme=dark] {color:#E4EBEF;background:#101C25;--ink:#E4EBEF;--muted:#B4C4CF;--border:#657D8C;--nav:#142632;--teal:#E4EBEF}
+:root[data-theme=dark] {color:#E4EBEF;background:#101C25;--ink:#E4EBEF;--muted:#B4C4CF;--border:#657D8C;--nav:#142632;--teal:#E4EBEF;--surface:#1C303E}
 :root[data-theme=dark] button {color:inherit}
 :root[data-theme=dark] .primary {color:#182C3A}
 :root[data-theme=dark] :is(input,select,textarea) {background:#1C303E;border-color:#7C94A3;color:#E4EBEF}
@@ -57,6 +57,7 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 :root[data-theme=dark] .offline-label {background:#443B24;color:#F4DEAA}
 :root[data-theme=dark] .badge {color:#E4EBEF}
 :root[data-theme=dark] .table-row:hover {background:#1C303E}
+:root[data-theme=dark] .record-card:hover {background:#1C303E}
 :root[data-theme=dark] .filter-pill {color:#B4C4CF}
 :root[data-theme=dark] .filter-pill.active {color:#E4EBEF}
 :root[data-theme=dark] .filter-pill span {background:#294252;color:#E4EBEF}
