@@ -110,3 +110,10 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 
 .wagon-number-invalid {border:2px solid #B52D26!important}
 :root[data-theme=dark] .wagon-number-invalid {border-color:#FF9D8C!important}
+
+.people-dropdown {grid-template-columns:minmax(0,1fr)}
+.people-dropdown>label {display:flex;flex-direction:column;align-items:stretch;gap:8px;cursor:default}
+.selected-people {min-width:0}.selected-people>p {color:var(--muted);font-size:13px}
+.selected-people ul {list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.selected-people li {display:flex;align-items:center;gap:8px;max-width:100%;border:1px solid var(--border);padding:4px 4px 4px 10px}
+.selected-people li span {overflow-wrap:anywhere;min-width:0}.selected-people li button {padding:0;min-width:36px;min-height:36px;flex-shrink:0;font-size:22px}
