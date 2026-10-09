@@ -17,7 +17,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
-Son doğrulanan etkin test Worker yayın kimliği: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
+Son doğrulanan etkin test Worker yayın kimliği: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
 9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Kullanıcının son cevabıyla iki vardiya ve yemek molaları kesinleşti; sürüm 2 geliştirmesi aşağıda kayıtlıdır. İlk pilotun hesap tablosu tarihsel sürüm 1 davranışını anlatır. Güncel yayın durumu sürüm 2 bölümünde belirtilir.
 
@@ -154,3 +154,17 @@ Kullanıcı uygun bulmazsa arayüz değişikliği yeni bir geri alma commit'iyle
 ## Rapor güncelleme kuralı ve dokümantasyon kaydı
 
 Bu rapor repoya eklendi; README üzerinden bağlantı verildi. Kök `AGENTS.md`, sonraki her anlamlı kod, yapılandırma, yayın veya kullanıcı akışı değişikliğinde raporun aynı commit içinde güncellenmesini zorunlu kılar. Her yeni kayıtta ne değiştiği, doğrulamanın gerçekten çalıştırılan kapsamı, yayın ortamı ve kalan sınırlamalar belirtilir. Güncel durum ve kullanıcı akışı değişmişse ilgili bölümler de yenilenir. Canlıya geçiş onayı verilmedikçe test aşaması uyarısı korunur.
+
+## 9 Ekim 2026 — Eksik seçimlerin alan üzerinde Türkçe gösterilmesi
+
+Kullanıcının bildirdiği `Array must contain at least 1 element(s)` mesajı, bakım formundaki boş iş veya personel dizileri için genel Zod doğrulamasından geliyordu. Test arayüzü artık kaydetmeden önce yapılan işler, personel/vardiya katılımı, her katılımın görevli personeli, her beklemenin personeli ve faaliyet personelini kontrol eder. Eksik bölüm kırmızı çerçeveyle işaretlenir ve kendi altında Türkçe açıklama gösterilir. İlk eksik bölüm kaydırılıp odaklanır; doğru seçim yapıldığında o bölümün uyarısı kaldırılır. Kontrol başarısızsa sunucuya kayıt isteği gönderilmez ve form içeriği korunur. Hiç katılım yoksa Kaydet düğmesi de açıklamayı gösterebilmek için kullanılabilir.
+
+İş ve personel grupları erişilebilir hata açıklamasıyla ilişkilendirildi; açık/koyu tema renkleri tanımlandı. Tüm personeli pasif olan listede de seçilebilir personel bulunmadığı açıkça belirtilir. Sunucudaki ilgili minimum dizi doğrulamaları Türkçeleştirildi; istemci kontrolü atlandığında da İngilizce mesaj dönmez. Diğer zaman/çakışma ve hesap kuralları değişmedi; günlük kayıt için yeni bir zorunlu personel koşulu eklenmedi.
+
+Doğrulama:
+- `npm test`: **69/69 geçti**. Yeni API testi boş işler, boş katılım, boş görevli ve boş bekleyen personel için Türkçe hata döndüğünü ve operasyon oluşturulmadığını doğrular.
+- `npm run build:test`: TypeScript, Vite ve PWA üretimi geçti.
+- `npm run test:maintenance`: **4/4 geçti**. Mobil senaryolarda boş iş/görevli/bekleyen/faaliyet personeli uyarıları, ilk eksik gruba odak, düzeltmeyle uyarının kalkması ve eksik seçimde kayıt isteği gönderilmemesi denendi; normal kayıt/düzenleme, birleşik vagon-bakım, geri dönüş ve rapor akışları da geçti.
+- `git diff --check`: geçti.
+
+Yayın yalnız `vagontakip-test` Worker'ına yapıldı. Gizli anahtar bağının korunması sonrasındaki etkin sürüm Cloudflare API üzerinden **%100 `7670d044-683d-430a-b387-dd39e8f57fe4`** olarak doğrulandı. Uzak testte giriş, yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle birebir eşleşmesi ve yayın öncesindeki vagon/parça/demirbaş/personel/günlük/bakım/faaliyet/eski bakım kayıt kimliklerinin korunması kontrol edildi. Uzak doğrulama yeni operasyon kaydı oluşturmadı. Canlı sayfanın yayın öncesi/sonrası içerik özeti aynı kaldı; `main` dalına veya canlı Worker'a yayın yapılmadı.

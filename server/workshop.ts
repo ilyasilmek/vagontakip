@@ -4,7 +4,7 @@ import { ApiError } from './errors';
 
 const id=z.string().min(1).max(100),text=z.string().trim().max(1000),instant=z.string().datetime({offset:true}).transform(value=>new Date(value).toISOString());
 const interval={startedAt:instant,finishedAt:instant};
-const people=z.array(id).min(1).max(100).refine(ids=>new Set(ids).size===ids.length,'Aynı kişi birden fazla seçilemez.');
+const people=z.array(id).min(1,'En az bir personel seçin.').max(100).refine(ids=>new Set(ids).size===ids.length,'Aynı kişi birden fazla seçilemez.');
 const meta={id,revision:z.number().int().positive(),createdAt:instant,updatedAt:instant,updatedBy:id};
 export const personInputSchema=z.object({name:z.string().trim().min(1).max(100),active:z.boolean()}).strict();
 const clock=z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
@@ -13,14 +13,14 @@ export const dayInputSchema=z.object({...interval,date:z.string().regex(/^\d{4}-
 export const participationSchema=z.object({...interval,dayId:id,personIds:people}).strict();
 export const waitSchema=z.object({...interval,personIds:people,reason:z.string().trim().min(1).max(200),note:text}).strict();
 export const operationInputSchema=z.object({...interval,wagonNumber:z.string().trim().min(1).max(200),supervisor:z.string().trim().min(1).max(100),notes:text,
- participation:z.array(participationSchema).min(1).max(100),waits:z.array(waitSchema).max(50),jobs:z.array(z.object({jobTypeId:z.number().int().positive(),quantity:z.number().int().positive().max(1000)}).strict()).min(1).max(100)}).strict();
+ participation:z.array(participationSchema).min(1,'En az bir personel / vardiya katılımı ekleyin.').max(100),waits:z.array(waitSchema).max(50),jobs:z.array(z.object({jobTypeId:z.number().int().positive(),quantity:z.number().int().positive().max(1000)}).strict()).min(1,'En az bir yapılan iş seçin.').max(100)}).strict();
 export const activityInputSchema=z.object({...interval,dayId:id,operationId:id.nullable(),personIds:people,kind:z.enum(ACTIVITY_KINDS),reason:text,notes:text}).strict();
 export const standardInputSchema=z.object({jobTypeId:z.number().int().positive(),name:z.string().trim().min(1).max(200),category:z.string().trim().min(1).max(100),standardMinutes:z.number().nonnegative().max(10000),active:z.boolean(),validFrom:instant}).strict();
 const lineSchema=z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),quantity:z.number().int().positive()});
 export const workshopSchema=z.object({formulaVersion:z.literal(2),people:z.array(personInputSchema.extend(meta)),shifts:z.array(shiftSchema),
  standards:z.array(z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),active:z.boolean(),validFrom:instant,validUntil:instant.nullable()})),
  days:z.array(dayInputSchema.extend({...meta,shiftName:z.string().min(1)})),
- operations:z.array(operationInputSchema.omit({jobs:true}).extend({...meta,formulaVersion:z.literal(2),jobs:z.array(lineSchema).min(1)})),
+ operations:z.array(operationInputSchema.omit({jobs:true}).extend({...meta,formulaVersion:z.literal(2),jobs:z.array(lineSchema).min(1,'En az bir yapılan iş seçin.')})),
  activities:z.array(activityInputSchema.extend(meta))});
 function requireRule(ok:boolean,message:string):asserts ok { if(!ok)throw new ApiError(400,'WORKSHOP_VALIDATION',message); }
 function validInterval(i:{startedAt:string;finishedAt:string}) { requireRule(milliseconds(i).every(Number.isFinite)&&minutes(i)>0,'Bitiş zamanı başlangıçtan sonra olmalı.'); }

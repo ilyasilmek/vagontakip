@@ -66,3 +66,14 @@ describe('relational pilot API',()=>{
  it('adds catalog versions without changing existing workload and permits person deactivation',async()=>{const {object,session,input,ids}=await prepared();expect((await call(object,'/api/workshop/operations','POST',input,session)).status).toBe(201);expect((await call(object,'/api/workshop/standards','POST',{jobTypeId:1,name:'Sabo sök-tak (1 adet)',category:'Fren & Mekanik',standardMinutes:8,active:true,validFrom:at('12:00')},session)).status).toBe(201);const data=await listing(object,session);expect(data.operations[0].jobs[0].standardMinutes).toBe(5);expect((await call(object,'/api/workshop/people/'+ids[0],'PATCH',{name:'A',active:false,revision:1},session)).status).toBe(200);const restored=await listing(object,session);expect(restored.people.find(p=>p.id===ids[0])?.active).toBe(false);expect(restored.operations[0].jobs[0].standardMinutes).toBe(5);expect((await call(object,'/api/workshop/operations','POST',{...input,startedAt:at('14:00'),finishedAt:at('15:00'),participation:[{...input.participation[0],startedAt:at('14:00'),finishedAt:at('15:00')}],waits:[]},session)).status).toBe(400);
  });
 });
+
+it('rejects missing work, crew and wait selections with Turkish field-specific messages without saving',async()=>{
+ const f=await prepared();
+ for(const [input,message] of [
+  [{...f.input,jobs:[]},'En az bir yapılan iş seçin.'],
+  [{...f.input,participation:[]},'En az bir personel / vardiya katılımı ekleyin.'],
+  [{...f.input,participation:[{...f.input.participation[0],personIds:[]}]},'En az bir personel seçin.'],
+  [{...f.input,waits:[{...f.input.waits[0],personIds:[]}]},'En az bir personel seçin.'],
+ ] as const){const response=await call(f.object,'/api/workshop/operations','POST',input,f.session);expect(response.status).toBe(400);expect((await response.json() as {error:string}).error).toBe(message);}
+ const data=await(await call(f.object,'/api/workshop','GET',undefined,f.session)).json() as WorkshopData;expect(data.operations).toHaveLength(0);
+});

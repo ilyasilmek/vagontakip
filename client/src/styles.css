@@ -101,3 +101,9 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 :root[data-theme=dark] .test-watermark img {opacity:.08}
 @media(max-width:700px){.test-watermark {inset:80px 0 calc(76px + env(safe-area-inset-bottom)) 0}.test-watermark img {width:min(100vw,calc(100dvh - 156px - env(safe-area-inset-bottom)))}}
 @media print {.test-watermark {display:none!important}}
+
+/* Pilot form selection errors: visible in both themes and linked to the group. */
+.field-invalid {border:2px solid #B52D26!important;padding:12px;border-radius:3px;scroll-margin-block:24px}
+.field-error {color:#A1241D;font-size:14px;font-weight:600;margin:8px 0;grid-column:1/-1}
+:root[data-theme=dark] .field-invalid {border-color:#FF9D8C!important}
+:root[data-theme=dark] .field-error {color:#FFB5A7}
