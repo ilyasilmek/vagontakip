@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `c938194` |
+| Son özellik commit'i | `6096db4` | `47eb367` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -305,6 +305,8 @@ Yalnız `vagontakip-test` yayımlandı. Etkin Cloudflare sürümü **%100 `f3996
 
 
 ## 9 Ekim 2026 — Çakışma uyarısından ilgili bakım formuna geçiş
+
+Özellik ve doğrulama kaydı: `47eb367` (`maintenance-test`).
 
 Personel-zaman çakışması hatası artık çakışan bakım kayıtlarının kimliklerini yapılandırılmış API alanında da döndürür. Bakım formundaki hata alanı, erişilebilen mevcut kayıtlar için vagon numaralı **bakımını aç** düğmesi gösterir. Düğme en güncel kaydı sunucudan alıp düzenleme formunu mevcut formun üzerinde açar; alt form geçici olarak etkileşime kapanır. Üstteki kayıttan geri dönüldüğünde yeni bakım taslağı (vagon, saat, personel, işler) korunur. İlgili bakım kaydedilirse yeni form açık kalır, eski hata temizlenir ve kullanıcı ilk kaydı yeniden kaydetmeyi deneyebilir. Kayıt silinmişse kullanıcıya yeniden yükleme uyarısı verilir. Numara metninden tahmin yapılmaz; sunucu kayıt kimliği kullanılır. Diğer faaliyet türleri hata metninde görünmeye devam eder ancak vagon formu bağlantısı yalnız bakım kaydı için gösterilir.
 
