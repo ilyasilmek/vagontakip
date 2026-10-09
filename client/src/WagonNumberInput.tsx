@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 
 const digits=(value:string)=>value.replace(/[^0-9]/g,'').slice(0,12);
 export function formatWagonNumber(value:string):string {
@@ -8,14 +8,16 @@ export function formatWagonNumber(value:string):string {
 const pattern='[0-9]{4} [0-9]{4} [0-9]{3}-[0-9]';
 const message='Vagon numarasını 12 rakamla girin. Örnek: 1234 5678 901-2.';
 export default function WagonNumberInput({value,onChange,original,required=false,readOnly=false,disabled=false,id,label}:{value:string;onChange:(value:string)=>void;original?:string;required?:boolean;readOnly?:boolean;disabled?:boolean;id?:string;label:string}){
- const hint=useId(),ref=useRef<HTMLInputElement>(null),[attempted,setAttempted]=useState(false);
+ const hint=useId(),ref=useRef<HTMLInputElement>(null),cursorRef=useRef<{value:string;position:number}|null>(null),[attempted,setAttempted]=useState(false);
+ useLayoutEffect(()=>{const desired=cursorRef.current,input=ref.current;if(desired&&desired.value===value){if(input&&input===document.activeElement)input.setSelectionRange(desired.position,desired.position);cursorRef.current=null;}},[value]);
  // Historical identifiers stay intact when only other fields are edited.
  const historical=!!original&&value===original;
  const invalid=!historical&&((required&&!value)||(!!value&&!new RegExp('^'+pattern+'$').test(value)));
  function change(raw:string,position:number){
   const formatted=formatWagonNumber(raw),count=digits(raw.slice(0,position)).length;
   let cursor=0,seen=0;while(cursor<formatted.length&&seen<count){if(/[0-9]/.test(formatted[cursor]))seen++;cursor++;}
-  onChange(formatted);requestAnimationFrame(()=>{const input=ref.current;if(input&&input===document.activeElement)input.setSelectionRange(cursor,cursor);});
+  if(formatted===value){const input=ref.current;if(input){input.value=formatted;input.setSelectionRange(cursor,cursor);}cursorRef.current=null;}else{cursorRef.current={value:formatted,position:cursor};}
+  onChange(formatted);
  }
  return <><input ref={ref} id={id} aria-label={label} type="text" inputMode="numeric" autoComplete="off" placeholder="1234 5678 901-2" value={value} required={required} readOnly={readOnly} disabled={disabled} pattern={historical?undefined:pattern} aria-describedby={hint} aria-invalid={attempted&&invalid} className={attempted&&invalid?'wagon-number-invalid':undefined} onInvalid={e=>{setAttempted(true);e.currentTarget.setCustomValidity(message);}} onBlur={()=>setAttempted(true)} onChange={e=>{e.target.setCustomValidity('');change(e.target.value,e.target.selectionStart??e.target.value.length);}} onKeyDown={e=>{
   const input=e.currentTarget,start=input.selectionStart??0,end=input.selectionEnd??start;
