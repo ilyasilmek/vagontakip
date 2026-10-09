@@ -54,7 +54,7 @@ test('back keeps a saving form open and closes it once the request completes', a
   await page.getByRole('navigation', { name: 'Mobil gezinme' }).getByRole('button', { name: 'Vagonlar', exact: true }).click();
   await page.locator('.page-heading').getByRole('button', { name: 'Vagon ekle', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Yeni vagon ekle' });
-  await dialog.getByLabel('Vagon numarası', { exact: false }).fill('e2e_back_pending');
+  await dialog.getByLabel('Vagon numarası', { exact: false }).fill('1234 5678 901-23');
   let release!: () => void;
   const barrier = new Promise<void>(resolve => { release = resolve; });
   await page.route('**/api/wagons', async route => {

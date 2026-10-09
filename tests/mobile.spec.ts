@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { formatWagonNumber } from '../client/src/WagonNumberInput';
 import { test, expect } from '@playwright/test';
 import type { CollectionName, RecordResponse } from '../shared/types';
 import { apiContext, createUser, credentials, data, deleteCreatedRecords, deleteCreatedUser, expectNoHorizontalOverflow, login, loginThroughPage, uniqueName, waitUntilReady } from './helpers';
@@ -46,7 +47,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     await expect(sort).toHaveValue('updated-desc');
     await sort.selectOption('created-desc');
     await page.locator('.page-heading').getByRole('button', { name: 'Vagon ekle', exact: true }).click();
-    const wagonName = uniqueName('mobilewagon');
+    const wagonName = formatWagonNumber(String(Date.now()));
     const editor = page.getByRole('dialog', { name: 'Yeni vagon ekle' });
     await editor.getByLabel('Vagon numarası', { exact: false }).fill(wagonName);
     await expect(editor.getByLabel('Vagon tipi', { exact: true }).locator('option')).toHaveCount(22);

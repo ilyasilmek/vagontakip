@@ -17,7 +17,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
-Son doğrulanan etkin test Worker yayın kimliği: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
+Son doğrulanan etkin test Worker yayın kimliği: `96037ab9-7f1e-4a69-bccb-76d76b04647f`. Önceki alan doğrulama yayını: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
 9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Kullanıcının son cevabıyla iki vardiya ve yemek molaları kesinleşti; sürüm 2 geliştirmesi aşağıda kayıtlıdır. İlk pilotun hesap tablosu tarihsel sürüm 1 davranışını anlatır. Güncel yayın durumu sürüm 2 bölümünde belirtilir.
 
@@ -178,3 +178,18 @@ Kullanıcının verdiği **29 personel adı**, yalnız test Worker'ındaki Perso
 Uzak API'den liste yeniden okunarak 29 ismin her birinin tek aktif kayıt olarak bulunduğu doğrulandı. Önceden bulunan personel kimlikleri korundu; günlük vardiyalar, operasyonlar, faaliyetler, eski bakım kayıtları, vardiya/standart tanımları ve vagon/parça/demirbaş kayıtları işlem öncesiyle karşılaştırıldı ve değişmediği doğrulandı.
 
 Bu işlem test verisi güncellemesidir; uygulama kodu değiştirilmedi, Worker yayını yapılmadı, canlı veriye dokunulmadı. Kod değişmediği için derleme ve test paketleri tekrar çalıştırılmadı; doğrulama gerçek test API'sindeki kayıt sonrası okuma ve koruma kontrolleridir. Personel verileri ayrı Cloudflare test deposunda kalır; yalnız bu değişiklik raporu GitHub'a kaydedilir.
+
+## 9 Ekim 2026 — Vagon numarası için rakam ve biçim kontrolü
+
+Kullanıcının belirttiği `.... .... ...-..` biçimi **4 + 4 + 3 + 2 = 13 rakam** olarak uygulandı. Vagon, bakım ve parça girişindeki vagon numarası alanları ortak bileşene bağlandı. Yazma veya yapıştırmada yalnız `0–9` rakamları alınır; boşluklar ve tire otomatik eklenir. Örnek: `1234567890123` → `1234 5678 901-23`. Baştaki sıfırlar korunur, 13 rakamı aşan giriş alınmaz ve mobil sayısal klavye istenir. Boşluk/tire yanından geri silme ve ileri silme, bitişik rakamı kaldırarak biçimlendirmede takılmayı önler; düzenleme sırasında imleç rakam konumunu korur.
+
+Eksik numarada ilgili alan kırmızı çerçeveyle işaretlenir ve Türkçe 13 rakam uyarısı gösterilir. Kaydetme ve yeni vagon formundan Bakım ekle geçişi, eksik numarada tarayıcı form doğrulamasıyla engellenir. Parça formundaki isteğe bağlı vagon numarası boş bırakılabilir; doldurulursa aynı biçim aranır.
+
+Mevcut veriler topluca dönüştürülmedi. Eski bir numara değiştirilmeden başka alanların düzenlenmesi veya eski vagona bakım eklenmesi mümkündür; kullanıcı numarayı değiştirirse yeni biçime geçirilir. Tarihsel kayıtlar ve içe aktarma/API uyumluluğu için sunucu şemaları değiştirilmedi; bu kural yeni/değiştirilen arayüz girişlerine uygulanır.
+
+Doğrulama:
+- `npm run build:test`: TypeScript, Vite ve PWA üretimi geçti.
+- Tüm yerel pilot Playwright paketi: **11/11 geçti**. Bakım/birleşik vagon senaryosuna harfli yapıştırmayı ayıklama, boşluk/tire ekleme, başlangıç sıfırları, ayırıcı yanından Backspace/Delete ve eksik numarayla Bakım ekle geçişinin engellenmesi eklendi. Normal vagon kaydı, bakım, düzenleme, Excel, API yetkileri, gezinme, çevrimdışı PWA, animasyon ve tema akışları da geçti.
+- `git diff --check`: geçti. Bu değişiklikte sunucu hesapları değişmediğinden birim/API paketleri yeniden çalıştırılmadı.
+
+Yayın yalnız `vagontakip-test` Worker'ına yapıldı. Gizli anahtar bağı işleminden sonra etkin sürüm Cloudflare API üzerinden **%100 `96037ab9-7f1e-4a69-bccb-76d76b04647f`** olarak doğrulandı. Uzak testte giriş ve yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle birebir eşleşmesi kontrol edildi. Yayın öncesindeki personel (önceki 29 kişilik ekleme dahil), vagon, parça, demirbaş, günlük vardiya, operasyon, faaliyet ve eski bakım kayıtlarının kimlikleri korundu. Uzak doğrulama yeni kayıt oluşturmadı. Canlı sayfanın yayın öncesi/sonrası içerik özeti aynı kaldı; `main` dalına veya canlı Worker'a yayın yapılmadı.

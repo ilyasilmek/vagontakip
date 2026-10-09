@@ -107,3 +107,6 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 .field-error {color:#A1241D;font-size:14px;font-weight:600;margin:8px 0;grid-column:1/-1}
 :root[data-theme=dark] .field-invalid {border-color:#FF9D8C!important}
 :root[data-theme=dark] .field-error {color:#FFB5A7}
+
+.wagon-number-invalid {border:2px solid #B52D26!important}
+:root[data-theme=dark] .wagon-number-invalid {border-color:#FF9D8C!important}
