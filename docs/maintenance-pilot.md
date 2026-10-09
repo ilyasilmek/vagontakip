@@ -29,7 +29,7 @@ Canlı sistemde bir kod/asset dağıtımı veya üretim veritabanı değişikli�
 
 ### Güncel sürüm 2
 
-9 Ekim 2026'da personel-zaman ve günlük kapasite modeli eklendi. Önce **Bakım → Personel** bölümünde gerçek personeli tanımlayın (yönetici). Sonra **Günlük atölye → Günlük kayıt ekle** ile tarihi, vardiyayı ve sahadaki planlı kişileri seçin. İzinli/raporlu kişileri seçmeyin. Kişi başına katılım saatleri gerektiğinde değiştirilebilir; kapasite yalnız kaydedilmiş vardiyalardan gelir.
+9 Ekim 2026'da personel-zaman ve günlük kapasite modeli eklendi. Önce **Bakım → Personel** bölümünde gerçek personeli tanımlayın (yönetici). Sonra **Günlük atölye → Günlük kayıt ekle** ile tarihi ve vardiyayı seçin. Yeni kayıtta tüm aktif personel listede otomatik seçili gelir; izinli/raporlu veya o vardiyada çalışmayan kişilerin seçimini kaldırın. Pasif personel yeni kayda otomatik eklenmez. Mevcut günlük kaydı düzenlerken kaydedilmiş personel seçimi korunur. Kişi başına katılım saatleri gerektiğinde değiştirilebilir; kapasite yalnız kaydedilmiş vardiyalardan gelir.
 
 | Vardiya | Saat | Yemek molası | Net süre |
 | --- | --- | --- | --- |

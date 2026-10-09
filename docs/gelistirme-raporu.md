@@ -19,7 +19,7 @@ Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölü
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
-Son doğrulanan etkin test Worker yayın kimliği: `061faf71-1c14-44c1-8aa0-2b1fb103ec38`. Önceki 13 rakam yayını: `96037ab9-7f1e-4a69-bccb-76d76b04647f`. Önceki alan doğrulama yayını: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
+Son doğrulanan etkin test Worker yayın kimliği: `448ec45f-84de-4ccb-a29a-126f82c7379b`. Önceki tek son hane yayını: `061faf71-1c14-44c1-8aa0-2b1fb103ec38`. Önceki 13 rakam yayını: `96037ab9-7f1e-4a69-bccb-76d76b04647f`. Önceki alan doğrulama yayını: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
 9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Kullanıcının son cevabıyla iki vardiya ve yemek molaları kesinleşti; sürüm 2 geliştirmesi aşağıda kayıtlıdır. İlk pilotun hesap tablosu tarihsel sürüm 1 davranışını anlatır. Güncel yayın durumu sürüm 2 bölümünde belirtilir.
 
@@ -212,3 +212,15 @@ Doğrulama:
 - `git diff --check`: geçti. Diğer paketler bu küçük arayüz düzeltmesinde yeniden çalıştırılmadı.
 
 İlk test sonucunu değerlendirmeden başlayan yayın yardımcı süreci sonlandırıldı; zaten başlamış alt süreç yalnız test Worker'ını yükledi. Son dört kontrol geçtikten sonra standart test yayın yardımcı süreci yeniden çalıştırılarak yayın tamamlandı. Canlı yayın izni kullanılmadı, `main` değişmedi. Cloudflare API üzerinden etkin sürüm **%100 `061faf71-1c14-44c1-8aa0-2b1fb103ec38`** olarak doğrulandı. Uzak giriş, yayımlanan JavaScript ile doğrulanan yerel derlemenin birebir eşleşmesi, önceki personel/vagon/parça/demirbaş/günlük/bakım/faaliyet/eski bakım kayıt kimliklerinin korunması ve canlı sayfanın içerik özetinin değişmediği kontrol edildi. Uzak doğrulama yeni kayıt oluşturmadı.
+
+## 9 Ekim 2026 — Günlük atölyede aktif personelin otomatik seçilmesi
+
+Yeni günlük atölye formunda tüm aktif personel, vardiyanın başlangıç/bitiş saatleriyle otomatik seçili gelir ve personel listesi doğrudan görünür. Kullanıcı o vardiyada çalışmayan kişilerin seçimini kaldırabilir veya geri ekleyebilir; kapasite önizlemesi buna göre güncellenir. Tarih/vardiya değişince kullanıcının kaldırdığı kişiler tekrar seçilmez, kalan kişilerin saatleri yeni vardiyaya taşınır. Pasif personel yeni kayda otomatik alınmaz. Mevcut günlük kayıt düzenlenirken kayıtlı katılım listesi korunur; geçmiş kayıtlar veya personel verileri topluca değiştirilmez. Bakım formundan açılan yeni günlük kayıt aynı varsayılanı kullanır. Kullanım kılavuzu buna göre güncellendi.
+
+Doğrulama:
+- `npm run build:test`: TypeScript, Vite ve PWA üretimi geçti.
+- Mobil bakım paketi ilk denemede 3 geçti, yeni testteki doğrulama çağrısının yazım hatası nedeniyle 1 başarısız oldu; test çağrısı düzeltildi.
+- `E2E_MAINTENANCE=true E2E_BASE_URL=http://127.0.0.1:8791 npx playwright test tests/maintenance.spec.ts`: son çalıştırma **4/4 geçti**. Aktif listenin başlangıçta tamamen seçili olması, personel çıkarınca kapasitenin azalması, vardiya değiştirmede çıkarılan kişinin tekrar seçilmemesi ve kayıt/bakım/rapor akışları doğrulandı. Önceki denemelerin pasifleştirilmiş personeli yeni varsayılan listeye alınmadı.
+- `git diff --check`: geçti. Sunucu/hesap modeli değişmediği için diğer paketler yeniden çalıştırılmadı.
+
+Yalnız `vagontakip-test` yayımlandı. Gizli anahtar bağı işleminden sonra etkin test sürümü Cloudflare API üzerinden **%100 `448ec45f-84de-4ccb-a29a-126f82c7379b`** olarak doğrulandı. Uzak giriş ve yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle eşleşmesi kontrol edildi. Önceki personel/vagon/parça/demirbaş/günlük/bakım/faaliyet/eski bakım kayıt kimlikleri korundu; uzak doğrulama yeni kayıt oluşturmadı. Canlı sayfanın içerik özeti yayın öncesiyle aynı kaldı; `main` veya canlı Worker güncellenmedi.
