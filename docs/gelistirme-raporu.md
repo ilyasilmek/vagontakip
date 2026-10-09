@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `be4d7f7` |
+| Son özellik commit'i | `6096db4` | `96f6bb9` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -327,6 +327,8 @@ Eski 49 standart ve önceki bakım kayıtlarının adları/süreleri korunur; d�
 Doğrulama: TypeScript denetimi geçti; 71 Vitest testi geçti (katalog satırları, eski standartların korunması, süresiz işin verimlilik sonucuna etkisi dahil). Yerel test Worker’ında yedi Playwright akışı geçti (posta görünürlüğü, iş seçimi, kayıt, düzenleme, rapor ve Excel dahil). `vagontakip-test` Worker yayımlandı (`7b0715ac-d447-4a73-99ee-38bc5abffd9f`); uzaktan giriş, 52 aktif iş ve 11 kategori doğrulandı. Önceki test kayıt kimlikleri korundu, canlı sitenin sayfa özeti aynı kaldı. Canlı Worker ve `main` dalı değişmedi.
 
 ## 9 Ekim 2026 — Boş iş listesinin nedeni ve yönlendirme (test)
+
+Özellik commit’i: `96f6bb9`.
 
 Kullanıcı bakım formunda personel seçmesine rağmen iş adı ve kategori listesinin 0 kaldığını bildirdi. Kontrolde katalog seçiminin görevli personelden bağımsız olarak giriş yapan hesabın postasına bağlı olduğu ve test yönetici hesabının posta alanının boş olduğu görüldü. Test yönetici hesabı **Hava-Fren** postasına ayarlandı; önceki bakım kayıtlarına dokunulmadı.
 
