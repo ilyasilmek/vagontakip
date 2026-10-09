@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `7bfa358` |
+| Son özellik commit'i | `6096db4` | `ff18cda` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -259,6 +259,8 @@ Yalnız `vagontakip-test` yayımlandı. Gizli anahtar bağı işleminden sonra e
 
 
 ## 9 Ekim 2026 — Vagon ayrıntılarında yapılan bakım işleri
+
+Özellik ve doğrulama kaydı: `ff18cda` (`maintenance-test`).
 
 Genel Bakış veya Vagonlar listesinden açılan vagon ayrıntısına, yalnız o vagona ait bakım operasyonlarının listesi eklendi. Her kayıtta bakım başlangıcı/bitişi, vardiya amiri ve yapılan işlerin adı ile adedi görünür. Kayıtlar en yeni başlangıçtan eskiye sıralanır. Bakım Ekle ile kayıt tamamlanınca açık ayrıntı penceresindeki liste otomatik yenilenir. Kayıt yoksa veya bakım verisi yüklenemezse ayrı Türkçe durum mesajı gösterilir; yükleme hatasında yeniden deneme sunulur. Süre, personel ve bekleme ayrıntıları mevcut Bakım operasyonları ekranında kalır. Değişiklik yalnız bakım pilotu etkin olan test uygulamasında görünür; veri şeması ve hesaplamalar değişmedi.
 
