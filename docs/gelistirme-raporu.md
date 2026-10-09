@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `e11d926` |
+| Son özellik commit'i | `6096db4` | `bd5ef22` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -228,6 +228,8 @@ Doğrulama:
 Yalnız `vagontakip-test` yayımlandı. Gizli anahtar bağı işleminden sonra etkin test sürümü Cloudflare API üzerinden **%100 `448ec45f-84de-4ccb-a29a-126f82c7379b`** olarak doğrulandı. Uzak giriş ve yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle eşleşmesi kontrol edildi. Önceki personel/vagon/parça/demirbaş/günlük/bakım/faaliyet/eski bakım kayıt kimlikleri korundu; uzak doğrulama yeni kayıt oluşturmadı. Canlı sayfanın içerik özeti yayın öncesiyle aynı kaldı; `main` veya canlı Worker güncellenmedi.
 
 ## 9 Ekim 2026 — Bakım personelinin açılır listeden seçilmesi
+
+Özellik ve doğrulama kaydı: `bd5ef22` (`maintenance-test`).
 
 Kullanıcının istediği gibi bakım formunda görevli personel checkbox tablosu yerine açılır listeden seçilir. Seçilen her kişi altındaki **Seçili personel** alanına eklenir; × düğmesiyle kaldırılır ve yeniden seçilebilir hale gelir. Açılır liste Türkçe alfabetik sıradadır, seçili kişileri tekrar sunmaz; yeni seçime yalnız ilgili günlük vardiyada planlı aktif kişiler alınır. Seçili kişi sayısı ve hata açıklamaları korunur; mobil görünümde isimler satıra sığacak şekilde sarılır.
 
