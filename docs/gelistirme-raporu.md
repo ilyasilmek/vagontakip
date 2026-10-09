@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `ff18cda` |
+| Son özellik commit'i | `6096db4` | `9a29c61` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -270,6 +270,8 @@ Yalnız `vagontakip-test` yayımlandı. Cloudflare API üzerinden etkin sürüm 
 
 
 ## 9 Ekim 2026 — Koyu temada vagon ve bakım kartlarının okunabilirliği
+
+Özellik ve doğrulama kaydı: `9a29c61` (`maintenance-test`).
 
 Vagonlar listesindeki satır üzerine gelindiğinde açık tema arka planı kullanıldığı için koyu temada açık renkli yazılar okunmuyordu. Vagon ayrıntısına yeni eklenen **Yapılan bakımlar** kartı da açık renkli varsayılan yüzeyle aynı sorunu gösteriyordu. Koyu tema için vagon satırı hover rengi ve bakım kartının yüzeyi koyu renge bağlandı. Açık tema davranışı ve veri/hesaplama kodu değişmedi.
 
