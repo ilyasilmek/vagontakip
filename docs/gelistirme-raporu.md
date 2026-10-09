@@ -15,9 +15,11 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
 | Son özellik commit'i | `6096db4` | `a0cd1a8` |
 
+Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
+
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
-Son doğrulanan etkin test Worker yayın kimliği: `96037ab9-7f1e-4a69-bccb-76d76b04647f`. Önceki alan doğrulama yayını: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
+Son doğrulanan etkin test Worker yayın kimliği: `061faf71-1c14-44c1-8aa0-2b1fb103ec38`. Önceki 13 rakam yayını: `96037ab9-7f1e-4a69-bccb-76d76b04647f`. Önceki alan doğrulama yayını: `7670d044-683d-430a-b387-dd39e8f57fe4`. Önceki bakım v2 yayını: `dac7a96d-aeb4-437b-80c7-7c17f5d98305`. Önceki arka plan yayını: `1ba71760-265a-4d1a-bdcd-2ffd564e1f6f`. Önceki birlikte kayıt yayını: `2ddcf0ea-9962-4154-9437-370aba01a278`. Dokümantasyon commitleri uygulama yayını değildir; uygulama dağıtımları aşağıdaki değişiklik ve yayın kayıtlarında belirtilir.
 
 9 Ekim 2026'da yeni bakım/adam-saat şartnamesi alındı. [Şartname analizi](bakim-sartname-analizi.md) ve [kaynak metin](requirements/bakim-adam-saat-sartnamesi-2026-10-09.txt) repoya kaydedildi. Kullanıcının son cevabıyla iki vardiya ve yemek molaları kesinleşti; sürüm 2 geliştirmesi aşağıda kayıtlıdır. İlk pilotun hesap tablosu tarihsel sürüm 1 davranışını anlatır. Güncel yayın durumu sürüm 2 bölümünde belirtilir.
 
@@ -195,3 +197,16 @@ Doğrulama:
 - `git diff --check`: geçti. Bu değişiklikte sunucu hesapları değişmediğinden birim/API paketleri yeniden çalıştırılmadı.
 
 Yayın yalnız `vagontakip-test` Worker'ına yapıldı. Gizli anahtar bağı işleminden sonra etkin sürüm Cloudflare API üzerinden **%100 `96037ab9-7f1e-4a69-bccb-76d76b04647f`** olarak doğrulandı. Uzak testte giriş ve yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle birebir eşleşmesi kontrol edildi. Yayın öncesindeki personel (önceki 29 kişilik ekleme dahil), vagon, parça, demirbaş, günlük vardiya, operasyon, faaliyet ve eski bakım kayıtlarının kimlikleri korundu. Uzak doğrulama yeni kayıt oluşturmadı. Canlı sayfanın yayın öncesi/sonrası içerik özeti aynı kaldı; `main` dalına veya canlı Worker'a yayın yapılmadı.
+
+## 9 Ekim 2026 — Vagon numarasının son bölümünün tek haneye indirilmesi
+
+Kullanıcının düzeltmesiyle yeni/değiştirilen numaralarda biçim `.... .... ...-.`, yani **4 + 4 + 3 + 1 = 12 rakam** oldu. Ortak giriş bileşeninin rakam sınırı, son grubu, form deseni, örnek metni ve Türkçe uyarıları `1234 5678 901-2` biçimine güncellendi. Vagon, bakım ve parça ekranları aynı bileşeni kullanır. Eski kayıtları aynen koruma, sayısal klavye, otomatik boşluk/tire, başlangıç sıfırları ve ayırıcı yanından silme davranışları devam eder.
+
+Doğrulama:
+- `npm run build:test`: TypeScript, Vite ve PWA üretimi geçti.
+- İlk mobil bakım paketi: 3 geçti, 1 imleç testinin zamanlaması nedeniyle başarısız oldu. Test, otomatik imleç yerleştirmesi tamamlandıktan sonra konumunu ayarlayacak şekilde düzeltildi.
+- İlk tekrar: eski yerel Worker'ın ana sayfası 404 döndüğünden 4 senaryo başlangıçta başarısız oldu; API sağlığı çalışıyordu. Mevcut yerel veri silinmeden, ayrı yerel durum ve port ile yeni Worker başlatıldı; ana sayfa 200 doğrulandı.
+- Yeni yerel oturumda `E2E_MAINTENANCE=true E2E_BASE_URL=http://127.0.0.1:8790 npx playwright test tests/maintenance.spec.ts`: **4/4 geçti**. 12 rakamla kayıt, fazla rakamı sınırlandırma, harfli yapıştırma, sıfırlar, ayırıcıdan silme, eksik numara uyarısı ve birleşik bakım/vagon akışı doğrulandı.
+- `git diff --check`: geçti. Diğer paketler bu küçük arayüz düzeltmesinde yeniden çalıştırılmadı.
+
+İlk test sonucunu değerlendirmeden başlayan yayın yardımcı süreci sonlandırıldı; zaten başlamış alt süreç yalnız test Worker'ını yükledi. Son dört kontrol geçtikten sonra standart test yayın yardımcı süreci yeniden çalıştırılarak yayın tamamlandı. Canlı yayın izni kullanılmadı, `main` değişmedi. Cloudflare API üzerinden etkin sürüm **%100 `061faf71-1c14-44c1-8aa0-2b1fb103ec38`** olarak doğrulandı. Uzak giriş, yayımlanan JavaScript ile doğrulanan yerel derlemenin birebir eşleşmesi, önceki personel/vagon/parça/demirbaş/günlük/bakım/faaliyet/eski bakım kayıt kimliklerinin korunması ve canlı sayfanın içerik özetinin değişmediği kontrol edildi. Uzak doğrulama yeni kayıt oluşturmadı.
