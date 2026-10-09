@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `a0cd1a8` |
+| Son özellik commit'i | `6096db4` | `a64e357` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -199,6 +199,8 @@ Doğrulama:
 Yayın yalnız `vagontakip-test` Worker'ına yapıldı. Gizli anahtar bağı işleminden sonra etkin sürüm Cloudflare API üzerinden **%100 `96037ab9-7f1e-4a69-bccb-76d76b04647f`** olarak doğrulandı. Uzak testte giriş ve yayımlanan JavaScript dosyasının doğrulanan yerel derlemeyle birebir eşleşmesi kontrol edildi. Yayın öncesindeki personel (önceki 29 kişilik ekleme dahil), vagon, parça, demirbaş, günlük vardiya, operasyon, faaliyet ve eski bakım kayıtlarının kimlikleri korundu. Uzak doğrulama yeni kayıt oluşturmadı. Canlı sayfanın yayın öncesi/sonrası içerik özeti aynı kaldı; `main` dalına veya canlı Worker'a yayın yapılmadı.
 
 ## 9 Ekim 2026 — Vagon numarasının son bölümünün tek haneye indirilmesi
+
+Özellik ve doğrulama kaydı: `a64e357` (`maintenance-test`).
 
 Kullanıcının düzeltmesiyle yeni/değiştirilen numaralarda biçim `.... .... ...-.`, yani **4 + 4 + 3 + 1 = 12 rakam** oldu. Ortak giriş bileşeninin rakam sınırı, son grubu, form deseni, örnek metni ve Türkçe uyarıları `1234 5678 901-2` biçimine güncellendi. Vagon, bakım ve parça ekranları aynı bileşeni kullanır. Eski kayıtları aynen koruma, sayısal klavye, otomatik boşluk/tire, başlangıç sıfırları ve ayırıcı yanından silme davranışları devam eder.
 
