@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `59be8c2` |
+| Son özellik commit'i | `6096db4` | `a0cd1a8` |
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
@@ -180,6 +180,8 @@ Uzak API'den liste yeniden okunarak 29 ismin her birinin tek aktif kayıt olarak
 Bu işlem test verisi güncellemesidir; uygulama kodu değiştirilmedi, Worker yayını yapılmadı, canlı veriye dokunulmadı. Kod değişmediği için derleme ve test paketleri tekrar çalıştırılmadı; doğrulama gerçek test API'sindeki kayıt sonrası okuma ve koruma kontrolleridir. Personel verileri ayrı Cloudflare test deposunda kalır; yalnız bu değişiklik raporu GitHub'a kaydedilir.
 
 ## 9 Ekim 2026 — Vagon numarası için rakam ve biçim kontrolü
+
+Özellik ve doğrulama kaydı: `a0cd1a8` (`maintenance-test`).
 
 Kullanıcının belirttiği `.... .... ...-..` biçimi **4 + 4 + 3 + 2 = 13 rakam** olarak uygulandı. Vagon, bakım ve parça girişindeki vagon numarası alanları ortak bileşene bağlandı. Yazma veya yapıştırmada yalnız `0–9` rakamları alınır; boşluklar ve tire otomatik eklenir. Örnek: `1234567890123` → `1234 5678 901-23`. Baştaki sıfırlar korunur, 13 rakamı aşan giriş alınmaz ve mobil sayısal klavye istenir. Boşluk/tire yanından geri silme ve ileri silme, bitişik rakamı kaldırarak biçimlendirmede takılmayı önler; düzenleme sırasında imleç rakam konumunu korur.
 
