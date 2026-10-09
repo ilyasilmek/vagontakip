@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `0deb110` |
+| Son özellik commit'i | `6096db4` | `8eccc83` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -343,6 +343,8 @@ Kullanıcının isteğiyle, iş kataloğu boş olduğunda gösterilen uzun posta
 Doğrulama: TypeScript denetimi ve test derlemesi geçti; posta görünürlüğünü ve uyarıyı denetleyen Playwright akışı geçti. `vagontakip-test` Worker yayımlandı (`65dc0336-4370-4206-bd39-ccab7d3a9506`). Uzaktan giriş ve yayınlanan dosya doğrulandı; önceki test kayıt kimlikleri korundu ve canlı sayfanın özeti değişmedi. İlk dosya kontrolü geçici önbellek yanıtı nedeniyle başarısız oldu, hemen ardından tekrarlandığında doğrulandı. Canlı site değişmedi.
 
 ## 9 Ekim 2026 — Fren işleri kataloğunun tamamına erişim (test)
+
+Özellik commit’i: `8eccc83`.
 
 Kullanıcı 2 kategori ve 12 iş gördüğünü bildirdi. Sunucu kontrolünde Fren Postası listesinin **11 kategori ve 52 iş satırının tamamının aktif** olduğu doğrulandı. Mobil form kontrolünde kategori menüsünde 11 kategori bulundu; “Kol Mekanizmaları İşlemleri” seçimi yalnız bu kategorinin 12 işini gösteriyordu. İşler eksik yüklenmemişti; seçili kategori filtresi ve varsayılan kapalı görünüm tüm listeye erişimi belirsizleştiriyordu.
 
