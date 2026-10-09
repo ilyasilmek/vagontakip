@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ACTIVITY_KINDS, ledger, milliseconds, minutes, netMinutes, subtract, turkeyDate, type WorkshopData, type WorkshopOperation, type Standard } from '../shared/workshop';
+import { ACTIVITY_KINDS, ACTIVITY_LABELS, ledger, milliseconds, minutes, netMinutes, subtract, turkeyDate, type LedgerEntry, type WorkshopData, type WorkshopOperation, type Standard } from '../shared/workshop';
 import { ApiError } from './errors';
 
 const id=z.string().min(1).max(100),text=z.string().trim().max(1000),instant=z.string().datetime({offset:true}).transform(value=>new Date(value).toISOString());
@@ -29,6 +29,33 @@ function covered(i:{startedAt:string;finishedAt:string},parts:{startedAt:string;
 function conflict(rows:{personId:string;startedAt:string;finishedAt:string}[],label:string){
  const grouped=new Map<string,typeof rows>();for(const row of rows){const values=grouped.get(row.personId)??[];values.push(row);grouped.set(row.personId,values);}
  for(const entries of grouped.values()){entries.sort((a,b)=>Date.parse(a.startedAt)-Date.parse(b.startedAt));let end=-Infinity;for(const row of entries){requireRule(Date.parse(row.startedAt)>=end,label);end=Math.max(end,Date.parse(row.finishedAt));}}
+}
+const conflictTime=new Intl.DateTimeFormat('tr-TR',{timeZone:'Europe/Istanbul',dateStyle:'short',timeStyle:'short'});
+function ledgerConflictMessage(data:WorkshopData):string|null {
+ const grouped=new Map<string,LedgerEntry[]>();
+ for(const entry of ledger(data)){const rows=grouped.get(entry.personId)??[];rows.push(entry);grouped.set(entry.personId,rows);}
+ const overlaps:{personId:string;first:LedgerEntry;second:LedgerEntry;startedAt:string;finishedAt:string}[]=[];
+ for(const [personId,rows] of grouped){
+  rows.sort((a,b)=>a.startedAt.localeCompare(b.startedAt));
+  for(let i=0;i<rows.length;i++)for(let j=i+1;j<rows.length&&rows[j].startedAt<rows[i].finishedAt;j++){
+   overlaps.push({personId,first:rows[i],second:rows[j],startedAt:rows[j].startedAt,finishedAt:rows[i].finishedAt<rows[j].finishedAt?rows[i].finishedAt:rows[j].finishedAt});
+  }
+ }
+ if(!overlaps.length)return null;
+ const selected=overlaps[0];
+ const sameSource=(entry:LedgerEntry,other:LedgerEntry)=>entry.kind===other.kind&&entry.sourceId===other.sourceId;
+ const related=overlaps.filter(row=>(sameSource(row.first,selected.first)&&sameSource(row.second,selected.second))||(sameSource(row.first,selected.second)&&sameSource(row.second,selected.first)));
+ const names=[...new Set(related.map(row=>data.people.find(person=>person.id===row.personId)?.name??'Bilinmeyen personel'))];
+ const describe=(entry:LedgerEntry)=>{
+  if(entry.kind==='maintenance'||entry.kind==='waiting'){
+   const wagon=data.operations.find(operation=>operation.id===entry.sourceId)?.wagonNumber??'bilinmeyen';
+   return `${wagon} numaralı vagonun ${entry.kind==='maintenance'?'bakımı':'bakım içi beklemesi'}`;
+  }
+  return `${ACTIVITY_LABELS[entry.kind]} kaydı`;
+ };
+ const peopleText=names.slice(0,5).join(', ')+(names.length>5?` ve ${names.length-5} kişi daha`:'');
+ const timeText=`${conflictTime.format(new Date(selected.startedAt))} – ${conflictTime.format(new Date(selected.finishedAt))}`;
+ return `${peopleText}: ${timeText} aralığında ${describe(selected.first)} ile ${describe(selected.second)} çakışıyor. Önce ilgili kayıtların gerçek bitiş saatlerini doğrulayın; ardından personel veya saat aralığını düzeltin.${overlaps.length>related.length?' Başka çakışmalar da olabilir.':''}`;
 }
 export function validateWorkshop(data:WorkshopData):void {
  const parsed=workshopSchema.safeParse(data);requireRule(parsed.success,parsed.success?'':parsed.error.issues[0]?.message??'Atölye kayıtları geçersiz.');
@@ -67,7 +94,7 @@ export function validateWorkshop(data:WorkshopData):void {
   if(a.kind==='no-wagon')requireRule(!!a.reason,'Vagonsuzluk nedeni girilmeli.');
   for(const personId of a.personIds){requireRule(people.has(personId),'Personel bulunamadı.');requireRule(covered(a,day.attendance.filter(p=>p.personId===personId)),'Faaliyet personeli ilgili saatlerde vardiyada planlı olmalı.');}
  }
- conflict(ledger(data),'Aynı personelin aynı saatleri bakım, bekleme, vagonsuzluk veya başka faaliyette çakışıyor.');
+ const overlapMessage=ledgerConflictMessage(data);requireRule(!overlapMessage,overlapMessage??'Aynı personelin aynı saatleri çakışıyor.');
 }
 export function resolveStandardLines(input:{jobTypeId:number;quantity:number}[],standards:Standard[],at:string,existing?:WorkshopOperation) {
  return input.map(j=>{
