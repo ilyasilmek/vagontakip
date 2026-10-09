@@ -7,7 +7,7 @@ import { DatabaseEngine, assertActor, audit, type DatabaseEnvironment } from './
 import { ApiError, errorResponse } from './errors';
 import { WorkshopSqlStorage } from './workshop-storage';
 import { workshopRequest } from './workshop-routes';
-import { createUserSchema, fieldSchemas, parseInput, passwordSchema, postSchema, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
+import { createUserSchema, fieldSchemas, normalizeUsername, parseInput, passwordSchema, postSchema, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
 
 export interface Env extends DatabaseEnvironment {
   DB: DurableObjectNamespace;
@@ -164,8 +164,10 @@ export class VagonDatabase {
       }
 
       if (pathname === '/api/login' && method === 'POST') {
-        const input = parseInput(z.object({ username: z.string().trim().min(1).max(64).transform(v => v.toLowerCase()), password: z.string().min(1).max(256) }).strict(), await body(request));
-        const loginKeys = await this.limitLogin(request, input.username);
+        const input = parseInput(z.object({ username: z.string().trim().min(1).max(64), password: z.string().min(1).max(256) }).strict(), await body(request));
+        const legacyUsername = input.username.toLowerCase();
+        const username = normalizeUsername(input.username);
+        const loginKeys = await this.limitLogin(request, legacyUsername);
         let database: DatabaseDocument;
         try { database = await this.engine.load(); }
         catch (error) {
@@ -174,7 +176,7 @@ export class VagonDatabase {
           await this.successfulLogin(loginKeys);
           throw error;
         }
-        const user = database.users.find(u => u.username === input.username);
+        const user = database.users.find(u => u.username === legacyUsername) ?? database.users.find(u => u.username === username);
         // Unknown accounts take the same PBKDF2 work as existing accounts.
         const valid = await verifyPassword(input.password, user?.password ?? { algorithm: 'PBKDF2-SHA256', iterations: PASSWORD_ITERATIONS, salt: 'AAAAAAAAAAAAAAAAAAAAAA==', hash: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' });
         if (!valid || !user?.active) throw new ApiError(401, 'INVALID_CREDENTIALS', 'Kullanıcı adı veya şifre yanlış.');

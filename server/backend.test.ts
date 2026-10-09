@@ -120,6 +120,25 @@ describe('authenticated shared records', () => {
     expect((await call(object, '/api/admin/audit', 'GET', undefined, user)).status).toBe(403);
   });
 
+  it('accepts Turkish letters in usernames and preserves existing ASCII logins', async () => {
+    const object = makeObject();
+    const admin = await login(object);
+    const created = await call(object, '/api/admin/users', 'POST', { username: 'Kaynakçı', displayName: 'Kaynakçı', password: USER_PASSWORD, role: 'user' }, admin);
+    expect(created.status).toBe(201);
+    const { user } = await created.json() as { user: { username: string; displayName: string } };
+    expect(user).toMatchObject({ username: 'kaynakçı', displayName: 'Kaynakçı' });
+    await login(object, 'KAYNAKÇI', USER_PASSWORD);
+    expect((await call(object, '/api/admin/users', 'POST', { username: 'KAYNAKÇI', displayName: 'Tekrar', password: USER_PASSWORD, role: 'user' }, admin)).status).toBe(409);
+    await login(object, 'ADMIN', ADMIN_PASSWORD);
+    const dotted = await call(object, '/api/admin/users', 'POST', { username: 'İşçi_01', displayName: 'İşçi', password: USER_PASSWORD, role: 'user' }, admin);
+    expect(dotted.status).toBe(201);
+    await login(object, 'İŞÇİ_01', USER_PASSWORD);
+    expect((await call(object, '/api/admin/users', 'POST', { username: 'Admın', displayName: 'Ayrı hesap', password: USER_PASSWORD, role: 'user' }, admin)).status).toBe(201);
+    const existingAscii = await call(object, '/api/login', 'POST', { username: 'ADMIN', password: ADMIN_PASSWORD });
+    expect(existingAscii.status).toBe(200);
+    expect(((await existingAscii.json()) as { user: { username: string } }).user.username).toBe('admin');
+  });
+
   it('serializes concurrent edits so exactly one writer can use a revision', async () => {
     const object = makeObject();
     const admin = await login(object);

@@ -66,7 +66,8 @@ export function validateWagonWorkflow(candidate: Pick<Wagon, 'entryDate' | 'chan
   if (candidate.completedDate && candidate.status !== 'Tamamlandı') throw new ApiError(400, 'INVALID_WAGON_DATES', 'Bitiş tarihi girilen vagonun durumu Tamamlandı olmalı.');
 }
 
-export const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9._-]{3,64}$/, 'Kullanıcı adı 3–64 harf, rakam, nokta, tire veya alt çizgiden oluşmalı.');
+export const normalizeUsername = (value: string): string => value.trim().normalize('NFC').toLocaleLowerCase('tr-TR');
+export const usernameSchema = z.string().transform(normalizeUsername).pipe(z.string().regex(/^[a-z0-9çğıöşü._-]{3,64}$/u, 'Kullanıcı adı 3–64 Türkçe veya İngilizce harf, rakam, nokta, tire ya da alt çizgiden oluşmalı.'));
 export const passwordSchema = z.string().min(8, 'Şifre en az 8 karakter olmalı.').max(256);
 export const postSchema = z.union([z.enum(POSTS), z.literal('')]);
 export const createUserSchema = z.object({
@@ -112,7 +113,7 @@ export function assertDatabase(database: unknown): asserts database is DatabaseD
   for (const records of [value.wagons, value.parts, value.inventory, value.users, value.maintenanceOperations ?? []]) {
     if (new Set(records.map(r => r.id)).size !== records.length) throw new ApiError(503, 'INVALID_DATABASE', 'Veritabanında yinelenen kimlikler var.');
   }
-  if (new Set(value.users.map(u => u.username.toLowerCase())).size !== value.users.length) throw new ApiError(503, 'INVALID_DATABASE', 'Veritabanında yinelenen kullanıcılar var.');
-  if (value.users.some(user => user.username !== user.username.toLowerCase())) throw new ApiError(503, 'INVALID_DATABASE', 'Kullanıcı adları küçük harf olmalı.');
+  if (new Set(value.users.map(u => normalizeUsername(u.username))).size !== value.users.length) throw new ApiError(503, 'INVALID_DATABASE', 'Veritabanında yinelenen kullanıcılar var.');
+  if (value.users.some(user => user.username !== normalizeUsername(user.username))) throw new ApiError(503, 'INVALID_DATABASE', 'Kullanıcı adları küçük harf olmalı.');
   if (value.users.length && !value.users.some(user => user.active && user.role === 'admin')) throw new ApiError(503, 'INVALID_DATABASE', 'Veritabanında en az bir aktif yönetici olmalı.');
 }
