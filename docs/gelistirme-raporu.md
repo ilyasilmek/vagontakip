@@ -463,3 +463,9 @@ Doğrulama: `npm run build` ve `git diff --check` geçti. Bu görsel ve yerel te
 ## 11 Ekim 2026 — Pastel tema denemesinden geri dönüş (test)
 
 Kullanıcı pastel tasarımı beğenmediğini belirtti. Pastel seçeneği ve ona ait renk kuralları kaldırıldı; önceki Açık, Koyu ve Sistem temaları geri getirildi. Cihazında Pastel seçili kalan kişiler için mevcut tema okuma davranışı Sistem seçeneğine döner. Bakım verileri ve diğer uygulama özellikleri değişmedi. Kullanıcının yeni renk düzeni için gönderdiği yerel görsel bağlantısı çalışma ortamından açılamadığından, görsel doğrudan yüklenene kadar yeni tema uygulanmadı. Yalnız test ortamı hedeflenir.
+
+Geri dönüş commit’i `2f554df`, yalnız `vagontakip-test` Worker sürümü `11e5b47c-c22b-4cd0-8477-b98fc06b12fd` olarak yayımlandı. `npm run build` ve `git diff --check` geçti. Uzak kontrol test girişinin ve önceki kayıt kimliklerinin korunduğunu, canlı sayfanın değişmediğini doğruladı.
+
+## 11 Ekim 2026 — Görsel referanslı modern turkuaz tema (test)
+
+Kullanıcı görseli doğrudan gönderdi. Görseldeki antrasit yan menü, turkuaz etkin menü ve eylem vurgusu, açık gri zemin ve beyaz kartlar mevcut uygulama ekranlarına tema olarak uyarlandı. Örnek görseldeki harita ve tren verileri uygulamaya taşınmadı. **Modern · Turkuaz** seçimi Hesabım → Tema menüsüne eklendi; Açık, Koyu ve Sistem seçenekleri korunur. Tema cihazda saklanır, verileri etkilemez. Yalnız test ortamı hedeflenir.

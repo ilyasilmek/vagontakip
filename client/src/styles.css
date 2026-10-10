@@ -156,3 +156,37 @@ button:active:not(:disabled) {transform:translateY(1px)}
 
 .job-category {margin:0 0 10px;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:color-mix(in srgb,var(--ink) 2%,transparent)}.job-category>summary {display:flex;align-items:center;gap:10px;min-height:52px;padding:11px 15px;list-style:none;cursor:pointer;background:color-mix(in srgb,var(--ink) 7%,transparent);font-weight:600;font-size:14px}.job-category>summary::-webkit-details-marker {display:none}.job-category>summary::before {content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform 160ms ease;flex:none}.job-category[open]>summary::before {transform:rotate(45deg)}.job-category>summary:focus-visible {outline:3px solid var(--accent);outline-offset:-3px}.job-category-count {margin-left:auto;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap}.job-category .job-choice:first-of-type {border-top:1px solid var(--border)}
 :root[data-theme=dark] .job-category>summary {background:#294252}
+
+/* Optional dashboard palette inspired by the supplied reference image. */
+:root[data-theme=modern] {--ink:#243442;--muted:#526572;--nav:#242E39;--teal:#168E95;--border:#D5DFE3;--accent:#199BA1;color:#243442;background:#F3F6F7}
+:root[data-theme=modern] .app-shell {background:#F3F6F7}
+:root[data-theme=modern] :is(.sidebar,.mobile-bottom,.login-masthead) {background:#242E39;color:#F4F8F9}
+:root[data-theme=modern] .sidebar {background:linear-gradient(150deg,#222C37,#2B3945)}
+:root[data-theme=modern] :is(.nav-button,.mobile-nav-button) {color:#E6F0F2}
+:root[data-theme=modern] :is(.nav-button.active,.mobile-nav-button.active) {background:#168E95;color:white;border-color:#42C6C4;border-radius:9px}
+:root[data-theme=modern] .topbar {background:#FFFFFF;border-bottom-color:#DCE5E8}
+:root[data-theme=modern] .content {color:#243442}
+:root[data-theme=modern] :is(.panel,.record-card,.metrics,.maintenance-metrics>*,.dashboard-columns>section,.account-panel) {background:#FFFFFF;border:1px solid #DCE5E8;border-radius:12px;box-shadow:0 2px 9px #2434420B}
+:root[data-theme=modern] :is(.record-card,.account-panel) {padding:20px;margin-bottom:12px}
+:root[data-theme=modern] .metrics {padding:8px}
+:root[data-theme=modern] .metric {border-color:#DCE5E8}
+:root[data-theme=modern] :is(.wagon-table th,.job-category>summary) {background:#E8F4F4;color:#24464A}
+:root[data-theme=modern] .wagon-table td {border-color:#DCE5E8}
+:root[data-theme=modern] :is(.table-row:hover,.record-card:hover) {background:#F1FAF9}
+:root[data-theme=modern] :is(input,select,textarea) {background:#FFFFFF;border-color:#B7C9CF;color:#243442;border-radius:8px}
+:root[data-theme=modern] :is(input,textarea)::placeholder {color:#647881}
+:root[data-theme=modern] :is(button,a,[role=button]):focus-visible {outline-color:#168E95}
+:root[data-theme=modern] :is(input,select,textarea):focus {outline-color:#168E95}
+:root[data-theme=modern] .primary {background:#168E95;color:#FFFFFF;border:1px solid #147A80;box-shadow:0 2px 5px #168E9529}
+:root[data-theme=modern] .primary:hover:not(:disabled) {background:#117A82}
+:root[data-theme=modern] .secondary {background:#FFFFFF;border-color:#B7C9CF;color:#243442}
+:root[data-theme=modern] .secondary:hover:not(:disabled) {background:#E8F4F4}
+:root[data-theme=modern] .job-view-controls .active {background:#168E95;color:#FFFFFF;border-color:#147A80}
+:root[data-theme=modern] :is(.modal,.modal-footer,.login-shell) {background:#F3F6F7;color:#243442}
+:root[data-theme=modern] .modal {border-color:#D5DFE3;border-radius:12px}
+:root[data-theme=modern] .modal-header {background:#FFFFFF;border-color:#D5DFE3;color:#243442}
+:root[data-theme=modern] .gbz-plate {background:#E8F4F4;color:#176F75;border-color:#99C9CA}
+:root[data-theme=modern] .avatar {background:#DFF4F2;color:#176F75;border-color:#A3D1D0}
+:root[data-theme=modern] .toast {background:#242E39;color:#FFFFFF}
+:root[data-theme=modern] .test-watermark img {opacity:.025}
+@media(max-width:700px){:root[data-theme=modern] .topbar {background:#242E39;color:#FFFFFF}:root[data-theme=modern] .modal {border-radius:0}:root[data-theme=modern] .modal-header {background:#242E39;color:#FFFFFF}:root[data-theme=modern] .modal-footer {background:#F3F6F7}:root[data-theme=modern] .record-card {padding:18px}}
