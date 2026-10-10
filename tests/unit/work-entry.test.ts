@@ -8,3 +8,8 @@ it('iş dakikalarını ekip sayısıyla A/S hesaplar; bakım tarih aralığını
  expect(result.totalLaborHours).toBe(2);
  expect(result.heavyLaborHours).toBe(1);
 });
+
+it('fren tecrübesi için girilen süre A/S hesabına katılır, ek iş toplamına katılmaz',()=>{
+ const entry:WorkEntry={id:'brake',wagonNumber:'3175 4568 337-5',actorId:'a',actorName:'A',post:'Hava&Fren',startedAt:'2026-10-10T08:00:00.000Z',finishedAt:'2026-10-10T10:00:00.000Z',crew:[{id:'a',name:'A'},{id:'b',name:'B'}],jobs:[{id:1004,name:'Fren tecrübesi yapıldı',category:'Genel İşlemler ve Testler',quantity:1,brakeMode:'G',durationMinutes:18,standardMinutes:10}],notes:'',createdAt:'2026-10-10T10:00:00.000Z'};
+ const hours=workEntryHours(entry);expect(hours.totalLaborHours).toBeCloseTo(0.6);expect(hours.customLaborHours).toBe(0);
+});

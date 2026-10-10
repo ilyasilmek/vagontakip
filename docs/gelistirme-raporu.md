@@ -429,3 +429,9 @@ Doğrulama: `npm run build`, `npm test` (**82/82**) ve `git diff --check` geçti
 G(yük)/P(yolcu) seçimi, Fren tecrübesi iş satırının içine, adet kontrolünün yerleştiği sağ bölüme taşındı. Dar ekranda seçenekler iş adının altında aynı satır kartının içinde kalır. Ayrı yerde duran seçim kaldırıldı; seçimin zorunluluğu ve kayıt biçimi değişmedi. Yalnız test ortamı hedeflenir.
 
 Doğrulama: `npm run build` ve `git diff --check` geçti. Bu yerleşim değişikliği için yeni otomatik test yazılmadı. Özellik commit’i `82a8e8f`. Yalnız `vagontakip-test` Worker sürümü `3f69b8c5-914b-4170-b1fe-b002ce5a2576` yayımlandı. Uzak kontrol test girişini, önceki kayıt kimliklerini ve canlı sayfanın değişmediğini doğruladı. Chromium 390×844 görünümünde iki G/P seçeneğinin Fren tecrübesi iş satırının içinde göründüğü ve yatay taşma olmadığı kontrol edildi.
+
+## 10 Ekim 2026 — G/P fren tecrübesine süre girişi (test)
+
+Fren tecrübesi iş satırında G(yük) veya P(yolcu) seçildiğinde, seçimin yanında **Süre (dk)** alanı açılır. Pozitif tam dakika zorunludur; tür değiştirilirse veya iş kaldırılırsa eski süre temizlenir. Sade saha iş formu ve yönetici Planlama formu aynı davranışı kullanır. Sunucu boş/geçersiz süreyi ve fren tecrübesi dışındaki işe eklenen süreyi reddeder. Dakika, G/P türüyle birlikte iş satırında saklanır; vagon bakım geçmişi, yönetici detay kartı ve Excel'de görünür. Saha iş girişinde girilen dakika seçilen ekip sayısıyla A/S hesabına katılır. Planlama kaydında girilen fiilî test dakikası saklanır, geçmiş standart iş dakikası ve standart iş yükü formülü değiştirilmez. Önceki G/P kayıtları korunur; eski bir operasyon yeniden düzenlenirse süre seçilmesi istenir.
+
+Doğrulama: `npm run build`, `npm test` (**83/83**) ve `git diff --check` geçti. API testi saha ve Planlama kayıtlarında zorunlu süreyi, saklamayı ve vagon geçmişini; birim testi saha A/S hesabını doğruladı. Yayın ve uzak kontrol sonucu bu bölümde güncellenecek.

@@ -150,3 +150,6 @@ button:active:not(:disabled) {transform:translateY(1px)}
 
 .job-choice .brake-mode-options {grid-column:2;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px 12px;width:auto;min-width:0;border:0;padding:0;margin:0}.job-choice .brake-mode-options legend {font-size:11px;color:var(--muted);padding:0 0 4px}.job-choice .brake-mode-options label {flex-direction:row;white-space:nowrap;gap:5px;font-size:13px}.job-choice .brake-mode-options input[type=radio] {min-height:20px;width:20px;height:20px;padding:0}.job-choice:has(.brake-mode-options) {grid-template-columns:minmax(0,1fr) auto}
 @media(max-width:700px){.job-choice .brake-mode-options {grid-column:1;justify-content:flex-start;padding:2px 0 6px 34px}.job-choice:has(.brake-mode-options) {grid-template-columns:minmax(0,1fr)}}
+
+.job-choice .brake-mode-choice {display:flex;align-items:center;gap:8px;min-height:40px}.job-choice .brake-duration {display:flex;flex-direction:row;align-items:center;gap:5px;white-space:nowrap;font-size:12px}.job-choice .brake-duration input {width:68px;min-width:68px;min-height:40px;height:40px;padding:6px 8px;font-size:14px}.job-choice .brake-mode-options {gap:4px 10px}
+@media(max-width:700px){.job-choice .brake-mode-options {justify-content:flex-start}.job-choice .brake-mode-choice {flex-wrap:wrap}}
