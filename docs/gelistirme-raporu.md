@@ -15,7 +15,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
 | Son özellik commit'i | `6096db4` | `58cfe12` |
 
-Güncel vagon numarası giriş biçimi **`1234 5678 901-2` (12 rakam, son bölüm tek hane)**. Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
+Güncel vagon numarası giriş biçimi **`1234 5678 901-2` veya `1234 567 901-2`** (orta bölüm üç ya da dört rakam, son bölüm tek hane). Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
@@ -23,7 +23,7 @@ Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon
 
 Normal kullanıcının Bakım ekranı ve Vagonlar → Bakım ekle penceresi sadeleştirildi. Kullanıcı vagon numarasını, başlangıç/bitiş tarih ve saatlerini, yalnız hesabının postasına tanımlı yapılan işleri ve isteğe bağlı açıklamayı girer. Personel/vardiya seçimi, bekleme ve A/S hesapları kullanıcı formunda gösterilmez. İşi yapan kişinin adı istemciden alınmaz; sunucu oturumundaki hesap adından kaydedilir. Yeni vagonla iş birlikte kaydedilebilir.
 
-Yönetici mevcut ayrıntılı bakım operasyonu formunu ve raporlarını kullanır. Kullanıcıların iş girişleri yönetici Bakım ekranında vagon, işi yapan hesap, saat ve iş kalemleriyle listelenir; vagon ayrıntısında geçmiş işleri yapan adlar yalnız yöneticiye gönderilir. Kullanıcıların iş girişleri, personel ve vardiya katılımı doğrulanmadan fiilî A/S hesabına katılmaz; kayıtlar yöneticiye görünür durumda kalır. Bu ilk adımda kullanıcı iş girişini yönetici operasyonuna dönüştüren ayrı bir onay iş akışı bulunmuyor.
+Yönetici mevcut ayrıntılı bakım operasyonu formunu ve raporlarını kullanır. Kullanıcıların iş girişleri yönetici Bakım ekranında vagon, işi yapan hesap, saat ve iş kalemleriyle listelenir; vagon ayrıntısında geçmiş işleri yapan adlar yalnız yöneticiye gönderilir. Yeni saha iş girişlerinin bilinen iş süreleri seçili ekip sayısıyla çarpılarak ayrıca A/S olarak gösterilir. Süresiz katalog işi varsa toplam A/S eksik işaretlenir. Bu girişler henüz ana atölye raporu hesabına katılmaz; yöneticiye ayrı listede görünür. Kullanıcı iş girişini yönetici operasyonuna dönüştüren ayrı bir onay iş akışı bulunmuyor.
 
 Sunucu, kullanıcıların personel ve vardiya içeren tam atölye verisini ya da yönetici operasyonu oluşturma/düzenleme uçlarını kullanmasını engeller. Vagon bakım özeti kullanıcıya iş ve saatleri gösterir, kişi adlarını sunucu tarafında çıkarır. Eski operasyonlar ve ayrı test verisi korunur.
 
@@ -375,3 +375,15 @@ Düzenleme formunda bu ayrım artık “52 yeni + 12 geçmiş iş” olarak yaz�
 Yönetim → Kullanıcı oluşturma ekranında “Kaynakçı” gibi Türkçe harf içeren kullanıcı adları sunucu kuralı yüzünden reddediliyordu. Kullanıcı adı kuralı Türkçe ve İngilizce harfleri, rakamı, nokta, tireyi ve alt çizgiyi kabul edecek şekilde güncellendi. Kullanıcı adı Türkçe büyük/küçük harf kurallarıyla normalize edilir. Girişte mevcut ASCII hesapların eski büyük harfli kullanımına öncelik verilerek uyumluluk korundu. Ad soyad alanı zaten Türkçe karakterleri kabul ediyordu; formda kullanıcı adı için kısa bir açıklama eklendi.
 
 Doğrulama: TypeScript ve test derlemesi geçti; 72 Vitest testi geçti. Testler Türkçe ad oluşturmayı, büyük harfli girişi, tekrar eden kullanıcı adını reddetmeyi ve eski ASCII hesaba büyük harfle girişi kapsıyor. Yerel Cloudflare Worker'da Türkçe kullanıcı oluşturma, büyük harfle giriş ve test hesabını silme başarılı oldu. `vagontakip-test` Worker yayımlandı (`e0abf178-772c-46f2-aeba-493cf63a4a14`). Uzaktan test girişi ve yayınlanan dosya doğrulandı; önceki test kayıt kimlikleri korundu, canlı sayfanın özeti değişmedi. Canlı uygulama değişmedi.
+
+## 10 Ekim 2026 — Vagon tipi ve sade saha iş akışı (test)
+
+Özellik commit’i: yayın sonrası eklenecek. Hedef yalnız `maintenance-test` ve `vagontakip-test`; kullanıcı onayı olmadan canlıya aktarılmaz.
+
+Vagon tipi seçimi giriş formundan kaldırıldı. Tip, girilen numaranın ikinci bloğuna göre sunucuda belirlenir; eşleşme kaynağı [kullanıcının verdiği tablo](requirements/vagon-tipi-kodlari-2026-10-10.txt) ve kod karşılığıdır. Kullanıcının özel kararı uyarınca `4568` kodu **Sgss-w** olur. Bilinmeyen kodda tip boş kalır. Numara girişinde orta blok artık üç veya dört rakam olabilir. Tamamlandı durumu ilk seçildiğinde İstanbul'un o günkü tarihi otomatik atanır; önceden tamamlanan kaydın tarihi korunur. Önceki kayıtların tipleri topluca değiştirilmedi.
+
+Saha bakım girişinde kategori filtresi çıkarıldı; iş adına göre arama ve tümünü/seçilenleri gösterme kaldı. Adet alanı yalnız adı `(adet)` ile biten işler içindir. Mevcut Hava-Fren iş adlarında bu işaret bulunmadığından şimdiki listede işler bir kez işaretlenir. Hem kullanıcı hem yönetici, **Ek iş ekle** ile serbest iş adı ve dakika, **Ağır bakım** ile kendi postasının kataloğundan seçilen iş için ayrı ek dakika girebilir. Bunlar ayrı iş satırları olarak saklanır. Başlangıç/bitiş tarih ve saati formda kalır ve bakım zaman aralığını gösterir; tek başına A/S üretmez. Bilinen iş dakikaları × seçilen kişi sayısı / 60 ile A/S hesaplanır. Süresi belirlenmemiş katalog işinde toplam A/S kesin sayı olarak sunulmaz; bilinen alt toplam ve eksik süre uyarısı görünür.
+
+Birlikte çalışanlar seçimi aynı postaya atanmış aktif hesapları **ve hesap açılmamış aktif personel kayıtlarını** kapsar. Kaydı yapan kişi oturumundan otomatik eklenir. Yöneticinin Personel ekranından kişilerin postasını bir kez belirlemesi gerekir; posta bilinmeyen personel, yanlış ekibe yazılmaması için seçimde gösterilmez. Sunucu başka postadan kişiyi ve başka postanın işini reddeder. Yönetici eski teknik operasyon formuna ayrıca erişebilir. Saha işleri yönetici raporunda ve ayrı Excel sayfasında görünür; ana atölye formül 2 toplamına otomatik karıştırılmaz.
+
+Doğrulama: `npm run build` geçti; `npm test` ile **78/78 birim ve API testi geçti**. Eşleştirme, üç/dört haneli orta blok, otomatik tarih, serbest ve ağır bakım iş dakikaları, aynı posta ve hesap açılmamış personel seçimi API testlerinde kapsandı. Yerel Worker tarayıcı testi çalışma zamanı kilitlenmesi nedeniyle tamamlanamadı. Test dağıtım sonucu yayın sonrasında eklenecek.

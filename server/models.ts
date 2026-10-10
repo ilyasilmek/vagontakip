@@ -1,11 +1,13 @@
 import { z } from 'zod';
 import type { JobType, MaintenanceOperation } from '../shared/maintenance';
 import { jobTypeSchema, maintenanceRecordSchema } from './maintenance';
-import { WAGON_STATUSES, WAGON_TYPES, POSTS, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
+import { WAGON_STATUSES, POSTS, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
 import type { PasswordHash } from './crypto';
 import { ApiError } from './errors';
 import type { WorkshopData } from '../shared/workshop';
+import type { WorkEntry } from '../shared/work-entry';
 import { validateWorkshop, workshopSchema } from './workshop';
+import { wagonTypeFromNumber } from '../shared/wagon-types';
 
 export interface StoredUser extends SafeUser {
   password: PasswordHash;
@@ -27,7 +29,7 @@ export interface DatabaseDocument {
   workEntries?: WorkEntry[];
 }
 
-export interface WorkEntry { id:string; wagonNumber:string; actorId:string; actorName:string; post:string; startedAt:string; finishedAt:string; jobs:{id:number;name:string;category:string;quantity:number}[]; notes:string; createdAt:string; }
+export type { WorkEntry } from '../shared/work-entry';
 
 const shortText = z.string().trim().max(200);
 const requiredText = shortText.min(1);
@@ -36,7 +38,7 @@ const quantity = z.number().int().min(0).max(1_000_000);
 
 export const wagonFields = z.object({
   number: requiredText,
-  wagonType: z.union([z.enum(WAGON_TYPES), z.literal('')]).optional(),
+  wagonType: z.string().max(100).optional(),
   entryDate: date,
   channelDate: date,
   completedDate: date,
@@ -56,6 +58,14 @@ export const partFields = z.object({
 }).strict();
 export const inventoryFields = z.object({ type: requiredText, brand: shortText, quantity, serialNumber: shortText }).strict();
 export const fieldSchemas = { wagons: wagonFields, parts: partFields, inventory: inventoryFields };
+
+export function derivedWagonFields<T extends {number:string;status:Wagon['status'];completedDate:string}>(fields:T,previous?:Wagon):T&{wagonType:string} {
+ const today=new Date(Date.now()+3*3600000).toISOString().slice(0,10);
+ return {...fields,wagonType:wagonTypeFromNumber(fields.number),completedDate:fields.status==='Tamamlandı'?(previous?.status==='Tamamlandı'&&previous.completedDate?previous.completedDate:today):''};
+}
+export function rejectManualCompletionDate(fields:Pick<Wagon,'status'|'completedDate'>):void {
+ if(fields.status!=='Tamamlandı'&&fields.completedDate)throw new ApiError(400,'INVALID_WAGON_DATES','Tamamlanma tarihi yalnız Tamamlandı durumu için kullanılabilir.');
+}
 
 export function validateWagonWorkflow(candidate: Pick<Wagon, 'entryDate' | 'channelDate' | 'completedDate' | 'status'>, existing?: Wagon, changed?: Record<string, unknown>): void {
   const relevant = ['entryDate', 'channelDate', 'completedDate', 'status'] as const;
@@ -108,7 +118,7 @@ export function assertDatabase(database: unknown): asserts database is DatabaseD
     wagons: z.array(wagonFields.merge(metadata)), parts: z.array(partFields.merge(metadata)), inventory: z.array(inventoryFields.merge(metadata)),
     jobTypes: z.array(jobTypeSchema).optional(), maintenanceOperations: z.array(maintenanceRecordSchema).optional(),
     workshop: workshopSchema.optional(),
-    workEntries: z.array(z.object({id:z.string(),wagonNumber:z.string(),actorId:z.string(),actorName:z.string(),post:z.string(),startedAt:z.string().datetime(),finishedAt:z.string().datetime(),jobs:z.array(z.object({id:z.number().int().positive(),name:z.string(),category:z.string(),quantity:z.number().int().positive()})).min(1),notes:z.string(),createdAt:z.string().datetime()})).optional(),
+    workEntries: z.array(z.object({id:z.string(),wagonNumber:z.string(),actorId:z.string(),actorName:z.string(),post:z.string(),startedAt:z.string().datetime(),finishedAt:z.string().datetime(),jobs:z.array(z.object({id:z.number().int(),name:z.string(),category:z.string(),quantity:z.number().int().positive(),durationMinutes:z.number().nonnegative().optional(),heavyMinutes:z.number().nonnegative().optional(),standardMinutes:z.number().nonnegative().optional()})).min(1),crew:z.array(z.object({id:z.string(),name:z.string()})).optional(),notes:z.string(),createdAt:z.string().datetime()})).optional(),
     users: z.array(user), audit: z.array(z.object({ id: z.string(), at: z.string(), actorId: z.string(), actorName: z.string(), action: z.string(), entity: z.enum(['wagon', 'part', 'inventory', 'user', 'system', 'maintenance']), entityId: z.string().optional(), details: z.string().optional() })),
   });
   if (!document.safeParse(database).success) throw new ApiError(503, 'INVALID_DATABASE', 'Ortak veritabanının yapısı geçersiz.');

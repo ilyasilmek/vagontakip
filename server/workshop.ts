@@ -1,12 +1,13 @@
 import { z } from 'zod';
 import { ACTIVITY_KINDS, ACTIVITY_LABELS, ledger, milliseconds, minutes, netMinutes, subtract, turkeyDate, type LedgerEntry, type WorkshopData, type WorkshopOperation, type Standard } from '../shared/workshop';
 import { ApiError } from './errors';
+import { POSTS } from '../shared/types';
 
 const id=z.string().min(1).max(100),text=z.string().trim().max(1000),instant=z.string().datetime({offset:true}).transform(value=>new Date(value).toISOString());
 const interval={startedAt:instant,finishedAt:instant};
 const people=z.array(id).min(1,'En az bir personel seçin.').max(100).refine(ids=>new Set(ids).size===ids.length,'Aynı kişi birden fazla seçilemez.');
 const meta={id,revision:z.number().int().positive(),createdAt:instant,updatedAt:instant,updatedBy:id};
-export const personInputSchema=z.object({name:z.string().trim().min(1).max(100),active:z.boolean()}).strict();
+export const personInputSchema=z.object({name:z.string().trim().min(1).max(100),active:z.boolean(),post:z.union([z.enum(POSTS),z.literal('')]).optional()}).strict();
 const clock=z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 export const shiftSchema=z.object({id:z.enum(['1','2']),name:z.string().min(1).max(100),start:clock,end:clock,breakStart:clock,breakEnd:clock}).strict().refine(s=>s.start<s.end&&s.start<=s.breakStart&&s.breakStart<s.breakEnd&&s.breakEnd<=s.end&&!(s.start===s.breakStart&&s.end===s.breakEnd),'Vardiya ve mola saatlerini kontrol edin.');
 export const dayInputSchema=z.object({...interval,date:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),shiftId:z.enum(['1','2']),breaks:z.array(z.object(interval).strict()).max(10),attendance:z.array(z.object({...interval,personId:id}).strict()).max(100),wagonAvailable:z.boolean(),noWagonReason:text,notes:text}).strict();

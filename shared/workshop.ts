@@ -1,11 +1,12 @@
 import { JOB_TYPES, type JobType, type WorkItem } from './maintenance';
 import { ensureFrenPostasiStandards } from './fren-postasi';
 import type { RecordMetadata } from './types';
+import type { Post } from './types';
 
 export const FORMULA_VERSION = 2 as const;
 export interface Interval { startedAt: string; finishedAt: string; }
 export interface PeopleInterval extends Interval { personIds: string[]; }
-export interface Person extends RecordMetadata { name: string; active: boolean; }
+export interface Person extends RecordMetadata { name: string; active: boolean; post?: Post|''; }
 export interface ShiftDefinition { id: string; name: string; start: string; end: string; breakStart: string; breakEnd: string; }
 export const DEFAULT_SHIFTS: ShiftDefinition[] = [
  { id:'1',name:'1. Vardiya',start:'08:00',end:'16:00',breakStart:'12:00',breakEnd:'12:30' },

@@ -7,7 +7,7 @@ import { DatabaseEngine, assertActor, audit, type DatabaseEnvironment } from './
 import { ApiError, errorResponse } from './errors';
 import { WorkshopSqlStorage } from './workshop-storage';
 import { workshopRequest } from './workshop-routes';
-import { createUserSchema, fieldSchemas, normalizeUsername, parseInput, passwordSchema, postSchema, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
+import { createUserSchema, derivedWagonFields, fieldSchemas, normalizeUsername, parseInput, passwordSchema, postSchema, rejectManualCompletionDate, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
 
 export interface Env extends DatabaseEnvironment {
   DB: DurableObjectNamespace;
@@ -295,7 +295,7 @@ export class VagonDatabase {
         const input = await body(request);
         if (method === 'POST' && !id) {
           const fields = parseInput(fieldSchemas[collection], input);
-          if (collection === 'wagons') validateWagonWorkflow(fields as Pick<Wagon, 'entryDate' | 'channelDate' | 'completedDate' | 'status'>);
+          if (collection === 'wagons') { rejectManualCompletionDate(fields as Wagon);Object.assign(fields,derivedWagonFields(fields as Wagon)); validateWagonWorkflow(fields as Pick<Wagon, 'entryDate' | 'channelDate' | 'completedDate' | 'status'>); }
           const recordId = crypto.randomUUID();
           const { result: record, version } = await this.engine.mutate(database => {
             const actor = assertActor(database, claims);
@@ -315,7 +315,7 @@ export class VagonDatabase {
             const actor = assertActor(database, claims);
             const record = this.records(database, collection).find(r => r.id === id);
             revisionCheck(record, revision);
-            if (collection === 'wagons') validateWagonWorkflow({ ...record, ...fields } as Wagon, record as Wagon, fields);
+            if (collection === 'wagons') {if(Object.hasOwn(fields,'completedDate'))rejectManualCompletionDate({...record,...fields} as Wagon);const derived=derivedWagonFields({...record,...fields} as Wagon,record as Wagon);if(Object.hasOwn(fields,'number'))Object.assign(fields,{wagonType:derived.wagonType});if(Object.hasOwn(fields,'status')||Object.hasOwn(fields,'completedDate'))Object.assign(fields,{completedDate:derived.completedDate});validateWagonWorkflow({ ...record, ...fields } as Wagon, record as Wagon, fields);}
             Object.assign(record, fields, { revision: record.revision + 1, updatedAt: new Date().toISOString(), updatedBy: actor.id });
             audit(database, actor, 'Kayıt düzenlendi', entityNames[collection], record.id);
             return record;
