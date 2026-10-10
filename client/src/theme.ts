@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 
-export type ThemePreference = 'system' | 'light' | 'dark' | 'pastel';
+export type ThemePreference = 'system' | 'light' | 'dark';
 const key = 'vagon-takip-theme';
 function readPreference(): ThemePreference {
   try {
     const stored = localStorage.getItem(key);
-    if (stored === 'light' || stored === 'dark' || stored === 'pastel') return stored;
+    if (stored === 'light' || stored === 'dark') return stored;
   } catch { /* The system preference still works without browser storage. */ }
   return 'system';
 }
 export function applyTheme(preference: ThemePreference): void {
   const dark = preference === 'dark' || (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.dataset.theme = preference === 'pastel' ? 'pastel' : dark ? 'dark' : 'light';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', preference === 'pastel' ? '#40665C' : dark ? '#101C25' : '#182C3A');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#101C25' : '#182C3A');
 }
 export function initializeTheme(): void { applyTheme(readPreference()); }
 export function useTheme() {
