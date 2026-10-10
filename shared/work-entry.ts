@@ -1,7 +1,8 @@
+import type { BrakeMode } from './fren-postasi';
 export interface WorkEntry {
  id:string; wagonNumber:string; actorId:string; actorName:string; post:string;
  startedAt:string; finishedAt:string;
- jobs:{id:number;name:string;category:string;quantity:number;durationMinutes?:number;heavyMinutes?:number;standardMinutes?:number}[];
+ jobs:{id:number;name:string;category:string;quantity:number;brakeMode?:BrakeMode;durationMinutes?:number;heavyMinutes?:number;standardMinutes?:number}[];
  crew?:{id:string;name:string}[]; notes:string; createdAt:string;
 }
 

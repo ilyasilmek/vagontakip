@@ -1,4 +1,5 @@
 import type { RecordMetadata } from './types';
+import type { BrakeMode } from './fren-postasi';
 
 export interface JobType { id: number; name: string; standardMinutes: number; category: string; }
 const rows: [string, number, string][] = [
@@ -12,7 +13,7 @@ const rows: [string, number, string][] = [
 ];
 export const JOB_TYPES: JobType[] = rows.map(([name,standardMinutes,category],i)=>({id:i+1,name,standardMinutes,category}));
 export const WAIT_REASONS = ['Manevra Bekleme','Malzeme/Valf Tedarik','Kanal/Test Yolu İşgali','Diğer'] as const;
-export interface WorkItem extends JobType { quantity: number; }
+export interface WorkItem extends JobType { quantity: number; brakeMode?: BrakeMode; }
 export interface WaitEntry { reason: typeof WAIT_REASONS[number]; minutes: number; note: string; }
 export interface MaintenanceOperation extends RecordMetadata {
  wagonNumber: string; startedAt: string; finishedAt: string; shift: string; supervisor: string; personnel: number;

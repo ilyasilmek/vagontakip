@@ -120,3 +120,5 @@ label {display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;col
 .selected-people ul {list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .selected-people li {display:flex;align-items:center;gap:8px;max-width:100%;border:1px solid var(--border);padding:4px 4px 4px 10px}
 .selected-people li span {overflow-wrap:anywhere;min-width:0}.selected-people li button {padding:0;min-width:36px;min-height:36px;flex-shrink:0;font-size:22px}
+
+.brake-mode-options {grid-column:1/-1;display:flex;gap:16px;align-items:center;border:1px solid var(--border);padding:10px 14px;margin:10px 0}.brake-mode-options legend {font-weight:600;font-size:13px}.brake-mode-options label {display:flex;align-items:center;gap:7px;font-size:14px}.brake-mode-options input[type=radio] {width:18px;height:18px;margin:0;accent-color:var(--ink)}

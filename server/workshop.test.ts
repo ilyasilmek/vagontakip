@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { afterEach, describe, expect, it } from 'vitest';
 import { calculateOperation, turkeyTime, type WorkshopData, type WorkshopOperation } from '../shared/workshop';
 import { workEntryHours, type WorkEntry } from '../shared/work-entry';
+import { BRAKE_TEST_JOB_ID } from '../shared/fren-postasi';
 import { VagonDatabase, type Env } from './index';
 import { DatabaseEngine, type StorageAdapter } from './database';
 
@@ -36,6 +37,24 @@ async function prepared(){const fixture=make(),session=await login(fixture.objec
  return{...fixture,session,ids,day,dayId,input};
 }
 async function listing(o:VagonDatabase,session:string){return await(await call(o,'/api/workshop','GET',undefined,session)).json() as WorkshopData;}
+it('requires and stores G/P for brake test work in field and planning entries',async()=>{
+ const {object,session,input}=await prepared();
+ expect((await call(object,'/api/account','PATCH',{post:'Hava&Fren'},session)).status).toBe(200);
+ const wagon={number:'3175 4568 337-5',entryDate:'2026-10-09',channelDate:'',completedDate:'',status:'Bekliyor',notes:''};
+ expect((await call(object,'/api/wagons','POST',wagon,session)).status).toBe(201);
+ const field={wagonNumber:wagon.number,startedAt:at('09:00'),finishedAt:at('10:00'),jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1}],notes:''};
+ expect((await call(object,'/api/workshop/work-entries','POST',field,session)).status).toBe(400);
+ const saved=await call(object,'/api/workshop/work-entries','POST',{...field,jobs:[{...field.jobs[0],brakeMode:'G'}]},session);
+ expect(saved.status).toBe(201);
+ expect((await saved.json() as {record:WorkEntry}).record.jobs[0].brakeMode).toBe('G');
+ const plan={...input,wagonNumber:wagon.number,jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1}]};
+ expect((await call(object,'/api/workshop/operations','POST',plan,session)).status).toBe(400);
+ const planned=await call(object,'/api/workshop/operations','POST',{...plan,jobs:[{...plan.jobs[0],brakeMode:'P'}]},session);
+ expect(planned.status).toBe(201);
+ expect((await planned.json() as {record:WorkshopOperation}).record.jobs[0].brakeMode).toBe('P');
+ const summary=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}`,'GET',undefined,session)).json() as {entries:{jobs:{brakeMode?:string}[]}[];operations:{jobs:{brakeMode?:string}[]}[]};
+ expect(summary.entries[0].jobs[0].brakeMode).toBe('G');expect(summary.operations[0].jobs[0].brakeMode).toBe('P');
+});
 it('offers only requested post names and keeps the Hava&Fren catalog available',async()=>{
  const {object,session}=await prepared();
  expect((await call(object,'/api/account','PATCH',{post:'Fren'},session)).status).toBe(400);

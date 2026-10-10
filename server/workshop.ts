@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ACTIVITY_KINDS, ACTIVITY_LABELS, ledger, milliseconds, minutes, netMinutes, subtract, turkeyDate, type LedgerEntry, type WorkshopData, type WorkshopOperation, type Standard } from '../shared/workshop';
 import { ApiError } from './errors';
 import { POSTS, LEGACY_POSTS } from '../shared/types';
+import { BRAKE_TEST_JOB_ID } from '../shared/fren-postasi';
 
 const id=z.string().min(1).max(100),text=z.string().trim().max(1000),instant=z.string().datetime({offset:true}).transform(value=>new Date(value).toISOString());
 const interval={startedAt:instant,finishedAt:instant};
@@ -14,10 +15,10 @@ export const dayInputSchema=z.object({...interval,date:z.string().regex(/^\d{4}-
 export const participationSchema=z.object({...interval,dayId:id,personIds:people}).strict();
 export const waitSchema=z.object({...interval,personIds:people,reason:z.string().trim().min(1).max(200),note:text}).strict();
 export const operationInputSchema=z.object({...interval,wagonNumber:z.string().trim().min(1).max(200),supervisor:z.string().trim().min(1).max(100),notes:text,
- participation:z.array(participationSchema).min(1,'En az bir personel / vardiya katılımı ekleyin.').max(100),waits:z.array(waitSchema).max(50),jobs:z.array(z.object({jobTypeId:z.number().int().positive(),quantity:z.number().int().positive().max(1000)}).strict()).min(1,'En az bir yapılan iş seçin.').max(100)}).strict();
+ participation:z.array(participationSchema).min(1,'En az bir personel / vardiya katılımı ekleyin.').max(100),waits:z.array(waitSchema).max(50),jobs:z.array(z.object({jobTypeId:z.number().int().positive(),quantity:z.number().int().positive().max(1000),brakeMode:z.enum(['G','P']).optional()}).strict()).min(1,'En az bir yapılan iş seçin.').max(100)}).strict();
 export const activityInputSchema=z.object({...interval,dayId:id,operationId:id.nullable(),personIds:people,kind:z.enum(ACTIVITY_KINDS),reason:text,notes:text}).strict();
 export const standardInputSchema=z.object({jobTypeId:z.number().int().positive(),name:z.string().trim().min(1).max(200),category:z.string().trim().min(1).max(100),standardMinutes:z.number().nonnegative().max(10000),active:z.boolean(),validFrom:instant}).strict();
-const lineSchema=z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),quantity:z.number().int().positive()});
+const lineSchema=z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),quantity:z.number().int().positive(),brakeMode:z.enum(['G','P']).optional()});
 export const workshopSchema=z.object({formulaVersion:z.literal(2),people:z.array(personInputSchema.extend({...meta,post:z.union([z.enum(POSTS),z.enum(LEGACY_POSTS),z.literal('')]).optional()})),shifts:z.array(shiftSchema),
  standards:z.array(z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),active:z.boolean(),validFrom:instant,validUntil:instant.nullable()})),
  days:z.array(dayInputSchema.extend({...meta,shiftName:z.string().min(1)})),
@@ -98,11 +99,13 @@ export function validateWorkshop(data:WorkshopData):void {
  }
  const overlap=ledgerConflict(data);if(overlap)throw new ApiError(400,'WORKSHOP_TIME_CONFLICT',overlap.message,{operationIds:overlap.operationIds});
 }
-export function resolveStandardLines(input:{jobTypeId:number;quantity:number}[],standards:Standard[],at:string,existing?:WorkshopOperation) {
+export function resolveStandardLines(input:{jobTypeId:number;quantity:number;brakeMode?:'G'|'P'}[],standards:Standard[],at:string,existing?:WorkshopOperation) {
  return input.map(j=>{
-  const old=existing?.jobs.find(line=>line.id===j.jobTypeId);if(old)return{...old,quantity:j.quantity};
+  requireRule(j.jobTypeId!==BRAKE_TEST_JOB_ID||!!j.brakeMode,'Fren tecrübesi için G(yük) veya P(yolcu) seçin.');
+  requireRule(j.jobTypeId===BRAKE_TEST_JOB_ID||!j.brakeMode,'G/P seçimi yalnız Fren tecrübesi için yapılabilir.');
+  const old=existing?.jobs.find(line=>line.id===j.jobTypeId);if(old)return{...old,quantity:j.quantity,brakeMode:j.brakeMode};
   const candidates=standards.filter(s=>s.id===j.jobTypeId&&Date.parse(s.validFrom)<=Date.parse(at)&&(!s.validUntil||Date.parse(s.validUntil)>Date.parse(at))).sort((a,b)=>b.validFrom.localeCompare(a.validFrom));
   const s=candidates[0];requireRule(!!s&&s.active,'İş kalemi bu tarihte aktif değil veya standardı bulunamadı.');
-  return{id:s.id,versionId:s.versionId,name:s.name,category:s.category,standardMinutes:s.standardMinutes,quantity:j.quantity};
+  return{id:s.id,versionId:s.versionId,name:s.name,category:s.category,standardMinutes:s.standardMinutes,quantity:j.quantity,brakeMode:j.brakeMode};
  });
 }

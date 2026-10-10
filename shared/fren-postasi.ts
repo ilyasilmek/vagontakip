@@ -67,6 +67,9 @@ export const FREN_POSTASI_JOBS = [
  ['Compact Fren İşlemleri', 'Compact fren perno arızası tamir edildi'],
 ] as const;
 export const FREN_POSTASI_JOB_IDS = FREN_POSTASI_JOBS.map((_, index) => 1001 + index);
+export const BRAKE_TEST_JOB_ID = 1001 + FREN_POSTASI_JOBS.findIndex(([,name]) => name === 'Fren tecrübesi yapıldı');
+export type BrakeMode = 'G' | 'P';
+export function brakeModeLabel(mode:BrakeMode):string{return mode==='G'?'G(yük)':'P(yolcu)';}
 const legacyMatches:Record<string,number>={
  'Sızdırmazlık kontrolü yapıldı':41,
  'Fren tecrübesi yapıldı':42,
