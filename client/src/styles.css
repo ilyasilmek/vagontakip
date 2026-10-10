@@ -169,6 +169,7 @@ button:active:not(:disabled) {transform:translateY(1px)}
 :root[data-theme=modern] :is(.panel,.record-card,.metrics,.maintenance-metrics>*,.dashboard-columns>section,.account-panel) {background:#FFFFFF;border:1px solid #DCE5E8;border-radius:12px;box-shadow:0 2px 9px #2434420B}
 :root[data-theme=modern] :is(.record-card,.account-panel) {padding:20px;margin-bottom:12px}
 :root[data-theme=modern] .metrics {padding:8px}
+:root[data-theme=modern] .dashboard-columns>section {padding:20px}
 :root[data-theme=modern] .metric {border-color:#DCE5E8}
 :root[data-theme=modern] :is(.wagon-table th,.job-category>summary) {background:#E8F4F4;color:#24464A}
 :root[data-theme=modern] .wagon-table td {border-color:#DCE5E8}

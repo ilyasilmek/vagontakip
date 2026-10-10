@@ -469,3 +469,5 @@ Geri dönüş commit’i `2f554df`, yalnız `vagontakip-test` Worker sürümü `
 ## 11 Ekim 2026 — Görsel referanslı modern turkuaz tema (test)
 
 Kullanıcı görseli doğrudan gönderdi. Görseldeki antrasit yan menü, turkuaz etkin menü ve eylem vurgusu, açık gri zemin ve beyaz kartlar mevcut uygulama ekranlarına tema olarak uyarlandı. Örnek görseldeki harita ve tren verileri uygulamaya taşınmadı. **Modern · Turkuaz** seçimi Hesabım → Tema menüsüne eklendi; Açık, Koyu ve Sistem seçenekleri korunur. Tema cihazda saklanır, verileri etkilemez. Yalnız test ortamı hedeflenir.
+
+İlk tema commit’i `d05a510` ve ilk test Worker sürümü `84c6f403-6096-4d6f-b1c4-27d94c59aaf5` oldu. `npm run build` ve `git diff --check` geçti. Uzak kontrol test girişini ve önceki kayıt kimliklerini doğruladı; canlı sayfa değişmedi. Chromium 390×844 görünümünde seçim ve yeniden yükleme sonrası korunması, Açık temaya dönüş ve yatay taşma kontrol edildi. Masaüstü 1365×900 görünümünde yan menü ve kartlar incelendi; kart içeriğine ek boşluk gerektiği görülerek düzeltildi.
