@@ -45,18 +45,18 @@ it('requires and stores G/P for brake test work in field and planning entries',a
  const field={wagonNumber:wagon.number,startedAt:at('09:00'),finishedAt:at('10:00'),jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1}],notes:''};
  expect((await call(object,'/api/workshop/work-entries','POST',field,session)).status).toBe(400);
  expect((await call(object,'/api/workshop/work-entries','POST',{...field,jobs:[{...field.jobs[0],brakeMode:'G'}]},session)).status).toBe(400);
- const saved=await call(object,'/api/workshop/work-entries','POST',{...field,jobs:[{...field.jobs[0],brakeMode:'G',durationMinutes:18}]},session);
+ const saved=await call(object,'/api/workshop/work-entries','POST',{...field,jobs:[{...field.jobs[0],brakeMode:'G',durationSeconds:18}]},session);
  expect(saved.status).toBe(201);
  const savedEntry=(await saved.json() as {record:WorkEntry}).record;
- expect(savedEntry.jobs[0].brakeMode).toBe('G');expect(savedEntry.jobs[0].durationMinutes).toBe(18);expect(workEntryHours(savedEntry).totalLaborHours).toBeCloseTo(0.3);
+ expect(savedEntry.jobs[0].brakeMode).toBe('G');expect(savedEntry.jobs[0].durationSeconds).toBe(18);expect(workEntryHours(savedEntry).totalLaborHours).toBeCloseTo(0.005);
  const plan={...input,wagonNumber:wagon.number,jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1}]};
  expect((await call(object,'/api/workshop/operations','POST',plan,session)).status).toBe(400);
  expect((await call(object,'/api/workshop/operations','POST',{...plan,jobs:[{...plan.jobs[0],brakeMode:'P'}]},session)).status).toBe(400);
- const planned=await call(object,'/api/workshop/operations','POST',{...plan,jobs:[{...plan.jobs[0],brakeMode:'P',durationMinutes:24}]},session);
+ const planned=await call(object,'/api/workshop/operations','POST',{...plan,jobs:[{...plan.jobs[0],brakeMode:'P',durationSeconds:24}]},session);
  expect(planned.status).toBe(201);
- const plannedRecord=(await planned.json() as {record:WorkshopOperation}).record;expect(plannedRecord.jobs[0].brakeMode).toBe('P');expect(plannedRecord.jobs[0].durationMinutes).toBe(24);
- const summary=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}`,'GET',undefined,session)).json() as {entries:{jobs:{brakeMode?:string;durationMinutes?:number}[]}[];operations:{jobs:{brakeMode?:string;durationMinutes?:number}[]}[]};
- expect(summary.entries[0].jobs[0].brakeMode).toBe('G');expect(summary.entries[0].jobs[0].durationMinutes).toBe(18);expect(summary.operations[0].jobs[0].brakeMode).toBe('P');expect(summary.operations[0].jobs[0].durationMinutes).toBe(24);
+ const plannedRecord=(await planned.json() as {record:WorkshopOperation}).record;expect(plannedRecord.jobs[0].brakeMode).toBe('P');expect(plannedRecord.jobs[0].durationSeconds).toBe(24);
+ const summary=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}`,'GET',undefined,session)).json() as {entries:{jobs:{brakeMode?:string;durationSeconds?:number}[]}[];operations:{jobs:{brakeMode?:string;durationSeconds?:number}[]}[]};
+ expect(summary.entries[0].jobs[0].brakeMode).toBe('G');expect(summary.entries[0].jobs[0].durationSeconds).toBe(18);expect(summary.operations[0].jobs[0].brakeMode).toBe('P');expect(summary.operations[0].jobs[0].durationSeconds).toBe(24);
 });
 it('accepts quantities only for Hava&Fren work marked adet',async()=>{
  const {object,session}=await prepared();
