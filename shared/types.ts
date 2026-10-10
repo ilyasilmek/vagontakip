@@ -2,8 +2,13 @@ export const WAGON_STATUSES = ['Bekliyor', 'Parça bekliyor', 'Bakım devam ediy
 export type WagonStatus = typeof WAGON_STATUSES[number];
 export const WAGON_TYPES = ['Hbbills', 'Habins', 'Gabs', 'Sgns', 'Sgss-w', 'Sggmrss', 'Rns', 'Eanos', 'Fals', 'Tagnpps', 'Uacs', 'Zans', 'Zacns', 'Laaes', 'Falns', 'Roos', 'Shimmns', 'Tamns', 'Remms', 'Sggrss', 'Zaes'] as const;
 export type WagonType = string;
-export const POSTS = ['Hava-Fren', 'Fren', 'Boji', 'Kaynak', 'Hazırlama', 'Vagonaj', 'Meydan', 'Torna', 'Tren Teşkil', 'Büro'] as const;
+export const POSTS = ['Hava&Fren', 'Boji', 'Kaynak', 'Vagonaj', 'Meydan', 'Torna', 'Tren Teşkil', 'Büro'] as const;
+export const LEGACY_POSTS = ['Hava-Fren', 'Fren', 'Hazırlama'] as const;
 export type Post = typeof POSTS[number];
+export function normalizePost(value:string|undefined):Post|'' {
+ if(value==='Hava-Fren'||value==='Fren')return 'Hava&Fren';
+ return POSTS.find(post=>post===value)??'';
+}
 export type UserRole = 'admin' | 'user';
 
 export interface RecordMetadata {

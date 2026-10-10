@@ -130,7 +130,7 @@ export default function App() {
   }, [user?.id, refresh]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(''), 4500); return () => window.clearTimeout(timer); }, [toast]);
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [page]);
-  useEffect(() => { if (page === 'admin' && user?.role !== 'admin') setPage('account'); }, [page, user?.role, setPage]);
+  useEffect(() => { if ((page === 'admin'||page === 'planning') && user?.role !== 'admin') setPage('account'); }, [page, user?.role, setPage]);
 
   async function login(nextUser: SafeUser) {
     epoch.current += 1; await cacheClear().catch(() => {}); snapshot.current = null;
@@ -148,7 +148,7 @@ export default function App() {
   async function saved(message: string) { setEditor(null); await refresh(); notify(message); }
   const edit = (collection: CollectionName, record: OperationalRecord | null) => setEditor({ collection, record });
   const navigation = data?.maintenanceEnabled ? [...primaryNavigation, { page: 'maintenance' as const, label: 'Bakım operasyonları', mobile: 'Bakım', Icon: Wrench }] : primaryNavigation;
-  const currentName = page === 'admin' ? 'Yönetim' : page === 'account' ? 'Hesabım' : navigation.find(item => item.page === page)?.label || 'Genel bakış';
+  const currentName = page === 'admin' ? 'Yönetim' : page === 'planning' ? 'Planlama' : page === 'account' ? 'Hesabım' : navigation.find(item => item.page === page)?.label || 'Genel bakış';
 
   if (intro && startupAnimation) return <Startup onDone={finishIntro} />;
   if (booting) return <div className="loading-screen"><Brand /><div className="spinner" /><p>Kayıtlar yükleniyor…</p></div>;
@@ -160,9 +160,10 @@ export default function App() {
     {!online && <div className="notice" role="status"><CloudOff /><span>Son alınan kayıtları görüntülüyorsunuz. Ekleme ve düzenleme için internet bağlantısı gerekiyor.</span>{connected && <button onClick={() => void refresh()} disabled={syncing}>Yenile</button>}</div>}
     {error && data && connected && <div className="notice error" role="alert"><TriangleAlert /><span>{error}</span><button onClick={() => void refresh()} disabled={syncing}>Tekrar dene</button></div>}
     {updated && <div className="notice update-banner" role="status"><Check /><span>Ekibin son değişiklikleri alındı. Kayıtlarınız güncel.</span><button onClick={() => setUpdated(false)}>Tamam</button></div>}
-    {page === 'dashboard' && <Dashboard data={data} online={online} onNavigate={setPage} onEdit={edit} notify={notify} />}
+    {page === 'dashboard' && <Dashboard data={data} online={online} isAdmin={user.role==='admin'} onPlan={()=>setPage('planning')} onNavigate={setPage} onEdit={edit} notify={notify} />}
     {(page === 'wagons' || page === 'parts' || page === 'inventory') && <Collection key={page} collection={page} rows={data[page]} online={online} onEdit={record => edit(page, record)} updatedAt={data.updatedAt} />}
     {page === 'maintenance' && data.maintenanceEnabled && <Maintenance user={user} online={online} onExpired={expired} notify={notify} />}
+    {page === 'planning' && data.maintenanceEnabled && user.role==='admin' && <Maintenance planning user={user} online={online} onExpired={expired} notify={notify} />}
     {page === 'admin' && user.role === 'admin' && <Admin online={online} onExpired={expired} notify={notify} />}
     {page === 'account' && <Account startupAnimation={startupAnimation} onStartupAnimationChange={changeStartupAnimation} theme={theme} onThemeChange={changeTheme} onUpdated={setUser} user={user} online={online} onLogout={logout} onExpired={expired} notify={notify} />}
   </main></div><nav className="mobile-bottom" aria-label="Mobil gezinme">{navigation.map(({ page: target, mobile, Icon }) => <button key={target} className={`mobile-nav-button ${page === target ? 'active' : ''}`} onClick={() => setPage(target)} aria-current={page === target ? 'page' : undefined}><Icon /><span>{mobile}</span></button>)}<button className={`mobile-nav-button ${page === 'admin' || page === 'account' ? 'active' : ''}`} onClick={() => setPage(user.role === 'admin' ? 'admin' : 'account')} aria-current={page === 'admin' || page === 'account' ? 'page' : undefined}>{user.role === 'admin' ? <ShieldCheck /> : <CircleUserRound />}<span>{user.role === 'admin' ? 'Yönetim' : 'Hesabım'}</span></button></nav>{editor && <div inert={!!maintenanceDraft}><RecordEditor {...editor} onNewMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && !editor.record ? fields => void startWagonMaintenance(fields) : undefined} maintenanceLoading={maintenanceLoading} maintenanceRefreshKey={maintenanceRefreshKey} onAddMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && editor.record ? () => void startWagonMaintenance() : undefined} user={user} online={online} onClose={() => setEditor(null)} onSaved={saved} onExpired={expired} onConflict={() => refresh()} /></div>}{maintenanceDraft && <SimpleWorkEntry user={user} wagonNumber={maintenanceDraft.wagonNumber} newWagon={maintenanceDraft.newWagon} online={online} onExpired={expired} onClose={() => setMaintenanceDraft(null)} onSaved={async () => {setMaintenanceDraft(null); if(maintenanceDraft.newWagon) setEditor(null); await refresh(); setMaintenanceRefreshKey(value => value + 1); notify('Yapılan iş kaydedildi.');}} />}{installOpen && <Install {...install} onClose={() => setInstallOpen(false)} />}{toast && <div className="toast" role="status"><Check /><span>{toast}</span></div>}</div>;

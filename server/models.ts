@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { JobType, MaintenanceOperation } from '../shared/maintenance';
 import { jobTypeSchema, maintenanceRecordSchema } from './maintenance';
-import { WAGON_STATUSES, POSTS, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
+import { WAGON_STATUSES, POSTS, LEGACY_POSTS, normalizePost, type AuditEvent, type Inventory, type Part, type SafeUser, type Wagon } from '../shared/types';
 import type { PasswordHash } from './crypto';
 import { ApiError } from './errors';
 import type { WorkshopData } from '../shared/workshop';
@@ -83,6 +83,7 @@ export const normalizeUsername = (value: string): string => value.trim().normali
 export const usernameSchema = z.string().transform(normalizeUsername).pipe(z.string().regex(/^[a-z0-9çğıöşü._-]{3,64}$/u, 'Kullanıcı adı 3–64 Türkçe veya İngilizce harf, rakam, nokta, tire ya da alt çizgiden oluşmalı.'));
 export const passwordSchema = z.string().min(8, 'Şifre en az 8 karakter olmalı.').max(256);
 export const postSchema = z.union([z.enum(POSTS), z.literal('')]);
+const storedPostSchema = z.union([postSchema,z.enum(LEGACY_POSTS)]);
 export const createUserSchema = z.object({
   username: usernameSchema,
   displayName: z.string().trim().min(1).max(100),
@@ -106,13 +107,13 @@ export function parseInput<S extends z.ZodTypeAny>(schema: S, input: unknown): z
 }
 
 export function safeUser(user: StoredUser): SafeUser {
-  return { id: user.id, username: user.username, displayName: user.displayName, post: user.post || '', role: user.role, active: user.active, createdAt: user.createdAt, updatedAt: user.updatedAt };
+  return { id: user.id, username: user.username, displayName: user.displayName, post: normalizePost(user.post), role: user.role, active: user.active, createdAt: user.createdAt, updatedAt: user.updatedAt };
 }
 
 export function assertDatabase(database: unknown): asserts database is DatabaseDocument {
   const metadata = z.object({ id: z.string().min(1), revision: z.number().int().positive(), createdAt: z.string(), updatedAt: z.string(), updatedBy: z.string() });
   const password = z.object({ algorithm: z.literal('PBKDF2-SHA256'), iterations: z.literal(100_000), salt: z.string().regex(/^[A-Za-z0-9+/]{22}==$/), hash: z.string().regex(/^[A-Za-z0-9+/]{43}=$/) });
-  const user = z.object({ id: z.string().min(1), username: usernameSchema, displayName: z.string(), post: postSchema.optional(), role: z.enum(['admin', 'user']), active: z.boolean(), createdAt: z.string(), updatedAt: z.string(), password, authVersion: z.number().int().nonnegative() });
+  const user = z.object({ id: z.string().min(1), username: usernameSchema, displayName: z.string(), post: storedPostSchema.optional(), role: z.enum(['admin', 'user']), active: z.boolean(), createdAt: z.string(), updatedAt: z.string(), password, authVersion: z.number().int().nonnegative() });
   const document = z.object({
     formatVersion: z.literal(1), version: z.number().int().nonnegative(), updatedAt: z.string(),
     wagons: z.array(wagonFields.merge(metadata)), parts: z.array(partFields.merge(metadata)), inventory: z.array(inventoryFields.merge(metadata)),

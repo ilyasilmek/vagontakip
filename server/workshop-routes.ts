@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { isFrenPostasiJob } from '../shared/fren-postasi';
 import { emptyWorkshop, type ActivityInput, type WorkshopActivity, type WorkshopData, type WorkshopOperation } from '../shared/workshop';
-import type { RecordMetadata, Wagon } from '../shared/types';
+import { normalizePost, type RecordMetadata, type Wagon } from '../shared/types';
 import { assertActor, audit, type DatabaseEngine } from './database';
 import type { SessionClaims } from './crypto';
 import { ApiError } from './errors';
@@ -9,11 +9,11 @@ import { derivedWagonFields, fieldSchemas, parseInput, rejectManualCompletionDat
 import { activityInputSchema, dayInputSchema, operationInputSchema, personInputSchema, resolveStandardLines, shiftSchema, standardInputSchema } from './workshop';
 
 const workEntryInput=z.object({wagonNumber:z.string().trim().min(1).max(200),startedAt:z.string().datetime({offset:true}),finishedAt:z.string().datetime({offset:true}),jobs:z.array(z.object({jobTypeId:z.number().int().positive(),quantity:z.number().int().positive().max(1000)}).strict()).max(100),customJobs:z.array(z.object({name:z.string().trim().min(1).max(200),durationMinutes:z.number().int().positive().max(10000)}).strict()).max(30).default([]),heavyJobs:z.array(z.object({jobTypeId:z.number().int().positive(),extraMinutes:z.number().int().positive().max(10000)}).strict()).max(100).default([]),crewIds:z.array(z.string().min(1)).max(100).default([]),notes:z.string().trim().max(1000)}).strict().refine(v=>Date.parse(v.finishedAt)>Date.parse(v.startedAt),'Bitiş zamanı başlangıçtan sonra olmalı.').refine(v=>v.jobs.length+v.customJobs.length+v.heavyJobs.length>0,'En az bir yapılan iş seçin.');
-function workCatalog(data:WorkshopData,post:string){return data.standards.filter(s=>s.active&&isFrenPostasiJob(s.id)&&post==='Hava-Fren'&&!data.standards.some(other=>other.id===s.id&&other.validFrom>s.validFrom));}
+function workCatalog(data:WorkshopData,post:string){return data.standards.filter(s=>s.active&&isFrenPostasiJob(s.id)&&normalizePost(post)==='Hava&Fren'&&!data.standards.some(other=>other.id===s.id&&other.validFrom>s.validFrom));}
 function availableCoworkers(db:DatabaseDocument,actor:StoredUser){
- if(!actor.post)return [];
- const accounts=db.users.filter(user=>user.active&&user.id!==actor.id&&user.post===actor.post).map(user=>({id:user.id,name:user.displayName}));
- const personnel=(db.workshop?.people??[]).filter(person=>person.active&&person.post===actor.post).map(person=>({id:person.id,name:person.name}));
+ if(!normalizePost(actor.post))return [];
+ const accounts=db.users.filter(user=>user.active&&user.id!==actor.id&&normalizePost(user.post)===normalizePost(actor.post)).map(user=>({id:user.id,name:user.displayName}));
+ const personnel=(db.workshop?.people??[]).filter(person=>person.active&&normalizePost(person.post)===normalizePost(actor.post)).map(person=>({id:person.id,name:person.name}));
  const seen=new Set([actor.displayName.trim().toLocaleLowerCase('tr-TR')]);
  return [...accounts,...personnel].filter(person=>{const name=person.name.trim().toLocaleLowerCase('tr-TR');if(seen.has(name))return false;seen.add(name);return true;});
 }
@@ -26,7 +26,7 @@ function existingRecord<T extends RecordMetadata>(rows:T[],id:string|undefined,r
 }
 function activePeople(data:WorkshopData,ids:string[],previous:string[]=[]){if(ids.some(id=>!previous.includes(id)&&!data.people.some(p=>p.id===id&&p.active)))throw new ApiError(400,'INACTIVE_PERSON','Yeni seçimlerde yalnız aktif personel kullanılabilir.');}
 function createOperation(data:WorkshopData,input:z.infer<typeof operationInputSchema>,actorId:string,actorPost:string,existing?:WorkshopOperation):WorkshopOperation {
- if(actorPost!=='Hava-Fren'&&input.jobs.some(job=>isFrenPostasiJob(job.jobTypeId)))throw new ApiError(403,'POST_JOB_FORBIDDEN','Bu işler yalnız Hava-Fren postası için tanımlandı. Hesabım bölümünden postanızı kontrol edin.');
+ if(normalizePost(actorPost)!=='Hava&Fren'&&input.jobs.some(job=>isFrenPostasiJob(job.jobTypeId)))throw new ApiError(403,'POST_JOB_FORBIDDEN','Bu işler yalnız Hava&Fren postası için tanımlandı. Hesabım bölümünden postanızı kontrol edin.');
  activePeople(data,input.participation.flatMap(p=>p.personIds),existing?.participation.flatMap(p=>p.personIds));
  return {...input,...metadata(actorId,existing),formulaVersion:2,jobs:resolveStandardLines(input.jobs,data.standards,input.finishedAt,existing)};
 }
@@ -40,17 +40,17 @@ export async function workshopRequest(engine:DatabaseEngine,claims:SessionClaims
   const parsed=id==='with-wagon'?parseInput(z.object({wagon:fieldSchemas.wagons,entry:workEntryInput}).strict(),raw):null;
   const input=parsed?.entry??parseInput(workEntryInput,raw);if(parsed){rejectManualCompletionDate(parsed.wagon);Object.assign(parsed.wagon,derivedWagonFields(parsed.wagon));validateWagonWorkflow(parsed.wagon);if(parsed.wagon.number!==input.wagonNumber)throw new ApiError(400,'WAGON_MISMATCH','Vagon ve bakım numarası aynı olmalı.');}
   const {result,version}=await engine.mutate(db=>{const actor=assertActor(db,claims),data=db.workshop??=emptyWorkshop();
-   if(!actor.post)throw new ApiError(400,'POST_REQUIRED','İş akışı girişi yapabilmek için Hesabım menüsünden Posta belirlemesi yapmanız gerekiyor!');
+   const actorPost=normalizePost(actor.post);if(!actorPost)throw new ApiError(400,'POST_REQUIRED','İş akışı girişi yapabilmek için Hesabım menüsünden Posta belirlemesi yapmanız gerekiyor!');
    if(!parsed&&!db.wagons.some(w=>w.number===input.wagonNumber))throw new ApiError(404,'WAGON_NOT_FOUND','Vagon kaydı bulunamadı.');
    if(parsed&&db.wagons.some(w=>w.number===parsed.wagon.number))throw new ApiError(409,'DUPLICATE_WAGON','Bu vagon numarası zaten kayıtlı.');
-   const allowed=workCatalog(data,actor.post);const catalogJobs=[...input.jobs];const heavy=new Map<number,number>();for(const item of input.heavyJobs){if(heavy.has(item.jobTypeId))throw new ApiError(400,'DUPLICATE_JOB','Aynı ağır bakım işi iki kez seçilemez.');heavy.set(item.jobTypeId,item.extraMinutes);}
+   const allowed=workCatalog(data,actorPost);const catalogJobs=[...input.jobs];const heavy=new Map<number,number>();for(const item of input.heavyJobs){if(heavy.has(item.jobTypeId))throw new ApiError(400,'DUPLICATE_JOB','Aynı ağır bakım işi iki kez seçilemez.');heavy.set(item.jobTypeId,item.extraMinutes);}
    const jobs:WorkEntry['jobs']=catalogJobs.map(job=>{const standard=allowed.find(s=>s.id===job.jobTypeId);if(!standard)throw new ApiError(403,'POST_JOB_FORBIDDEN','Bu iş hesabınızın postası için tanımlı değil.');if(job.quantity!==1&&!standard.name.trim().toLocaleLowerCase('tr-TR').endsWith('(adet)'))throw new ApiError(400,'JOB_QUANTITY','Bu iş yalnız bir kez işaretlenebilir.');return{id:standard.id,name:standard.name,category:standard.category,quantity:job.quantity,standardMinutes:standard.standardMinutes};});
    if(new Set(jobs.map(j=>j.id)).size!==jobs.length)throw new ApiError(400,'DUPLICATE_JOB','Aynı iş iki kez seçilemez.');
    for(const [index,custom] of input.customJobs.entries())jobs.push({id:-index-1,name:custom.name,category:'Ek iş',quantity:1,standardMinutes:custom.durationMinutes,durationMinutes:custom.durationMinutes});
    for(const [id,minutes] of heavy){const standard=allowed.find(s=>s.id===id);if(!standard)throw new ApiError(403,'POST_JOB_FORBIDDEN','Ağır bakım işi hesabınızın postası için tanımlı değil.');jobs.push({id:-100000-id,name:`Ağır bakım — ${standard.name}`,category:'Ağır bakım',quantity:1,heavyMinutes:minutes});}
    if(new Set(input.crewIds).size!==input.crewIds.length||input.crewIds.includes(actor.id))throw new ApiError(400,'INVALID_CREW','Birlikte çalışılan personeli bir kez seçin.');
    const candidates=availableCoworkers(db,actor);const crew=[{id:actor.id,name:actor.displayName},...input.crewIds.map(id=>{const person=candidates.find(person=>person.id===id);if(!person)throw new ApiError(400,'INVALID_CREW','Yalnız aynı postadaki aktif kişiler seçilebilir.');return person;})];
-   const entry={id:crypto.randomUUID(),wagonNumber:input.wagonNumber,actorId:actor.id,actorName:actor.displayName,post:actor.post,startedAt:input.startedAt,finishedAt:input.finishedAt,jobs,crew,notes:input.notes,createdAt:new Date().toISOString()};
+   const entry={id:crypto.randomUUID(),wagonNumber:input.wagonNumber,actorId:actor.id,actorName:actor.displayName,post:actorPost,startedAt:input.startedAt,finishedAt:input.finishedAt,jobs,crew,notes:input.notes,createdAt:new Date().toISOString()};
    (db.workEntries??=[]).push(entry);if(parsed){const wagon={...parsed.wagon,...metadata(actor.id)} as Wagon;db.wagons.push(wagon);audit(db,actor,'Vagon eklendi','wagon',wagon.id);}
    audit(db,actor,'Yapılan işler kaydedildi','maintenance',entry.id);return entry;});return Response.json({record:result,version},{status:201});
  }

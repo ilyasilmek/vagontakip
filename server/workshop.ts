@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ACTIVITY_KINDS, ACTIVITY_LABELS, ledger, milliseconds, minutes, netMinutes, subtract, turkeyDate, type LedgerEntry, type WorkshopData, type WorkshopOperation, type Standard } from '../shared/workshop';
 import { ApiError } from './errors';
-import { POSTS } from '../shared/types';
+import { POSTS, LEGACY_POSTS } from '../shared/types';
 
 const id=z.string().min(1).max(100),text=z.string().trim().max(1000),instant=z.string().datetime({offset:true}).transform(value=>new Date(value).toISOString());
 const interval={startedAt:instant,finishedAt:instant};
@@ -18,7 +18,7 @@ export const operationInputSchema=z.object({...interval,wagonNumber:z.string().t
 export const activityInputSchema=z.object({...interval,dayId:id,operationId:id.nullable(),personIds:people,kind:z.enum(ACTIVITY_KINDS),reason:text,notes:text}).strict();
 export const standardInputSchema=z.object({jobTypeId:z.number().int().positive(),name:z.string().trim().min(1).max(200),category:z.string().trim().min(1).max(100),standardMinutes:z.number().nonnegative().max(10000),active:z.boolean(),validFrom:instant}).strict();
 const lineSchema=z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),quantity:z.number().int().positive()});
-export const workshopSchema=z.object({formulaVersion:z.literal(2),people:z.array(personInputSchema.extend(meta)),shifts:z.array(shiftSchema),
+export const workshopSchema=z.object({formulaVersion:z.literal(2),people:z.array(personInputSchema.extend({...meta,post:z.union([z.enum(POSTS),z.enum(LEGACY_POSTS),z.literal('')]).optional()})),shifts:z.array(shiftSchema),
  standards:z.array(z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),active:z.boolean(),validFrom:instant,validUntil:instant.nullable()})),
  days:z.array(dayInputSchema.extend({...meta,shiftName:z.string().min(1)})),
  operations:z.array(operationInputSchema.omit({jobs:true}).extend({...meta,formulaVersion:z.literal(2),jobs:z.array(lineSchema).min(1,'En az bir yapılan iş seçin.')})),
