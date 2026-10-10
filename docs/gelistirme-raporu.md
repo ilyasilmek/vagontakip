@@ -423,3 +423,9 @@ Doğrulama: `npm run build` geçti; `git diff --check` ile biçim kontrol edildi
 Kullanıcının gönderdiği güncel Hava&Fren listesindeki `(adet)` işaretleri iş adı metnine eklenmeden, iş kimliği üzerinden 20 katalog satırına bağlandı. Aynı işin iki kategoride geçtiği satırlar ayrı kimliklerle aynı adet kuralını taşır. İş ekle ve yönetici Planlama formlarında adet alanı yalnız işaretli satır seçilince görünür; varsayılan değer 1'dir. Sunucu işaretli işlerde birden fazla adedi kabul eder, diğer Hava&Fren işlerini tek işaretleme ile sınırlar. Kaydedilen adet, mevcut A/S ve rapor hesaplarında kullanılmaya devam eder. Eski kayıtlar ve iş adları değiştirilmedi. Değişiklik yalnız test ortamı içindir.
 
 Doğrulama: `npm run build`, `npm test` (**82/82**) ve `git diff --check` geçti. Birim testi 20 adetli satırı ve iki kategorideki tekrarını, API testi adetli işte çoklu miktarın kaydını ve adetsiz işte reddini doğruladı. Özellik commit’i `cc5530a`. Yalnız `vagontakip-test` Worker sürümü `7028d074-9cc1-42e0-b76e-358e88125450` yayımlandı. Uzak kontrol yayımlanan dosyayı, test girişini, önceki kayıt kimliklerinin korunmasını ve canlı sayfanın değişmediğini doğruladı. Chromium 390×844 görünümünde `Sensör hortumları söküldü` seçilince adet alanı açıldı, `Mekanik kontrol ve bakım` seçilince açılmadı; yatay taşma yoktu.
+
+## 10 Ekim 2026 — Fren tecrübesi G/P seçiminin iş satırına taşınması (test)
+
+G(yük)/P(yolcu) seçimi, Fren tecrübesi iş satırının içine, adet kontrolünün yerleştiği sağ bölüme taşındı. Dar ekranda seçenekler iş adının altında aynı satır kartının içinde kalır. Ayrı yerde duran seçim kaldırıldı; seçimin zorunluluğu ve kayıt biçimi değişmedi. Yalnız test ortamı hedeflenir.
+
+Doğrulama: `npm run build` ve `git diff --check` geçti. Bu yerleşim değişikliği için yeni otomatik test yazılmadı. Yayın ve mobil görünüm kontrolü sonrasında bu bölüm güncellenecek.
