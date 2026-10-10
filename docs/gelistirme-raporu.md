@@ -13,11 +13,13 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `03013a4` |
+| Son özellik commit'i | `6096db4` | `b324cd1` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` veya `1234 567 901-2`** (orta bölüm üç ya da dört rakam, son bölüm tek hane). Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
+
+Güncel posta seçimleri yalnız **Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro** adlarıdır. Yöneticiye özel Planlama, Genel bakışta Vagon ekle yanındadır; Bakım ekle yönetici ve kullanıcı için aynı saha iş formudur.
 
 ## Kullanıcı iş girişi ve yönetici görünümü (9 Ekim 2026)
 
@@ -396,8 +398,10 @@ Doğrulama: `npm run build` geçti; `npm test` ile **78/78 birim ve API testi ge
 
 ## 10 Ekim 2026 — Tek posta adı ve yönetici planlamasının ayrılması (test)
 
-Özellik commit’i ve dağıtım sonucu doğrulama sonrasında eklenecek. Posta seçimleri kullanıcının verdiği adlarla sınırlandı: Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro. Eski Hava-Fren ve Fren kayıtları Hava&Fren'e eşlenir; Hazırlama artık seçim değildir. Geçmiş veriler okunabilsin diye eski posta değerleri saklama doğrulamasında tanınır, ancak yeni hesap/personel girişinde kabul edilmez. Fren iş kataloğu yalnız Hava&Fren postasına bağlı kalır.
+Özellik commit’i: `b324cd1`. Posta seçimleri kullanıcının verdiği adlarla sınırlandı: Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro. Eski Hava-Fren ve Fren kayıtları Hava&Fren'e eşlenir; Hazırlama artık seçim değildir. Geçmiş veriler okunabilsin diye eski posta değerleri saklama doğrulamasında tanınır, ancak yeni hesap/personel girişinde kabul edilmez. Fren iş kataloğu yalnız Hava&Fren postasına bağlı kalır.
 
 Genel bakışta Vagon ekle düğmesinin yanına yalnız yöneticiye görünen **Planlama** düğmesi eklendi. Bu düğme, yöneticiye ait eski teknik operasyon formunu açar: günlük atölye kaydı oluşturma, personel/vardiya katılımı, vardiyalara göre başlangıç/bitiş sınırları, kişi/zaman aralığı ve bakım içi beklemeler burada bulunur. Yönetici Bakım ekle yolu da diğer kullanıcılarla aynı sade saha iş formunu açar. Planlama sayfasında günlük atölye, personel, rapor ve geçmiş teknik operasyonları düzenleme korunur. Teknik operasyon kaydı halen iş kalemi ister; mevcut sunucu formül 2 kayıt kuralı değiştirilmedi.
 
-`npm run build`, `npm test` (79/79) ve `git diff --check` geçti. API testi artık eski Fren/Hava-Fren adlarının yeni hesap postası olarak reddedildiğini ve Hava&Fren'in 52 işlik kataloğu açtığını doğrular. Yerel Worker tarayıcı denemesi çalışma zamanının açılışta çökmesi nedeniyle tamamlanamadı; uzak test arayüzü ayrıca kontrol edilecek. Test veritabanındaki eski posta değerleri yeni ada taşınacak; canlı site ve canlı veri değiştirilmeyecek.
+`npm run build`, `npm test` (79/79) ve `git diff --check` geçti. API testi eski Fren/Hava-Fren adlarının yeni hesap postası olarak reddedildiğini ve Hava&Fren'in 52 işlik kataloğu açtığını doğrular. Yerel Worker çalışma zamanı açılışta çöktü; ardından yayımlanan test sitesi sistem Chromium tarayıcısında 390×844 görünümle denendi. Yönetici Planlama düğmesi vardiya/katılım ve bekleme alanlarını; Bakım ekle ise sade saha formunu açtı. Hesabım posta menüsünün yalnız sekiz istenen adı içerdiği doğrulandı.
+
+Yalnız `vagontakip-test` Worker sürümü `273bc16a-6adb-4840-b9fd-4bc91c997f34` yayımlandı. Test personeli ve uygulama hesaplarındaki eski posta değerleri Hava&Fren adına taşındı. Yönetici hesap posta değişikliği oturumu yenilediği için diğer hesaplar ayrı girişlerle güncellendi. Vagon, personel ve hesap kimlikleri ile önceki vardiya, bakım, faaliyet ve saha iş kayıtları korundu. Uzak test girişi, yayımlanan arayüzün yerel derlemeyle eşleşmesi ve canlı sayfanın değişmemesi doğrulandı. Canlı uygulama ve canlı veri değiştirilmedi.
