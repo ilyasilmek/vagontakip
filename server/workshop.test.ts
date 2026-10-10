@@ -2,7 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { afterEach, describe, expect, it } from 'vitest';
 import { calculateOperation, turkeyTime, type WorkshopData, type WorkshopOperation } from '../shared/workshop';
 import { workEntryHours, type WorkEntry } from '../shared/work-entry';
-import { BRAKE_TEST_JOB_ID } from '../shared/fren-postasi';
+import { BRAKE_TEST_JOB_ID, isFrenPostasiQuantityJob } from '../shared/fren-postasi';
 import { VagonDatabase, type Env } from './index';
 import { DatabaseEngine, type StorageAdapter } from './database';
 
@@ -54,6 +54,19 @@ it('requires and stores G/P for brake test work in field and planning entries',a
  expect((await planned.json() as {record:WorkshopOperation}).record.jobs[0].brakeMode).toBe('P');
  const summary=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}`,'GET',undefined,session)).json() as {entries:{jobs:{brakeMode?:string}[]}[];operations:{jobs:{brakeMode?:string}[]}[]};
  expect(summary.entries[0].jobs[0].brakeMode).toBe('G');expect(summary.operations[0].jobs[0].brakeMode).toBe('P');
+});
+it('accepts quantities only for Hava&Fren work marked adet',async()=>{
+ const {object,session}=await prepared();
+ await call(object,'/api/account','PATCH',{post:'Hava&Fren'},session);
+ const wagon={number:'3175 4568 337-5',entryDate:'2026-10-09',channelDate:'',completedDate:'',status:'Bekliyor',notes:''};
+ expect((await call(object,'/api/wagons','POST',wagon,session)).status).toBe(201);
+ const quantityId=1001+6;
+ expect(isFrenPostasiQuantityJob(quantityId)).toBe(true);
+ const entry={wagonNumber:wagon.number,startedAt:at('09:00'),finishedAt:at('10:00'),jobs:[{jobTypeId:quantityId,quantity:4}],notes:''};
+ const saved=await call(object,'/api/workshop/work-entries','POST',entry,session);
+ expect(saved.status).toBe(201);
+ expect((await saved.json() as {record:WorkEntry}).record.jobs[0].quantity).toBe(4);
+ expect((await call(object,'/api/workshop/work-entries','POST',{...entry,jobs:[{jobTypeId:1001,quantity:4}]},session)).status).toBe(400);
 });
 it('offers only requested post names and keeps the Hava&Fren catalog available',async()=>{
  const {object,session}=await prepared();

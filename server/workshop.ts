@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ACTIVITY_KINDS, ACTIVITY_LABELS, ledger, milliseconds, minutes, netMinutes, subtract, turkeyDate, type LedgerEntry, type WorkshopData, type WorkshopOperation, type Standard } from '../shared/workshop';
 import { ApiError } from './errors';
 import { POSTS, LEGACY_POSTS } from '../shared/types';
-import { BRAKE_TEST_JOB_ID } from '../shared/fren-postasi';
+import { BRAKE_TEST_JOB_ID, isFrenPostasiJob, isFrenPostasiQuantityJob } from '../shared/fren-postasi';
 
 const id=z.string().min(1).max(100),text=z.string().trim().max(1000),instant=z.string().datetime({offset:true}).transform(value=>new Date(value).toISOString());
 const interval={startedAt:instant,finishedAt:instant};
@@ -103,6 +103,7 @@ export function resolveStandardLines(input:{jobTypeId:number;quantity:number;bra
  return input.map(j=>{
   requireRule(j.jobTypeId!==BRAKE_TEST_JOB_ID||!!j.brakeMode,'Fren tecrübesi için G(yük) veya P(yolcu) seçin.');
   requireRule(j.jobTypeId===BRAKE_TEST_JOB_ID||!j.brakeMode,'G/P seçimi yalnız Fren tecrübesi için yapılabilir.');
+  requireRule(!isFrenPostasiJob(j.jobTypeId)||isFrenPostasiQuantityJob(j.jobTypeId)||j.quantity===1,'Bu iş yalnız bir kez işaretlenebilir.');
   const old=existing?.jobs.find(line=>line.id===j.jobTypeId);if(old)return{...old,quantity:j.quantity,brakeMode:j.brakeMode};
   const candidates=standards.filter(s=>s.id===j.jobTypeId&&Date.parse(s.validFrom)<=Date.parse(at)&&(!s.validUntil||Date.parse(s.validUntil)>Date.parse(at))).sort((a,b)=>b.validFrom.localeCompare(a.validFrom));
   const s=candidates[0];requireRule(!!s&&s.active,'İş kalemi bu tarihte aktif değil veya standardı bulunamadı.');

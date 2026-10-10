@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FREN_POSTASI_JOBS, ensureFrenPostasiStandards } from '../../shared/fren-postasi';
+import { FREN_POSTASI_JOBS, ensureFrenPostasiStandards, isFrenPostasiQuantityJob } from '../../shared/fren-postasi';
 import { JOB_TYPES } from '../../shared/maintenance';
 import { calculateOperation, emptyWorkshop, netMinutes, ratio, summarizeWorkshop, turkeyTime, type WorkshopData, type WorkshopDay, type WorkshopOperation } from '../../shared/workshop';
 import { resolveStandardLines, validateWorkshop } from '../../server/workshop';
@@ -46,6 +46,15 @@ describe('Hava-Fren catalog migration',()=>{
   const initial=data.standards.length;ensureFrenPostasiStandards(data.standards);expect(data.standards).toHaveLength(initial);
   expect(data.standards.find(s=>s.name==='Sabo değişti')?.standardMinutes).toBe(data.standards.find(s=>s.id===1)?.standardMinutes);
   expect(data.standards.find(s=>s.name==='Sensör hortumları söküldü')?.standardMinutes).toBe(0);
+ });
+ it('opens quantities only for the marked Hava&Fren jobs in both occurrences',()=>{
+  const ids=FREN_POSTASI_JOBS.map((_,index)=>1001+index).filter(isFrenPostasiQuantityJob);
+  expect(ids).toHaveLength(20);
+  expect(FREN_POSTASI_JOBS.filter(([,name])=>name==='Emniyet çemberi eksik vida-somun takıldı')).toHaveLength(2);
+  expect(ids.filter(id=>FREN_POSTASI_JOBS[id-1001][1]==='Emniyet çemberi eksik vida-somun takıldı')).toHaveLength(2);
+  const data=emptyWorkshop(),at='2026-10-10T10:00:00.000Z';
+  expect(resolveStandardLines([{jobTypeId:ids[0],quantity:3}],data.standards,at)[0].quantity).toBe(3);
+  expect(()=>resolveStandardLines([{jobTypeId:1001,quantity:3}],data.standards,at)).toThrow('Bu iş yalnız bir kez işaretlenebilir.');
  });
  it('marks an operation with untimed work as incomplete for efficiency',()=>{
   const {data,operation}=fixture();operation.jobs=resolveStandardLines([{jobTypeId:1007,quantity:1},{jobTypeId:1035,quantity:1}],data.standards,operation.finishedAt);

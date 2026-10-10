@@ -67,6 +67,24 @@ export const FREN_POSTASI_JOBS = [
  ['Compact Fren İşlemleri', 'Compact fren perno arızası tamir edildi'],
 ] as const;
 export const FREN_POSTASI_JOB_IDS = FREN_POSTASI_JOBS.map((_, index) => 1001 + index);
+// The source marks these work items with “(adet)”; keep that marker out of saved job names.
+const QUANTITY_JOB_NAMES = new Set([
+ 'Emniyet çemberi eksik vida-somun takıldı',
+ 'Sensör hortumları söküldü', 'Sensör hortumları takıldı',
+ 'Regülatör çubuğu söküldü', 'Regülatör çubuğu takıldı',
+ 'Akerman tepe contası değişti', 'Akerman ağız contası değişti',
+ 'Akerman göbek contası değişti', 'Akerman musluğu değişti',
+ 'Akerman hortumu değişti', 'Yük sensörü söküldü',
+ 'Yük sensörü takıldı', 'Sensör hortumu değişti',
+ 'Sensör hortumu contası takıldı', 'Yön sensörü söküldü',
+ 'Yön sensörü takıldı', 'Sabo değişti',
+ 'Emniyet çemberi değişti', 'Fren silindiri contası değişti',
+]);
+export function isFrenPostasiQuantityJob(id:number):boolean {
+ const row=FREN_POSTASI_JOBS[id-1001];
+ return !!row&&QUANTITY_JOB_NAMES.has(row[1]);
+}
+
 export const BRAKE_TEST_JOB_ID = 1001 + FREN_POSTASI_JOBS.findIndex(([,name]) => name === 'Fren tecrübesi yapıldı');
 export type BrakeMode = 'G' | 'P';
 export function brakeModeLabel(mode:BrakeMode):string{return mode==='G'?'G(yük)':'P(yolcu)';}
