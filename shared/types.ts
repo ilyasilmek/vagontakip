@@ -2,7 +2,7 @@ export const WAGON_STATUSES = ['Bekliyor', 'Parça bekliyor', 'Bakım devam ediy
 export type WagonStatus = typeof WAGON_STATUSES[number];
 export const WAGON_TYPES = ['Hbbills', 'Habins', 'Gabs', 'Sgns', 'Sgss-w', 'Sggmrss', 'Rns', 'Eanos', 'Fals', 'Tagnpps', 'Uacs', 'Zans', 'Zacns', 'Laaes', 'Falns', 'Roos', 'Shimmns', 'Tamns', 'Remms', 'Sggrss', 'Zaes'] as const;
 export type WagonType = string;
-export const POSTS = ['Hava-Fren', 'Boji', 'Kaynak', 'Hazırlama', 'Vagonaj', 'Meydan', 'Torna'] as const;
+export const POSTS = ['Hava-Fren', 'Fren', 'Boji', 'Kaynak', 'Hazırlama', 'Vagonaj', 'Meydan', 'Torna', 'Tren Teşkil', 'Büro'] as const;
 export type Post = typeof POSTS[number];
 export type UserRole = 'admin' | 'user';
 
