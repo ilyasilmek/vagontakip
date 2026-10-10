@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `58cfe12` |
+| Son özellik commit'i | `6096db4` | `03013a4` |
 
 Güncel vagon numarası giriş biçimi **`1234 5678 901-2` veya `1234 567 901-2`** (orta bölüm üç ya da dört rakam, son bölüm tek hane). Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
 
@@ -21,7 +21,7 @@ Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon
 
 ## Kullanıcı iş girişi ve yönetici görünümü (9 Ekim 2026)
 
-Normal kullanıcının Bakım ekranı ve Vagonlar → Bakım ekle penceresi sadeleştirildi. Kullanıcı vagon numarasını, başlangıç/bitiş tarih ve saatlerini, yalnız hesabının postasına tanımlı yapılan işleri ve isteğe bağlı açıklamayı girer. Personel/vardiya seçimi, bekleme ve A/S hesapları kullanıcı formunda gösterilmez. İşi yapan kişinin adı istemciden alınmaz; sunucu oturumundaki hesap adından kaydedilir. Yeni vagonla iş birlikte kaydedilebilir.
+Normal kullanıcının Bakım ekranı ve Vagonlar → Bakım ekle penceresi sadeleştirildi. Kullanıcı vagon numarasını, başlangıç/bitiş tarih ve saatlerini, yalnız hesabının postasına tanımlı yapılan işleri, aynı postadan birlikte çalışan kişileri ve isteğe bağlı açıklamayı girer. Serbest ek iş ve ağır bakım dakikaları da girilebilir. Vardiya seçimi, bekleme ve A/S hesapları kullanıcı formunda gösterilmez. İşi yapan kişinin adı istemciden alınmaz; sunucu oturumundaki hesap adından kaydedilir. Yeni vagonla iş birlikte kaydedilebilir.
 
 Yönetici mevcut ayrıntılı bakım operasyonu formunu ve raporlarını kullanır. Kullanıcıların iş girişleri yönetici Bakım ekranında vagon, işi yapan hesap, saat ve iş kalemleriyle listelenir; vagon ayrıntısında geçmiş işleri yapan adlar yalnız yöneticiye gönderilir. Yeni saha iş girişlerinin bilinen iş süreleri seçili ekip sayısıyla çarpılarak ayrıca A/S olarak gösterilir. Süresiz katalog işi varsa toplam A/S eksik işaretlenir. Bu girişler henüz ana atölye raporu hesabına katılmaz; yöneticiye ayrı listede görünür. Kullanıcı iş girişini yönetici operasyonuna dönüştüren ayrı bir onay iş akışı bulunmuyor.
 
@@ -128,20 +128,20 @@ Kod ve bu rapor `maintenance-test` dalında GitHub'a kaydedildi; `main`, canlı 
 
 ### Yeni vagon ve bakım birlikte
 
-1. Vagon ekle açılır ve vagon bilgileri girilir.
+1. Vagon ekle açılır ve vagon numarası ile diğer bilgiler girilir; vagon tipi numaradan gösterilir.
 2. Aynı giriş akışındaki Bakım ekle düğmesine basılır; vagon numarası hazır gelir.
-3. Günlük atölye vardiyası seçilir/oluşturulur; gerçek personel, başlangıç/bitiş, yapılan işler ve bekleyen kişiler doldurulur.
-4. Vagon ve bakımı kaydet ile iki kayıt tek sunucu işlemi içinde oluşturulur.
+3. Bakımın başlangıç/bitiş zamanı, aynı postadan birlikte çalışanlar ve yapılan işler girilir. Ek iş ve ağır bakım dakikaları gerektiğinde elle eklenir.
+4. Kaydet ile vagon ve yapılan iş kaydı tek sunucu işlemi içinde oluşturulur.
 
 Önce vagonu kaydedip listeden tekrar seçmek gerekmez. Bakım formundan vazgeçmek henüz kaydedilmemiş vagonu da oluşturmaz; ilk forma dönüldüğünde vagon alanları korunur. Geçersiz bakımda yalnız vagonun yazılması önlenir. Bakım ekle seçilmeden normal Kaydet yalnız vagon kaydı oluşturur.
 
 ### Mevcut vagonun bakımı
 
-Vagonlar → vagon ayrıntıları → Bakım ekle. Vagon numarası hazır gelir. Kaydedince veya vazgeçince vagon detayına dönülür. Bu yol mevcut vagon için yalnız yeni bakım operasyonu oluşturur.
+Vagonlar → vagon ayrıntıları → Bakım ekle. Vagon numarası hazır gelir. Kaydedince veya vazgeçince vagon detayına dönülür. Bu yol mevcut vagon için yeni saha iş girişi oluşturur. Yönetici ayrı Bakım bölümünden **Teknik operasyon** formunu da açabilir.
 
 ### Raporlama
 
-Bakım operasyonları bölümü ayrı kalır. Rapor, Günlük atölye ve Personel sekmeleri vardır. Ay/hafta/özel aralık, arama ve sıralama; standart iş yükü, kapasite, kayıplar, yardımcı faaliyetler ve verimlilik gösterilir. Excel dokuz sayfadır: Yönetim özeti, Günlük atölye, Bakım operasyonları, Yapılan işler, Beklemeler, Personel katılımı, Faaliyet ve kayıplar, Performans, Eski kayıt açıklaması. Bakım detay kartı ve yönetim raporu sistem yazdırma ekranından PDF olarak kaydedilebilir. PDF desteği cihazın yazdırma olanaklarına bağlıdır. İlk sürümün dört sayfalı Excel'i tarihsel davranıştır.
+Bakım operasyonları bölümü ayrı kalır. Rapor, Günlük atölye ve Personel sekmeleri vardır. Ay/hafta/özel aralık, arama ve sıralama; standart iş yükü, kapasite, kayıplar, yardımcı faaliyetler ve verimlilik gösterilir. Excel'de önceki dokuz sayfaya ek olarak **Saha iş girişleri** sayfası bulunur. Bakım detay kartı ve yönetim raporu sistem yazdırma ekranından PDF olarak kaydedilebilir. PDF desteği cihazın yazdırma olanaklarına bağlıdır. İlk sürümün dört sayfalı Excel'i tarihsel davranıştır.
 
 ## Önceki doğrulamalar ve sınırlar (sürüm 1)
 
@@ -378,7 +378,7 @@ Doğrulama: TypeScript ve test derlemesi geçti; 72 Vitest testi geçti. Testler
 
 ## 10 Ekim 2026 — Vagon tipi ve sade saha iş akışı (test)
 
-Özellik commit’i: yayın sonrası eklenecek. Hedef yalnız `maintenance-test` ve `vagontakip-test`; kullanıcı onayı olmadan canlıya aktarılmaz.
+Özellik commit’i: `03013a4`. Hedef yalnız `maintenance-test` ve `vagontakip-test`; kullanıcı onayı olmadan canlıya aktarılmaz.
 
 Vagon tipi seçimi giriş formundan kaldırıldı. Tip, girilen numaranın ikinci bloğuna göre sunucuda belirlenir; eşleşme kaynağı [kullanıcının verdiği tablo](requirements/vagon-tipi-kodlari-2026-10-10.txt) ve kod karşılığıdır. Kullanıcının özel kararı uyarınca `4568` kodu **Sgss-w** olur. Bilinmeyen kodda tip boş kalır. Numara girişinde orta blok artık üç veya dört rakam olabilir. Tamamlandı durumu ilk seçildiğinde İstanbul'un o günkü tarihi otomatik atanır; önceden tamamlanan kaydın tarihi korunur. Önceki kayıtların tipleri topluca değiştirilmedi.
 
@@ -386,4 +386,4 @@ Saha bakım girişinde kategori filtresi çıkarıldı; iş adına göre arama v
 
 Birlikte çalışanlar seçimi aynı postaya atanmış aktif hesapları **ve hesap açılmamış aktif personel kayıtlarını** kapsar. Kaydı yapan kişi oturumundan otomatik eklenir. Yöneticinin Personel ekranından kişilerin postasını bir kez belirlemesi gerekir; posta bilinmeyen personel, yanlış ekibe yazılmaması için seçimde gösterilmez. Sunucu başka postadan kişiyi ve başka postanın işini reddeder. Yönetici eski teknik operasyon formuna ayrıca erişebilir. Saha işleri yönetici raporunda ve ayrı Excel sayfasında görünür; ana atölye formül 2 toplamına otomatik karıştırılmaz.
 
-Doğrulama: `npm run build` geçti; `npm test` ile **78/78 birim ve API testi geçti**. Eşleştirme, üç/dört haneli orta blok, otomatik tarih, serbest ve ağır bakım iş dakikaları, aynı posta ve hesap açılmamış personel seçimi API testlerinde kapsandı. Yerel Worker tarayıcı testi çalışma zamanı kilitlenmesi nedeniyle tamamlanamadı. Test dağıtım sonucu yayın sonrasında eklenecek.
+Doğrulama: `npm run build` geçti; `npm test` ile **78/78 birim ve API testi geçti**. Eşleştirme, üç/dört haneli orta blok, otomatik tarih, serbest ve ağır bakım iş dakikaları, aynı posta ve hesap açılmamış personel seçimi API testlerinde kapsandı. Yerel Worker tarayıcı testi çalışma zamanı kilitlenmesi nedeniyle tamamlanamadı. Yalnız `vagontakip-test` Worker sürümü `468edd0b-9387-4527-a5a7-3c60eb8625e5` yayımlandı. Uzak test girişi, önceki kayıt kimliklerinin korunması, yayımlanan arayüzün yerel derlemeyle eşleşmesi ve canlı sayfanın değişmemesi doğrulandı. Gerçek cihazda formun görsel/kullanılabilirlik denemesi henüz kullanıcı tarafından yapılmadı.
