@@ -453,3 +453,9 @@ Doğrulama: `npm run build`, `npm test` (**84/84**) ve `git diff --check` geçti
 Saha iş formunda **Ağır bakım** bölümü açıldığında tüm posta işleri artık listelenmez. İş adına yazıldıkça eşleşen işler görünür. Seçilmiş ağır bakım işleri, arama temizlense bile ek süreleriyle görünür kalır; böylece seçimler kaybolmuş gibi görünmez. Bölüm kapatılıp yeniden açıldığında arama ve ağır bakım seçimleri sıfırlanır. Normal iş araması ve kayıt mantığı değişmedi. Yalnız test ortamı hedeflenir.
 
 Doğrulama: `npm run build` ve `git diff --check` geçti. Bu düşük etkili görünüm değişikliği için yeni otomatik test yazılmadı. Özellik commit’i `0194cac`. Yalnız `vagontakip-test` Worker sürümü `a13f7831-fcb9-4777-9626-ea22ae2fd36a` yayımlandı. Uzak kontrol test girişini, önceki kayıt kimliklerinin korunmasını ve canlı sayfanın değişmediğini doğruladı. Chromium 390×844 görünümünde ağır bakım açılınca sıfır iş göründü; arama bir eşleşme getirdi; seçilen iş arama temizlenince görünür kaldı. Yatay taşma yoktu.
+
+## 11 Ekim 2026 — Seçilebilir pastel tema (test)
+
+Hesabım → Tema menüsüne **Pastel · Adaçayı** eklendi. Sıcak kırık beyaz zemin, adaçayı yeşili üst/alt gezinme ve yumuşak şeftali işlem vurguları kullanıldı; formlar, listeler, tablolar, uyarılar ve koyu metin kontrastı bu palete uyarlandı. Açık, Koyu ve Sistem seçenekleri korundu. Tema seçimi mevcut cihaz yerel depolama anahtarında saklanır; kullanıcı aynı menüden önceki tasarıma anında dönebilir. Operasyon verisi veya hesap ayarları değiştirilmedi. Yalnız test ortamı hedeflenir.
+
+Doğrulama: `npm run build` ve `git diff --check` geçti. Bu görsel ve yerel tercih değişikliği için yeni otomatik test yazılmadı. Test yayını sonrasında tarayıcıda görünüm, yeniden yüklemede tercih ve eski temaya dönüş kontrol edilecek.
