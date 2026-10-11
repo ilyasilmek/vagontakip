@@ -497,3 +497,5 @@ Fren tecrübesi seçildiğinde G (yük) ve P (yolcu) saniye girişleri her ekran
 ## 11 Ekim 2026 — Ek iş ve ağır bakım düğmelerinin hizalanması (test)
 
 Saha Bakım ekle formunda **Ek iş ekle** ve **Ağır bakım** düğmeleri eşit genişlikli iki sütuna taşındı. Dar ekranda aynı sırada kalmaları için düğmeler kapsayıcıya sığacak şekilde ayarlandı; Ağır bakım açıldığında seçili durum daha belirgin görünür. Ek iş ve ağır bakım kayıt mantığı değişmedi. Yalnız test ortamı hedeflenir.
+
+Özellik commit’i `6bb6e68`. `npm run build` ve `git diff --check` geçti; yalnız `vagontakip-test` Worker sürümü `92d4d25f-cd6f-42be-b7b5-9ebf3c93906a` yayımlandı. Uzak kontrol yayımlanan dosyayı, test girişini, önceki kayıt kimliklerini ve canlı sayfanın değişmediğini doğruladı. Chromium 320 ve 390 piksel görünümünde düğmeler aynı sırada ve eşit genişlikteydi; Ek iş ekle alanı ve Ağır bakım bölümü açıldı, yatay taşma görülmedi. Gerçek kayıt oluşturulmadı. Yalnız görünüm değişikliği için yeni otomatik test yazılmadı.
