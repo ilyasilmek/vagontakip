@@ -140,6 +140,11 @@ it('saves both brake test seconds, permits instant timestamps, and edits own wor
  expect(created.status).toBe(201);
  const record=(await created.json() as {record:WorkEntry}).record;
  expect(record.jobs[0]).toMatchObject({loadDurationSeconds:18,passengerDurationSeconds:24});
+ const automatic=await call(object,'/api/workshop/work-entries','POST',{...input,autoTimestamp:true},mechanic);
+ expect(automatic.status).toBe(201);
+ const automaticEntry=(await automatic.json() as {record:WorkEntry}).record;
+ expect(automaticEntry.startedAt).toBe(automaticEntry.finishedAt);
+ expect(Math.abs(Date.parse(automaticEntry.startedAt)-Date.now())).toBeLessThan(10000);
  expect(workEntryHours(record).knownLaborHours).toBeCloseTo(42/3600);
  expect((await call(object,`/api/workshop/work-entries/${record.id}`,'GET',undefined,other)).status).toBe(403);
  expect((await call(object,`/api/workshop/work-entries/${record.id}`,'PATCH',{...input,revision:1,notes:'other'},other)).status).toBe(403);
