@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { calculateOperation, turkeyTime, type WorkshopData, type WorkshopOperation } from '../shared/workshop';
 import { workEntryHours, type WorkEntry } from '../shared/work-entry';
 import { BRAKE_TEST_JOB_ID, isFrenPostasiQuantityJob } from '../shared/fren-postasi';
+import { resolveStandardLines } from './workshop';
 import { VagonDatabase, type Env } from './index';
 import { DatabaseEngine, type StorageAdapter } from './database';
 
@@ -147,4 +148,14 @@ it('saves both brake test seconds, permits instant timestamps, and edits own wor
  expect((await updated.json() as {record:WorkEntry}).record).toMatchObject({revision:2,startedAt:at('08:00'),notes:'Düzeltildi'});
  expect((await call(object,`/api/workshop/work-entries/${record.id}`,'PATCH',{...input,revision:1},mechanic)).status).toBe(409);
  expect((await call(object,'/api/workshop/work-entries','POST',{...input,jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,loadDurationSeconds:18}]},mechanic)).status).toBe(400);
+});
+
+it('requires both G and P seconds for new planning brake tests while preserving legacy lines',async()=>{
+ const {object,session}=await prepared(),data=await listing(object,session),standard=data.standards.find(row=>row.id===BRAKE_TEST_JOB_ID);
+ expect(standard).toBeDefined();
+ const atTime=standard!.validFrom;
+ const lines=resolveStandardLines([{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,loadDurationSeconds:18,passengerDurationSeconds:24}],data.standards,atTime);
+ expect(lines[0]).toMatchObject({loadDurationSeconds:18,passengerDurationSeconds:24});
+ expect(()=>resolveStandardLines([{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,loadDurationSeconds:18}],data.standards,atTime)).toThrow('hem G (yük) hem P (yolcu)');
+ expect(resolveStandardLines([{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,brakeMode:'G',durationSeconds:18}],data.standards,atTime)[0].durationSeconds).toBe(18);
 });

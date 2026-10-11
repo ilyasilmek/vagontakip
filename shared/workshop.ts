@@ -30,7 +30,7 @@ export interface WorkshopOperation extends RecordMetadata, Interval {
  participation: Participation[]; waits: WorkshopWait[];
 }
 export interface WorkshopData { formulaVersion: 2; people: Person[]; shifts: ShiftDefinition[]; standards: Standard[]; days: WorkshopDay[]; operations: WorkshopOperation[]; activities: WorkshopActivity[]; }
-export type OperationInput = Omit<WorkshopOperation,keyof RecordMetadata|'jobs'|'formulaVersion'> & { jobs: {jobTypeId:number;quantity:number;brakeMode?:'G'|'P';durationSeconds?:number}[]; };
+export type OperationInput = Omit<WorkshopOperation,keyof RecordMetadata|'jobs'|'formulaVersion'> & { jobs: {jobTypeId:number;quantity:number;brakeMode?:'G'|'P';durationSeconds?:number;loadDurationSeconds?:number;passengerDurationSeconds?:number}[]; };
 export type DayInput = Omit<WorkshopDay,keyof RecordMetadata|'shiftName'>;
 export type ActivityInput = Omit<WorkshopActivity,keyof RecordMetadata>;
 export function emptyWorkshop(): WorkshopData {

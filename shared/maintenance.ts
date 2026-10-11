@@ -13,7 +13,7 @@ const rows: [string, number, string][] = [
 ];
 export const JOB_TYPES: JobType[] = rows.map(([name,standardMinutes,category],i)=>({id:i+1,name,standardMinutes,category}));
 export const WAIT_REASONS = ['Manevra Bekleme','Malzeme/Valf Tedarik','Kanal/Test Yolu İşgali','Diğer'] as const;
-export interface WorkItem extends JobType { quantity: number; brakeMode?: BrakeMode; durationMinutes?: number; durationSeconds?: number; }
+export interface WorkItem extends JobType { quantity: number; brakeMode?: BrakeMode; durationMinutes?: number; durationSeconds?: number; loadDurationSeconds?:number; passengerDurationSeconds?:number; }
 export interface WaitEntry { reason: typeof WAIT_REASONS[number]; minutes: number; note: string; }
 export interface MaintenanceOperation extends RecordMetadata {
  wagonNumber: string; startedAt: string; finishedAt: string; shift: string; supervisor: string; personnel: number;
