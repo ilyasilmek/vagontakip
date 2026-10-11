@@ -125,3 +125,26 @@ it('rejects missing work, crew and wait selections with Turkish field-specific m
  ] as const){const response=await call(f.object,'/api/workshop/operations','POST',input,f.session);expect(response.status).toBe(400);expect((await response.json() as {error:string}).error).toBe(message);}
  const data=await(await call(f.object,'/api/workshop','GET',undefined,f.session)).json() as WorkshopData;expect(data.operations).toHaveLength(0);
 });
+
+it('saves both brake test seconds, permits instant timestamps, and edits own work with revision checks',async()=>{
+ const {object,session}=await prepared();
+ await call(object,'/api/admin/users','POST',{username:'mechanic',displayName:'Mechanic',password:PASSWORD,role:'user'},session);
+ await call(object,'/api/admin/users','POST',{username:'otheruser',displayName:'Other User',password:PASSWORD,role:'user'},session);
+ const mechanic=await login(object,'mechanic'),other=await login(object,'otheruser');
+ await call(object,'/api/account','PATCH',{post:'Hava&Fren'},mechanic);
+ const wagon={number:'3175 4568 337-5',entryDate:'2026-10-09',channelDate:'',completedDate:'',status:'Bekliyor',notes:''};
+ expect((await call(object,'/api/wagons','POST',wagon,session)).status).toBe(201);
+ const input={wagonNumber:wagon.number,startedAt:at('09:00'),finishedAt:at('09:00'),jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,loadDurationSeconds:18,passengerDurationSeconds:24}],customJobs:[],heavyJobs:[],crewIds:[],notes:''};
+ const created=await call(object,'/api/workshop/work-entries','POST',input,mechanic);
+ expect(created.status).toBe(201);
+ const record=(await created.json() as {record:WorkEntry}).record;
+ expect(record.jobs[0]).toMatchObject({loadDurationSeconds:18,passengerDurationSeconds:24});
+ expect(workEntryHours(record).knownLaborHours).toBeCloseTo(42/3600);
+ expect((await call(object,`/api/workshop/work-entries/${record.id}`,'GET',undefined,other)).status).toBe(403);
+ expect((await call(object,`/api/workshop/work-entries/${record.id}`,'PATCH',{...input,revision:1,notes:'other'},other)).status).toBe(403);
+ const updated=await call(object,`/api/workshop/work-entries/${record.id}`,'PATCH',{...input,revision:1,startedAt:at('08:00'),finishedAt:at('08:15'),notes:'Düzeltildi'},mechanic);
+ expect(updated.status).toBe(200);
+ expect((await updated.json() as {record:WorkEntry}).record).toMatchObject({revision:2,startedAt:at('08:00'),notes:'Düzeltildi'});
+ expect((await call(object,`/api/workshop/work-entries/${record.id}`,'PATCH',{...input,revision:1},mechanic)).status).toBe(409);
+ expect((await call(object,'/api/workshop/work-entries','POST',{...input,jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,loadDurationSeconds:18}]},mechanic)).status).toBe(400);
+});

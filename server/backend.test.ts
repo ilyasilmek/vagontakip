@@ -167,7 +167,12 @@ describe('authenticated shared records', () => {
     const admin = await login(object);
     expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, entryDate: '' }, admin)).status).toBe(400);
     expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, channelDate: '2026-10-05' }, admin)).status).toBe(400);
-    const completed=await call(object, '/api/wagons', 'POST', { ...wagonFields, status: 'Tamamlandı' }, admin);expect(completed.status).toBe(201);expect((await completed.json() as {record:Wagon}).record.completedDate).toBe(new Date(Date.now()+3*3600000).toISOString().slice(0,10));
+    const completed=await call(object, '/api/wagons', 'POST', { ...wagonFields, status: 'Tamamlandı' }, admin);expect(completed.status).toBe(201);
+    const completedRecord=(await completed.json() as {record:Wagon}).record;
+    expect(completedRecord.completedDate).toBe(new Date(Date.now()+3*3600000).toISOString().slice(0,10));
+    const revised=await call(object, `/api/wagons/${completedRecord.id}`, 'PATCH', { revision:completedRecord.revision,completedDate:'2026-10-08' }, admin);
+    expect(revised.status).toBe(200);
+    expect((await revised.json() as {record:Wagon}).record.completedDate).toBe('2026-10-08');
     expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, completedDate: '2026-10-07' }, admin)).status).toBe(400);
     expect((await call(object, '/api/wagons/wagon-1', 'PATCH', { revision: 1, notes: 'Preserve historical workflow' }, admin)).status).toBe(200);
     expect((await call(object, '/api/wagons/wagon-1', 'PATCH', { revision: 2, status: 'Bekliyor' }, admin)).status).toBe(400);

@@ -315,7 +315,7 @@ export class VagonDatabase {
             const actor = assertActor(database, claims);
             const record = this.records(database, collection).find(r => r.id === id);
             revisionCheck(record, revision);
-            if (collection === 'wagons') {if(Object.hasOwn(fields,'completedDate'))rejectManualCompletionDate({...record,...fields} as Wagon);const derived=derivedWagonFields({...record,...fields} as Wagon,record as Wagon);if(Object.hasOwn(fields,'number'))Object.assign(fields,{wagonType:derived.wagonType});if(Object.hasOwn(fields,'status')||Object.hasOwn(fields,'completedDate'))Object.assign(fields,{completedDate:derived.completedDate});validateWagonWorkflow({ ...record, ...fields } as Wagon, record as Wagon, fields);}
+            if (collection === 'wagons') {if(Object.hasOwn(fields,'completedDate'))rejectManualCompletionDate({...record,...fields} as Wagon);const derived=derivedWagonFields({...record,...fields} as Wagon,record as Wagon);if(Object.hasOwn(fields,'number'))Object.assign(fields,{wagonType:derived.wagonType});if(Object.hasOwn(fields,'status')||Object.hasOwn(fields,'completedDate'))Object.assign(fields,{completedDate:({...record,...fields} as Wagon).status==='Tamamlandı'&&fields.completedDate?fields.completedDate:derived.completedDate});validateWagonWorkflow({ ...record, ...fields } as Wagon, record as Wagon, fields);}
             Object.assign(record, fields, { revision: record.revision + 1, updatedAt: new Date().toISOString(), updatedBy: actor.id });
             audit(database, actor, 'Kayıt düzenlendi', entityNames[collection], record.id);
             return record;
