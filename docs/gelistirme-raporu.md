@@ -487,3 +487,7 @@ Ek düzeltme commit’i `2d3c5cf`; yalnız `vagontakip-test` Worker sürümü `5
 Yeni Bakım ekle kaydının otomatik zamanı, cihaz saatinden bağımsız olarak sunucu tarafından Kaydet isteğinde atanacak biçimde sağlamlaştırıldı. Düzenlenen geçmiş kayıtlarda kullanıcı tarafından seçilen tarih/saat korunur. API testi otomatik başlangıç ve bitişin aynı sunucu anı olduğunu doğruladı; toplam **86/86** test ve derleme yeniden geçti.
 
 Sunucu zamanı düzeltmesi `24abd60` commit’iyle yalnız `vagontakip-test` Worker sürümü `cd3da7be-a7ed-4f47-bdd8-fe2c73296455` olarak yayımlandı. Uzak kontrol yayımlanan dosyayı, test girişini, önceki kayıt kimliklerini ve canlı sayfanın değişmediğini doğruladı.
+
+## 11 Ekim 2026 — Fren tecrübesi süre alanlarının kompakt görünümü (test)
+
+Fren tecrübesi seçildiğinde G (yük) ve P (yolcu) saniye girişleri her ekran genişliğinde aynı satırda, kısa başlıklarla gösterilir. Dar mobil ekran için tek sütuna geçiş kaldırıldı; iki alanın genişliği eşit ve taşmadan sığacak şekilde ayarlandı. Erişilebilir alan adları, iki sürenin zorunluluğu ve kayıt/hesaplama kuralları değişmedi. Yalnız test ortamı hedeflenir.
