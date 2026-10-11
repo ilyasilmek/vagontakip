@@ -493,3 +493,7 @@ Sunucu zamanı düzeltmesi `24abd60` commit’iyle yalnız `vagontakip-test` Wor
 Fren tecrübesi seçildiğinde G (yük) ve P (yolcu) saniye girişleri her ekran genişliğinde aynı satırda, kısa başlıklarla gösterilir. Dar mobil ekran için tek sütuna geçiş kaldırıldı; iki alanın genişliği eşit ve taşmadan sığacak şekilde ayarlandı. Erişilebilir alan adları, iki sürenin zorunluluğu ve kayıt/hesaplama kuralları değişmedi. Yalnız test ortamı hedeflenir.
 
 Özellik commit’i `9facc05`. `npm run build` ve `git diff --check` geçti; yalnız `vagontakip-test` Worker sürümü `8851b0a8-fc6d-4f93-9e16-5ad2604befd4` yayımlandı. Uzak kontrol yayımlanan dosyanın derlemeyle eşleştiğini, test girişini, önceki kayıt kimliklerini ve canlı sayfanın değişmediğini doğruladı. Chromium'da 320 ve 390 piksel genişlikte örnek katalogla açılan G/P alanları aynı sıradaydı; alan genişlikleri sırasıyla 108 ve 143 pikseldi, yatay taşma görülmedi. Gerçek kayıt oluşturulmadı. Bu yalnız görünüm değişikliği için yeni otomatik test yazılmadı.
+
+## 11 Ekim 2026 — Ek iş ve ağır bakım düğmelerinin hizalanması (test)
+
+Saha Bakım ekle formunda **Ek iş ekle** ve **Ağır bakım** düğmeleri eşit genişlikli iki sütuna taşındı. Dar ekranda aynı sırada kalmaları için düğmeler kapsayıcıya sığacak şekilde ayarlandı; Ağır bakım açıldığında seçili durum daha belirgin görünür. Ek iş ve ağır bakım kayıt mantığı değişmedi. Yalnız test ortamı hedeflenir.
