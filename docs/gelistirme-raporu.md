@@ -485,3 +485,5 @@ Ek düzeltme: Yönetici Planlama formundaki fren tecrübesi de tekli G/P seçimi
 Ek düzeltme commit’i `2d3c5cf`; yalnız `vagontakip-test` Worker sürümü `5a3cae6b-213c-4fde-8c97-d2270da6f665` yayımlandı. `npm run build` ve `git diff --check` geçti. Uzak kontrol yayımlanan dosyanın derlemeyle eşleştiğini, test girişinin ve önceki kayıt kimliklerinin korunduğunu, canlı sayfanın değişmediğini doğruladı. Test yönetici hesabının postasına iş kataloğu atanmadığı için iki G/P alanı bu hesapla tarayıcıda açılamadı; form ve API doğrulaması testlerle yapıldı.
 
 Yeni Bakım ekle kaydının otomatik zamanı, cihaz saatinden bağımsız olarak sunucu tarafından Kaydet isteğinde atanacak biçimde sağlamlaştırıldı. Düzenlenen geçmiş kayıtlarda kullanıcı tarafından seçilen tarih/saat korunur. API testi otomatik başlangıç ve bitişin aynı sunucu anı olduğunu doğruladı; toplam **86/86** test ve derleme yeniden geçti.
+
+Sunucu zamanı düzeltmesi `24abd60` commit’iyle yalnız `vagontakip-test` Worker sürümü `cd3da7be-a7ed-4f47-bdd8-fe2c73296455` olarak yayımlandı. Uzak kontrol yayımlanan dosyayı, test girişini, önceki kayıt kimliklerini ve canlı sayfanın değişmediğini doğruladı.
