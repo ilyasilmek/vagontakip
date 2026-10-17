@@ -166,7 +166,7 @@ it('requires both G and P seconds for new planning brake tests while preserving 
 });
 
 it('separates duplicate wagon records and keeps heavy duration local to one work entry',async()=>{
- const {object,session}=await prepared();
+ const {object,session,input}=await prepared();
  await call(object,'/api/account','PATCH',{post:'Hava&Fren'},session);
  const catalog=await(await call(object,'/api/workshop/work-catalog','GET',undefined,session)).json() as {standards:{id:number;standardMinutes:number}[]};
  const standard=catalog.standards.find(row=>row.standardMinutes>0&&row.id!==BRAKE_TEST_JOB_ID)!;
@@ -189,4 +189,10 @@ it('separates duplicate wagon records and keeps heavy duration local to one work
  expect(secondHistory.entries.map(row=>row.id)).toEqual([saved.record.id]);
  const firstHistory=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}?wagonId=${first.record.id}`,'GET',undefined,session)).json() as {entries:{id:string}[]};
  expect(firstHistory.entries).toHaveLength(1);
+ const plan=await call(object,'/api/workshop/operations','POST',{...input,wagonNumber:wagon.number},session);
+ expect(plan.status).toBe(201);
+ const oldWithPlan=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}?wagonId=${first.record.id}`,'GET',undefined,session)).json() as {operations:unknown[]};
+ const newWithPlan=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}?wagonId=${second.record.id}`,'GET',undefined,session)).json() as {operations:unknown[]};
+ expect(oldWithPlan.operations).toHaveLength(0);
+ expect(newWithPlan.operations).toHaveLength(1);
 });

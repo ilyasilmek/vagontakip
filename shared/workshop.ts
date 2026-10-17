@@ -26,7 +26,7 @@ export interface WorkshopWait extends PeopleInterval { reason: string; note: str
 export interface Standard extends JobType { versionId: string; validFrom: string; validUntil: string|null; active: boolean; }
 export interface StandardLine extends WorkItem { versionId: string; }
 export interface WorkshopOperation extends RecordMetadata, Interval {
- formulaVersion: 2; wagonNumber: string; supervisor: string; notes: string; jobs: StandardLine[];
+ formulaVersion: 2; wagonId?:string; wagonNumber: string; supervisor: string; notes: string; jobs: StandardLine[];
  participation: Participation[]; waits: WorkshopWait[];
 }
 export interface WorkshopData { formulaVersion: 2; people: Person[]; shifts: ShiftDefinition[]; standards: Standard[]; days: WorkshopDay[]; operations: WorkshopOperation[]; activities: WorkshopActivity[]; }

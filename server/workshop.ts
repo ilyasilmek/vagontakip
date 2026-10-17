@@ -22,7 +22,7 @@ const lineSchema=z.object({id:z.number().int().positive(),versionId:id,name:z.st
 export const workshopSchema=z.object({formulaVersion:z.literal(2),people:z.array(personInputSchema.extend({...meta,post:z.union([z.enum(POSTS),z.enum(LEGACY_POSTS),z.literal('')]).optional()})),shifts:z.array(shiftSchema),
  standards:z.array(z.object({id:z.number().int().positive(),versionId:id,name:z.string().min(1),category:z.string().min(1),standardMinutes:z.number().nonnegative(),active:z.boolean(),validFrom:instant,validUntil:instant.nullable()})),
  days:z.array(dayInputSchema.extend({...meta,shiftName:z.string().min(1)})),
- operations:z.array(operationInputSchema.omit({jobs:true}).extend({...meta,formulaVersion:z.literal(2),jobs:z.array(lineSchema).min(1,'En az bir yapılan iş seçin.')})),
+ operations:z.array(operationInputSchema.omit({jobs:true}).extend({...meta,wagonId:id.optional(),formulaVersion:z.literal(2),jobs:z.array(lineSchema).min(1,'En az bir yapılan iş seçin.')})),
  activities:z.array(activityInputSchema.extend(meta))});
 function requireRule(ok:boolean,message:string):asserts ok { if(!ok)throw new ApiError(400,'WORKSHOP_VALIDATION',message); }
 function validInterval(i:{startedAt:string;finishedAt:string}) { requireRule(milliseconds(i).every(Number.isFinite)&&minutes(i)>0,'Bitiş zamanı başlangıçtan sonra olmalı.'); }
