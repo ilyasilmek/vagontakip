@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `50de7dd` |
+| Son özellik commit'i | `6096db4` | `3f2970f` |
 
 Güncel yeni vagon numarası giriş biçimi **`1234 5678 901-2`** (12 rakam). Eski 11 haneli kayıtlar okunur ve numarası değişmeden düzenlenebilir; yeni kayıt olarak 11 hane kabul edilmez. Önceki biçimler aşağıdaki tarihsel kayıtlarda yer alır.
 
@@ -27,7 +27,7 @@ Yalnız test dalında yeni vagon numarası girilirken aynı numaralı kayıt var
 
 Yeni vagon numarası 12 rakam biçiminde sunucu ve arayüzde doğrulanır. Yeni vagonun varsayılan durumu Bakım devam ediyor olur. Bakım ekleme formunda vagon numarası tek satırda okunur. Ağır bakım paneli yalnız seçilmiş işleri gösterir; katalog araması açmaz. Normal standart dakika gösterilir, artırılan dakika yalnız o bakım girişinin iş anlık görüntüsüne yazılır ve A/S hesabında o kayda uygulanır. Katalog standardı ve sonraki kayıtlar değişmez. Eski ayrı ağır bakım iş satırları düzenlemede korunur.
 
-Doğrulama: TypeScript kontrolü, test derlemesi ve 87 birim/API testi geçti. Yeni API testi çift vagon kaydının ayrı saha işi ve planlama geçmişini, 11 haneli yeni numaranın reddini ve ağır bakım süre değişikliğinin sonraki kaydın standardını etkilememesini doğrular. Özellik commit’i `50de7dd` GitHub `maintenance-test` dalına gönderildi. Yalnız `vagontakip-test` Worker sürümü `70c90a38-7202-4556-b83d-e16d188edad7` yayımlandı. Uzak test sağlık kontrolü `ok: true`, `storage: local` döndü; sayfa yeni arayüz dosyasına işaret ediyor. Canlı sağlık kontrolü `ok: true`, `storage: github` döndü. Canlıya aktarım onay bekler.
+Doğrulama: TypeScript kontrolü, test derlemesi ve 87 birim/API testi geçti. Yeni API testi çift vagon kaydının ayrı saha işi ve planlama geçmişini, 11 haneli yeni numaranın reddini ve ağır bakım süre değişikliğinin sonraki kaydın standardını etkilememesini doğrular. Özellik commitleri `50de7dd` ve `3f2970f` GitHub `maintenance-test` dalına gönderildi. Güncel `vagontakip-test` Worker sürümü `fe424ed4-eb49-4f49-a35f-a58131f687ba` yayımlandı; önceki test sürümü `70c90a38-7202-4556-b83d-e16d188edad7`. Uzak test sağlık kontrolü `ok: true`, `storage: local` döndü; sayfa yeni arayüz dosyasına işaret ediyor. Canlı sağlık kontrolü `ok: true`, `storage: github` döndü. Canlıya aktarım onay bekler.
 
 ## Kullanıcı iş girişi ve yönetici görünümü (9 Ekim 2026)
 
