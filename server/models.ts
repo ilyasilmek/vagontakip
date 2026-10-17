@@ -45,6 +45,9 @@ export const wagonFields = z.object({
   status: z.enum(WAGON_STATUSES),
   notes: z.string().trim().max(10_000),
 }).strict();
+export function validateNewWagonNumber(number:string):void {
+ if(!/^\d{4} \d{4} \d{3}-\d$/.test(number))throw new ApiError(400,'INVALID_WAGON_NUMBER','Vagon numarası 12 rakamlıdır; boşluklar ve tire otomatik eklenir.');
+}
 export const partFields = z.object({
   type: requiredText,
   brand: shortText,

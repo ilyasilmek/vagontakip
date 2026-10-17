@@ -6,8 +6,8 @@ export function formatWagonNumber(value:string):string {
  if(n.length===11)return `${n.slice(0,4)} ${n.slice(4,7)} ${n.slice(7,10)}-${n.slice(10)}`;
  return n.slice(0,4)+(n.length>4?' '+n.slice(4,8):'')+(n.length>8?' '+n.slice(8,11):'')+(n.length>11?'-'+n.slice(11,12):'');
 }
-const pattern='[0-9]{4} [0-9]{3,4} [0-9]{3}-[0-9]';
-const message='Vagon numarasını 11 veya 12 rakamla girin. Örnek: 1234 567 901-2 veya 1234 5678 901-2.';
+const pattern='[0-9]{4} [0-9]{4} [0-9]{3}-[0-9]';
+const message='Vagon numarası 12 rakamlıdır; boşluklar ve tire otomatik eklenir.';
 export default function WagonNumberInput({value,onChange,original,required=false,readOnly=false,disabled=false,id,label}:{value:string;onChange:(value:string)=>void;original?:string;required?:boolean;readOnly?:boolean;disabled?:boolean;id?:string;label:string}){
  const hint=useId(),ref=useRef<HTMLInputElement>(null),cursorRef=useRef<{value:string;position:number}|null>(null),[attempted,setAttempted]=useState(false);
  useLayoutEffect(()=>{const desired=cursorRef.current,input=ref.current;if(desired&&desired.value===value){if(input&&input===document.activeElement)input.setSelectionRange(desired.position,desired.position);cursorRef.current=null;}},[value]);
@@ -26,5 +26,5 @@ export default function WagonNumberInput({value,onChange,original,required=false
   // Deleting a generated separator removes the adjacent digit, rather than getting stuck.
   if(e.key==='Backspace'&&start>0&&/[ -]/.test(value[start-1])){e.preventDefault();input.setCustomValidity('');change(value.slice(0,start-2)+value.slice(start),start-2);}
   else if(e.key==='Delete'&&/[ -]/.test(value[start]??'')&&start<value.length){e.preventDefault();input.setCustomValidity('');change(value.slice(0,start)+value.slice(start+2),start);}
- }}/><span id={hint} className={attempted&&invalid?'field-error':'field-hint'} role={attempted&&invalid?'alert':undefined}>{attempted&&invalid?message:historical&&!new RegExp('^'+pattern+'$').test(value)?'Mevcut numara korunur. Değiştirirken 11 veya 12 rakam girin.':'11 veya 12 rakam; boşluklar ve tire otomatik eklenir.'}</span></>;
+ }}/><span id={hint} className={attempted&&invalid?'field-error':'field-hint'} role={attempted&&invalid?'alert':undefined}>{attempted&&invalid?message:historical&&!new RegExp('^'+pattern+'$').test(value)?'Mevcut numara korunur. Değiştirirken 12 rakam girin.':message}</span></>;
 }

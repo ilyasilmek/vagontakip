@@ -199,3 +199,9 @@ button:active:not(:disabled) {transform:translateY(1px)}
 .work-entry-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
 .work-entry-actions button {width:100%;min-width:0;min-height:46px;white-space:normal}
 .work-entry-actions button[aria-expanded=true] {background:color-mix(in srgb,var(--accent) 20%,transparent);border-color:var(--ink)}
+
+.duplicate-wagon-prompt {display:block;padding:16px;border:1px solid var(--accent);border-radius:8px}
+.duplicate-wagon-prompt p {margin:0 0 12px;font-weight:600}
+.duplicate-wagon-prompt .confirm-actions {display:flex;flex-wrap:wrap;gap:10px}
+.duplicate-wagon-prompt .confirm-actions button {flex:1 1 220px;min-height:44px;white-space:normal}
+.work-entry-wagon {display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;font-size:14px}

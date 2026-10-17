@@ -15,11 +15,19 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
 | Son özellik commit'i | `6096db4` | `b324cd1` |
 
-Güncel vagon numarası giriş biçimi **`1234 5678 901-2` veya `1234 567 901-2`** (orta bölüm üç ya da dört rakam, son bölüm tek hane). Önceki 13 rakam uygulaması aşağıdaki tarihsel kayıtta yer alır.
+Güncel yeni vagon numarası giriş biçimi **`1234 5678 901-2`** (12 rakam). Eski 11 haneli kayıtlar okunur ve numarası değişmeden düzenlenebilir; yeni kayıt olarak 11 hane kabul edilmez. Önceki biçimler aşağıdaki tarihsel kayıtlarda yer alır.
 
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
 Güncel posta seçimleri yalnız **Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro** adlarıdır. Yöneticiye özel Planlama, Genel bakışta Vagon ekle yanındadır; Bakım ekle yönetici ve kullanıcı için aynı saha iş formudur.
+
+## 17 Ekim 2026 — yinelenen vagon kaydı ve ağır bakım süresi
+
+Yalnız test dalında yeni vagon numarası girilirken aynı numaralı kayıt varsa kullanıcıya mevcut kayda geçme veya yeni kayıt açma seçimi gösterilir. Mevcut kayda geçince vagon ayrıntısı ve yapılan bakımlar açılır. Yeni kayıt seçimi aynı numarayla ayrı kayıt kimliği oluşturur; saha iş girişleri vagon kimliğine bağlanır ve vagon ayrıntısında ilgili kaydın iş geçmişi gösterilir. Kimliği bulunmayan eski iş kayıtları aynı numaradaki ilk kayda ait kabul edilir. Yönetici planlama operasyonları tarihsel olarak numaraya bağlıdır; bunların numara bazlı görünümü korunur.
+
+Yeni vagon numarası 12 rakam biçiminde sunucu ve arayüzde doğrulanır. Yeni vagonun varsayılan durumu Bakım devam ediyor olur. Bakım ekleme formunda vagon numarası tek satırda okunur. Ağır bakım paneli yalnız seçilmiş işleri gösterir; katalog araması açmaz. Normal standart dakika gösterilir, artırılan dakika yalnız o bakım girişinin iş anlık görüntüsüne yazılır ve A/S hesabında o kayda uygulanır. Katalog standardı ve sonraki kayıtlar değişmez. Eski ayrı ağır bakım iş satırları düzenlemede korunur.
+
+Doğrulama: TypeScript kontrolü, test derlemesi ve 87 birim/API testi geçti. Yeni API testi çift vagon kaydının ayrı bakım geçmişini, 11 haneli yeni numaranın reddini ve ağır bakım süre değişikliğinin sonraki kaydın standardını etkilememesini doğrular. Bu özellikler yalnız `maintenance-test` dalı ve `vagontakip-test` hedefi içindir; canlıya aktarım onay bekler.
 
 ## Kullanıcı iş girişi ve yönetici görünümü (9 Ekim 2026)
 

@@ -7,7 +7,7 @@ import { DatabaseEngine, assertActor, audit, type DatabaseEnvironment } from './
 import { ApiError, errorResponse } from './errors';
 import { WorkshopSqlStorage } from './workshop-storage';
 import { workshopRequest } from './workshop-routes';
-import { createUserSchema, derivedWagonFields, fieldSchemas, normalizeUsername, parseInput, passwordSchema, postSchema, rejectManualCompletionDate, safeUser, updateUserSchema, validateWagonWorkflow, type DatabaseDocument, type StoredUser } from './models';
+import { createUserSchema, derivedWagonFields, fieldSchemas, normalizeUsername, parseInput, passwordSchema, postSchema, rejectManualCompletionDate, safeUser, updateUserSchema, validateWagonWorkflow, validateNewWagonNumber, type DatabaseDocument, type StoredUser } from './models';
 
 export interface Env extends DatabaseEnvironment {
   DB: DurableObjectNamespace;
@@ -153,7 +153,7 @@ export class VagonDatabase {
       if (pathname.startsWith('/api/workshop')) {
         if(this.env.MAINTENANCE_ENABLED!=='true'||this.env.STORAGE_MODE!=='local')throw new ApiError(404,'NOT_FOUND','Bu bölüm yalnız test ortamında etkin.');
         const claims=await this.requireClaims(request);
-        return await workshopRequest(this.engine,claims,pathname,method,method==='GET'?undefined:await body(request));
+        return await workshopRequest(this.engine,claims,pathname+new URL(request.url).search,method,method==='GET'?undefined:await body(request));
       }
 
       if (pathname === '/api/session' && method === 'GET') {
@@ -295,7 +295,7 @@ export class VagonDatabase {
         const input = await body(request);
         if (method === 'POST' && !id) {
           const fields = parseInput(fieldSchemas[collection], input);
-          if (collection === 'wagons') { rejectManualCompletionDate(fields as Wagon);Object.assign(fields,derivedWagonFields(fields as Wagon)); validateWagonWorkflow(fields as Pick<Wagon, 'entryDate' | 'channelDate' | 'completedDate' | 'status'>); }
+          if (collection === 'wagons') { validateNewWagonNumber((fields as {number:string}).number); rejectManualCompletionDate(fields as Wagon);Object.assign(fields,derivedWagonFields(fields as Wagon)); validateWagonWorkflow(fields as Pick<Wagon, 'entryDate' | 'channelDate' | 'completedDate' | 'status'>); }
           const recordId = crypto.randomUUID();
           const { result: record, version } = await this.engine.mutate(database => {
             const actor = assertActor(database, claims);

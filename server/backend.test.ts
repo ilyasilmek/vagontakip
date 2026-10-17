@@ -41,7 +41,7 @@ async function login(object: VagonDatabase, username = 'admin', password = ADMIN
   return response.headers.get('Set-Cookie')!.split(';')[0];
 }
 
-const wagonFields = { number: '33407812345', entryDate: '2026-10-06', channelDate: '', completedDate: '', status: 'Bekliyor', notes: '' };
+const wagonFields = { number: '3340 7812 345-6', entryDate: '2026-10-06', channelDate: '', completedDate: '', status: 'Bekliyor', notes: '' };
 
 function testDocument(): DatabaseDocument {
   const now = '2026-10-06T00:00:00.000Z';
@@ -75,8 +75,8 @@ describe('authenticated shared records', () => {
     expect(response.status).toBe(201);
     const saved = await response.json() as { record: Wagon };
     expect(saved.record.wagonType).toBe('Sgss-w');
-    expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, number: 'legacy' }, session)).status).toBe(201);
-    expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, number: '3175 568 337-5', wagonType: 'Unknown' }, session)).status).toBe(201);
+    expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, number: 'legacy' }, session)).status).toBe(400);
+    expect((await call(object, '/api/wagons', 'POST', { ...wagonFields, number: '3175 568 337-5', wagonType: 'Unknown' }, session)).status).toBe(400);
     const result = await (await call(object, '/api/data', 'GET', undefined, session)).json() as { wagons: Wagon[] };
     expect(result.wagons.find(wagon => wagon.id === saved.record.id)?.wagonType).toBe('Sgss-w');
   });
@@ -161,6 +161,7 @@ describe('authenticated shared records', () => {
 
   it('validates wagon workflow changes while preserving unrelated edits to legacy records', async () => {
     const legacy = testDocument();
+    legacy.wagons[0].number = '33407812345';
     legacy.wagons[0].entryDate = '';
     legacy.wagons[0].status = 'Tamamlandı';
     const object = makeObject(makeEnv({ LOCAL_SEED_JSON: JSON.stringify(legacy) }));

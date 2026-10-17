@@ -164,3 +164,29 @@ it('requires both G and P seconds for new planning brake tests while preserving 
  expect(()=>resolveStandardLines([{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,loadDurationSeconds:18}],data.standards,atTime)).toThrow('hem G (yük) hem P (yolcu)');
  expect(resolveStandardLines([{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1,brakeMode:'G',durationSeconds:18}],data.standards,atTime)[0].durationSeconds).toBe(18);
 });
+
+it('separates duplicate wagon records and keeps heavy duration local to one work entry',async()=>{
+ const {object,session}=await prepared();
+ await call(object,'/api/account','PATCH',{post:'Hava&Fren'},session);
+ const catalog=await(await call(object,'/api/workshop/work-catalog','GET',undefined,session)).json() as {standards:{id:number;standardMinutes:number}[]};
+ const standard=catalog.standards.find(row=>row.standardMinutes>0&&row.id!==BRAKE_TEST_JOB_ID)!;
+ const wagon={number:'3175 4568 337-5',entryDate:'2026-10-09',channelDate:'',completedDate:'',status:'Bakım devam ediyor',notes:''};
+ const invalid=await call(object,'/api/wagons','POST',{...wagon,number:'3175 568 337-5'},session);
+ expect(invalid.status).toBe(400);
+ const first=await(await call(object,'/api/wagons','POST',wagon,session)).json() as {record:{id:string}};
+ const second=await(await call(object,'/api/wagons','POST',wagon,session)).json() as {record:{id:string}};
+ expect(second.record.id).not.toBe(first.record.id);
+ const base={wagonNumber:wagon.number,startedAt:at('09:00'),finishedAt:at('09:00'),customJobs:[],heavyJobs:[],crewIds:[],notes:''};
+ const heavy=await call(object,'/api/workshop/work-entries','POST',{...base,wagonId:second.record.id,jobs:[{jobTypeId:standard.id,quantity:1,overrideMinutes:standard.standardMinutes+20}]},session);
+ expect(heavy.status).toBe(201);
+ const saved=await heavy.json() as {record:WorkEntry};
+ expect(saved.record.jobs[0].overrideMinutes).toBe(standard.standardMinutes+20);
+ expect(workEntryHours(saved.record).totalLaborHours).toBeCloseTo((standard.standardMinutes+20)/60);
+ const normal=await call(object,'/api/workshop/work-entries','POST',{...base,wagonId:first.record.id,jobs:[{jobTypeId:standard.id,quantity:1}]},session);
+ expect(normal.status).toBe(201);
+ expect(workEntryHours((await normal.json() as {record:WorkEntry}).record).totalLaborHours).toBeCloseTo(standard.standardMinutes/60);
+ const secondHistory=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}?wagonId=${second.record.id}`,'GET',undefined,session)).json() as {entries:{id:string}[]};
+ expect(secondHistory.entries.map(row=>row.id)).toEqual([saved.record.id]);
+ const firstHistory=await(await call(object,`/api/workshop/wagon-jobs/${encodeURIComponent(wagon.number)}?wagonId=${first.record.id}`,'GET',undefined,session)).json() as {entries:{id:string}[]};
+ expect(firstHistory.entries).toHaveLength(1);
+});
