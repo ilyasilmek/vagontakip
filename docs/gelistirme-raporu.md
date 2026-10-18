@@ -13,7 +13,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
-| Son özellik commit'i | `6096db4` | `3f2970f` |
+| Son özellik commit'i | `6096db4` | `0e5fe93` |
 
 Güncel yeni vagon numarası giriş biçimi **`1234 5678 901-2`** (12 rakam). Eski 11 haneli kayıtlar okunur ve numarası değişmeden düzenlenebilir; yeni kayıt olarak 11 hane kabul edilmez. Önceki biçimler aşağıdaki tarihsel kayıtlarda yer alır.
 
@@ -27,7 +27,7 @@ Kullanıcının sağladığı yeni Fren Postası listesindeki 11 kategori ve 55 
 
 Yeni standartlar sürümlü kaydedilir; önceki iş kayıtlarının süre ve hesap anlık görüntüleri değiştirilmez. Fren tecrübesinde G/P saniyeleri ayrı ölçüm alanları olarak kalır; yeni saha iş girişinin A/S hesabı kullanıcı tarafından verilen 20 dakikalık standardı esas alır. Eski saniyeye dayalı bakım girişlerinin hesap davranışı korunur. İşlemi düzenlerken eski işin kayıtlı standardı kullanılmaya devam eder. Değişiklik yalnız test ortamındadır.
 
-Doğrulama: 87 birim/API testi, test derlemesi ve Hava&Fren katalog görünürlüğüne ilişkin 1 yerel tarayıcı testi geçti. Katalogda 55 etkin iş ve 11 kategori doğrulandı. Test yayını ve uzak doğrulama bilgileri bu bölümde yayın sonrasında güncellenir.
+Doğrulama: 87 birim/API testi, test derlemesi ve Hava&Fren katalog görünürlüğüne ilişkin 1 yerel tarayıcı testi geçti. Katalogda 55 etkin iş ve 11 kategori doğrulandı. Özellik commit’i `0e5fe93` GitHub `maintenance-test` dalına gönderildi. Yalnız `vagontakip-test` Worker sürümü `89c0a6e7-2d79-40bf-b144-c31741edd2e7` yayımlandı. Uzak test sağlık kontrolü `ok: true`, `storage: local`; canlı sağlık kontrolü `ok: true`, `storage: github` döndü. Uzak test kataloğunda 55 etkin Hava&Fren işi, 11 kategori ve mekanik kontrol işi için 30 dakika doğrulandı. Canlı uygulama yayımlanmadı.
 
 ## 17 Ekim 2026 — yinelenen vagon kaydı ve ağır bakım süresi
 
