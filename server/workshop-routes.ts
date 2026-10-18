@@ -10,18 +10,19 @@ import { activityInputSchema, dayInputSchema, operationInputSchema, personInputS
 
 const workEntryInput=z.object({wagonNumber:z.string().trim().min(1).max(200),wagonId:z.string().uuid().optional(),startedAt:z.string().datetime({offset:true}),finishedAt:z.string().datetime({offset:true}),autoTimestamp:z.boolean().optional(),jobs:z.array(z.object({jobTypeId:z.number().int().positive(),quantity:z.number().int().positive().max(1000),brakeMode:z.enum(['G','P']).optional(),durationSeconds:z.number().int().positive().max(86400).optional(),loadDurationSeconds:z.number().int().positive().max(86400).optional(),passengerDurationSeconds:z.number().int().positive().max(86400).optional(),overrideMinutes:z.number().int().positive().max(10000).optional()}).strict()).max(100),customJobs:z.array(z.object({name:z.string().trim().min(1).max(200),durationMinutes:z.number().int().positive().max(10000)}).strict()).max(30).default([]),heavyJobs:z.array(z.object({jobTypeId:z.number().int().positive(),extraMinutes:z.number().int().positive().max(10000)}).strict()).max(100).default([]),crewIds:z.array(z.string().min(1)).max(100).default([]),notes:z.string().trim().max(1000)}).strict().refine(v=>Date.parse(v.finishedAt)>=Date.parse(v.startedAt),'Bitiş zamanı başlangıçtan önce olamaz.').refine(v=>v.jobs.length+v.customJobs.length+v.heavyJobs.length>0,'En az bir yapılan iş seçin.');
 function workCatalog(data:WorkshopData,post:string){return data.standards.filter(s=>s.active&&isFrenPostasiJob(s.id)&&normalizePost(post)==='Hava&Fren'&&!data.standards.some(other=>other.id===s.id&&other.validFrom>s.validFrom));}
-function resolveEntryJobs(data:WorkshopData,input:z.infer<typeof workEntryInput>,actorPost:string):WorkEntry['jobs']{
+function resolveEntryJobs(data:WorkshopData,input:z.infer<typeof workEntryInput>,actorPost:string,existing?:WorkEntry):WorkEntry['jobs']{
  const allowed=workCatalog(data,actorPost),heavy=new Map<number,number>();
  for(const item of input.heavyJobs){if(heavy.has(item.jobTypeId))throw new ApiError(400,'DUPLICATE_JOB','Aynı ağır bakım işi iki kez seçilemez.');heavy.set(item.jobTypeId,item.extraMinutes);}
  const jobs:WorkEntry['jobs']=input.jobs.map(job=>{
-  const standard=allowed.find(s=>s.id===job.jobTypeId);if(!standard)throw new ApiError(403,'POST_JOB_FORBIDDEN','Bu iş hesabınızın postası için tanımlı değil.');
+  const standard=allowed.find(s=>s.id===job.jobTypeId),previous=existing?.jobs.find(line=>line.id===job.jobTypeId);if(!standard&&!previous)throw new ApiError(403,'POST_JOB_FORBIDDEN','Bu iş hesabınızın postası için tanımlı değil.');
+  const definition=previous??standard!;
   const brake=job.jobTypeId===BRAKE_TEST_JOB_ID,dual=job.loadDurationSeconds!==undefined&&job.passengerDurationSeconds!==undefined,legacy=!!job.brakeMode&&!!job.durationSeconds;
   if(brake&&!dual&&!legacy)throw new ApiError(400,'BRAKE_DURATION_REQUIRED','Fren tecrübesi için hem G (yük) hem P (yolcu) süresini saniye olarak girin.');
   if(!brake&&(job.brakeMode||job.durationSeconds!==undefined||job.loadDurationSeconds!==undefined||job.passengerDurationSeconds!==undefined))throw new ApiError(400,'INVALID_JOB_DURATION','Fren tecrübesi süreleri yalnız ilgili iş için girilebilir.');
   if(brake&&dual&&(job.brakeMode||job.durationSeconds!==undefined))throw new ApiError(400,'INVALID_BRAKE_MODE','Yeni fren tecrübesinde G ve P sürelerini ayrı girin.');
-  if(job.overrideMinutes!==undefined&&(job.jobTypeId===BRAKE_TEST_JOB_ID||!standard.standardMinutes||job.overrideMinutes<=standard.standardMinutes))throw new ApiError(400,'INVALID_HEAVY_DURATION','Ağır bakım süresi normal iş süresinden fazla olmalı.');
+  if(job.overrideMinutes!==undefined&&(job.jobTypeId===BRAKE_TEST_JOB_ID||!definition.standardMinutes||job.overrideMinutes<=definition.standardMinutes))throw new ApiError(400,'INVALID_HEAVY_DURATION','Ağır bakım süresi normal iş süresinden fazla olmalı.');
   if(job.quantity!==1&&!isFrenPostasiQuantityJob(job.jobTypeId))throw new ApiError(400,'JOB_QUANTITY','Bu iş yalnız bir kez işaretlenebilir.');
-  return{id:standard.id,name:standard.name,category:standard.category,quantity:job.quantity,brakeMode:job.brakeMode,durationSeconds:job.durationSeconds,loadDurationSeconds:job.loadDurationSeconds,passengerDurationSeconds:job.passengerDurationSeconds,standardMinutes:standard.standardMinutes,overrideMinutes:job.overrideMinutes};
+  return{id:definition.id,name:definition.name,category:definition.category,quantity:job.quantity,brakeMode:job.brakeMode,durationSeconds:job.durationSeconds,loadDurationSeconds:job.loadDurationSeconds,passengerDurationSeconds:job.passengerDurationSeconds,standardMinutes:definition.standardMinutes,overrideMinutes:job.overrideMinutes,durationBasis:previous?.durationBasis??(brake&&standard?.versionId.endsWith('-2026-10-18')?'standard':undefined)};
  });
  if(new Set(jobs.map(j=>j.id)).size!==jobs.length)throw new ApiError(400,'DUPLICATE_JOB','Aynı iş iki kez seçilemez.');
  for(const [index,custom] of input.customJobs.entries())jobs.push({id:-index-1,name:custom.name,category:'Ek iş',quantity:1,standardMinutes:custom.durationMinutes,durationMinutes:custom.durationMinutes});
@@ -71,7 +72,7 @@ export async function workshopRequest(engine:DatabaseEngine,claims:SessionClaims
    if(actor.role!=='admin'&&entry.actorId!==actor.id)throw new ApiError(403,'FORBIDDEN','Yalnız kendi bakım kaydınızı düzenleyebilirsiniz.');
    if((entry.revision??1)!==revision)throw new ApiError(409,'REVISION_CONFLICT','Bakım kaydı değişmiş. Yeniden açın.');
    if(!db.wagons.some(w=>w.number===input.wagonNumber&&(!input.wagonId||w.id===input.wagonId)))throw new ApiError(404,'WAGON_NOT_FOUND','Vagon kaydı bulunamadı.');
-   const entryActor=db.users.find(row=>row.id===entry.actorId)??actor,post=normalizePost(entry.post),jobs=resolveEntryJobs(data,input,post),crew=resolveEntryCrew(db,entryActor,input.crewIds,entry);
+   const entryActor=db.users.find(row=>row.id===entry.actorId)??actor,post=normalizePost(entry.post),jobs=resolveEntryJobs(data,input,post,entry),crew=resolveEntryCrew(db,entryActor,input.crewIds,entry);
    const updated={...entry,wagonId:input.wagonId??entry.wagonId,wagonNumber:input.wagonNumber,startedAt:input.startedAt,finishedAt:input.finishedAt,jobs,crew,notes:input.notes,revision:(entry.revision??1)+1};
    db.workEntries![db.workEntries!.indexOf(entry)]=updated;audit(db,actor,'Yapılan işler düzenlendi','maintenance',id);return updated;
   });return Response.json({record:result,version});

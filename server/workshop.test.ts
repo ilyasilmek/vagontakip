@@ -49,7 +49,7 @@ it('requires and stores G/P for brake test work in field and planning entries',a
  const saved=await call(object,'/api/workshop/work-entries','POST',{...field,jobs:[{...field.jobs[0],brakeMode:'G',durationSeconds:18}]},session);
  expect(saved.status).toBe(201);
  const savedEntry=(await saved.json() as {record:WorkEntry}).record;
- expect(savedEntry.jobs[0].brakeMode).toBe('G');expect(savedEntry.jobs[0].durationSeconds).toBe(18);expect(workEntryHours(savedEntry).totalLaborHours).toBeCloseTo(0.005);
+ expect(savedEntry.jobs[0].brakeMode).toBe('G');expect(savedEntry.jobs[0].durationSeconds).toBe(18);expect(workEntryHours(savedEntry).totalLaborHours).toBeCloseTo(20/60);
  const plan={...input,wagonNumber:wagon.number,jobs:[{jobTypeId:BRAKE_TEST_JOB_ID,quantity:1}]};
  expect((await call(object,'/api/workshop/operations','POST',plan,session)).status).toBe(400);
  expect((await call(object,'/api/workshop/operations','POST',{...plan,jobs:[{...plan.jobs[0],brakeMode:'P'}]},session)).status).toBe(400);
@@ -78,7 +78,7 @@ it('offers only requested post names and keeps the Hava&Fren catalog available',
  expect((await call(object,'/api/account','PATCH',{post:'Hava-Fren'},session)).status).toBe(400);
  expect((await call(object,'/api/account','PATCH',{post:'Hava&Fren'},session)).status).toBe(200);
  const result=await call(object,'/api/workshop/work-catalog','GET',undefined,session);
- expect((await result.json() as {standards:unknown[]}).standards).toHaveLength(52);
+ expect((await result.json() as {standards:unknown[]}).standards).toHaveLength(55);
 });
 describe('relational pilot API',()=>{
  it('persists person selection, original standards, revisions and normalized SQL links across restart',async()=>{const {object,storage,session,input}=await prepared();const r=await call(object,'/api/workshop/operations','POST',input,session);expect(r.status).toBe(201);const {record}=await r.json() as {record:WorkshopOperation};expect(record.formulaVersion).toBe(2);
@@ -145,7 +145,7 @@ it('saves both brake test seconds, permits instant timestamps, and edits own wor
  const automaticEntry=(await automatic.json() as {record:WorkEntry}).record;
  expect(automaticEntry.startedAt).toBe(automaticEntry.finishedAt);
  expect(Math.abs(Date.parse(automaticEntry.startedAt)-Date.now())).toBeLessThan(10000);
- expect(workEntryHours(record).knownLaborHours).toBeCloseTo(42/3600);
+ expect(workEntryHours(record).knownLaborHours).toBeCloseTo(20/60);
  expect((await call(object,`/api/workshop/work-entries/${record.id}`,'GET',undefined,other)).status).toBe(403);
  expect((await call(object,`/api/workshop/work-entries/${record.id}`,'PATCH',{...input,revision:1,notes:'other'},other)).status).toBe(403);
  const updated=await call(object,`/api/workshop/work-entries/${record.id}`,'PATCH',{...input,revision:1,startedAt:at('08:00'),finishedAt:at('08:15'),notes:'Düzeltildi'},mechanic);

@@ -40,25 +40,26 @@ describe('real person-time validation and period boundaries',()=>{
 });
 
 describe('Hava-Fren catalog migration',()=>{
- it('keeps 52 categorized rows and preserves historical standards',()=>{
-  const data=emptyWorkshop();expect(FREN_POSTASI_JOBS).toHaveLength(52);expect(new Set(FREN_POSTASI_JOBS.map(([category])=>category)).size).toBe(11);expect(FREN_POSTASI_JOBS.every(([,name])=>!name.includes('(adet)'))).toBe(true);
-  expect(data.standards.filter(s=>s.id<1000)).toHaveLength(49);expect(data.standards.filter(s=>s.id>=1001)).toHaveLength(52);
+ it('keeps 55 active categorized jobs and versions historical standards',()=>{
+  const data=emptyWorkshop();expect(FREN_POSTASI_JOBS).toHaveLength(57);expect(new Set(FREN_POSTASI_JOBS.map(([category])=>category)).size).toBe(11);expect(FREN_POSTASI_JOBS.every(([,name])=>!name.includes('(adet)'))).toBe(true);
+  expect(data.standards.filter(s=>s.id<1000)).toHaveLength(49);expect(data.standards.filter(s=>s.id>=1001)).toHaveLength(57);
   const initial=data.standards.length;ensureFrenPostasiStandards(data.standards);expect(data.standards).toHaveLength(initial);
-  expect(data.standards.find(s=>s.name==='Sabo değişti')?.standardMinutes).toBe(data.standards.find(s=>s.id===1)?.standardMinutes);
-  expect(data.standards.find(s=>s.name==='Sensör hortumları söküldü')?.standardMinutes).toBe(0);
+  expect(data.standards.find(s=>s.name==='Sabo değişti')?.standardMinutes).toBe(5);
+  expect(data.standards.find(s=>s.name==='Sensör hortumları söküldü')?.standardMinutes).toBe(5);
+  expect(data.standards.filter(s=>s.id>=1001&&s.active)).toHaveLength(55);
+  const old=data.standards.find(s=>s.id===1001)!;old.versionId='fren-postasi-1001';old.standardMinutes=0;ensureFrenPostasiStandards(data.standards);expect(old.standardMinutes).toBe(0);expect(old.validUntil).toBe('2026-10-18T13:30:00.000Z');expect(data.standards.find(s=>s.id===1001&&s.versionId.endsWith('-2026-10-18'))?.standardMinutes).toBe(30);
  });
  it('opens quantities only for the marked Hava&Fren jobs in both occurrences',()=>{
   const ids=FREN_POSTASI_JOBS.map((_,index)=>1001+index).filter(isFrenPostasiQuantityJob);
-  expect(ids).toHaveLength(20);
+  expect(ids).toHaveLength(29);
   expect(FREN_POSTASI_JOBS.filter(([,name])=>name==='Emniyet çemberi eksik vida-somun takıldı')).toHaveLength(2);
   expect(ids.filter(id=>FREN_POSTASI_JOBS[id-1001][1]==='Emniyet çemberi eksik vida-somun takıldı')).toHaveLength(2);
   const data=emptyWorkshop(),at='2026-10-10T10:00:00.000Z';
   expect(resolveStandardLines([{jobTypeId:ids[0],quantity:3}],data.standards,at)[0].quantity).toBe(3);
   expect(()=>resolveStandardLines([{jobTypeId:1001,quantity:3}],data.standards,at)).toThrow('Bu iş yalnız bir kez işaretlenebilir.');
  });
- it('marks an operation with untimed work as incomplete for efficiency',()=>{
+ it('calculates formerly untimed work with the supplied standards',()=>{
   const {data,operation}=fixture();operation.jobs=resolveStandardLines([{jobTypeId:1007,quantity:1},{jobTypeId:1035,quantity:1}],data.standards,operation.finishedAt);
-  const result=calculateOperation(operation,data.days);expect(result.estimatedMinutes).toBeNull();expect(result.netEfficiency).toBeNull();expect(result.grossEfficiency).toBeNull();
-  const monthResult=summarizeWorkshop(data,month);expect(monthResult.netEfficiency).toBeNull();expect(monthResult.warning).toContain('standart süresi');
+  const result=calculateOperation(operation,data.days);expect(result.standardMinutes).toBe(15);expect(result.netEfficiency).not.toBeNull();
  });
 });

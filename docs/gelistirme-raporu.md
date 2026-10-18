@@ -21,6 +21,14 @@ Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon
 
 Güncel posta seçimleri yalnız **Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro** adlarıdır. Yöneticiye özel Planlama, Genel bakışta Vagon ekle yanındadır; Bakım ekle yönetici ve kullanıcı için aynı saha iş formudur.
 
+## 18 Ekim 2026 — Hava&Fren iş standartları
+
+Kullanıcının sağladığı yeni Fren Postası listesindeki 11 kategori ve 55 etkin iş, dakika standartları ve yalnız “adet” işaretli kalemlerin miktar seçimiyle test kataloğuna işlendi. Mevcut iş kimlikleri sabit tutuldu; beş yeni iş yeni kimliklerle eklendi. Önceki listede olup yeni listede bulunmayan iki iş yeni seçimlerden çıkarıldı, tarihsel bakım satırları ve eski standart sürümleri korundu. Adı değişen compact fren plaka işi yeni sürüm adıyla sunulur. Aynı isim farklı kategorilerde geçiyorsa ayrı iş kalemi olarak kalır.
+
+Yeni standartlar sürümlü kaydedilir; önceki iş kayıtlarının süre ve hesap anlık görüntüleri değiştirilmez. Fren tecrübesinde G/P saniyeleri ayrı ölçüm alanları olarak kalır; yeni saha iş girişinin A/S hesabı kullanıcı tarafından verilen 20 dakikalık standardı esas alır. Eski saniyeye dayalı bakım girişlerinin hesap davranışı korunur. İşlemi düzenlerken eski işin kayıtlı standardı kullanılmaya devam eder. Değişiklik yalnız test ortamındadır.
+
+Doğrulama: 87 birim/API testi, test derlemesi ve Hava&Fren katalog görünürlüğüne ilişkin 1 yerel tarayıcı testi geçti. Katalogda 55 etkin iş ve 11 kategori doğrulandı. Test yayını ve uzak doğrulama bilgileri bu bölümde yayın sonrasında güncellenir.
+
 ## 17 Ekim 2026 — yinelenen vagon kaydı ve ağır bakım süresi
 
 Yalnız test dalında yeni vagon numarası girilirken aynı numaralı kayıt varsa kullanıcıya mevcut kayda geçme veya yeni kayıt açma seçimi gösterilir. Mevcut kayda geçince vagon ayrıntısı ve yapılan bakımlar açılır. Yeni kayıt seçimi aynı numarayla ayrı kayıt kimliği oluşturur; saha iş girişleri vagon kimliğine bağlanır ve vagon ayrıntısında ilgili kaydın iş geçmişi gösterilir. Kimliği bulunmayan eski iş kayıtları aynı numaradaki ilk kayda ait kabul edilir. Yönetici planlama operasyonları da yeni kayıtlarda vagon kimliğine bağlanır. Kimliği olmayan tarihsel operasyonlar aynı numaradaki ilk vagon kaydında görünür.
