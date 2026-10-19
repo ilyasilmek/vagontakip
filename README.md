@@ -1,5 +1,7 @@
 # Vagon Takip
 
+Başka bir geliştiriciye veya AI aracına devir için: [Ayrıntılı AI devir rehberi](docs/AI-DEVIR-REHBERI.md). Güncel mimari, bütün ekran ve tuşlar, hesaplar, kayıt modeli, GitHub/Cloudflare görevleri, güvenli erişim envanteri, kurulum, yayın ve veri taşıma sınırlarını içerir.
+
 Güncel değişiklikler, test sonuçları ve test/canlı yayın durumu: [Geliştirme raporu](docs/gelistirme-raporu.md).
 
 Yeni bakım/adam-saat şartnamesinin karşılaştırması ve kesinleşen vardiya kuralları: [Şartname analizi](docs/bakim-sartname-analizi.md). Yalnız testteki personel, günlük atölye ve rapor ekranlarının kullanımı: [Bakım pilotu](docs/maintenance-pilot.md).

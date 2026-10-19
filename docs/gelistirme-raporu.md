@@ -21,6 +21,14 @@ Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon
 
 Güncel posta seçimleri yalnız **Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro** adlarıdır. Yöneticiye özel Planlama, Genel bakışta Vagon ekle yanındadır; Bakım ekle yönetici ve kullanıcı için aynı saha iş formudur.
 
+## 19 Ekim 2026 — başka bir AI aracına ayrıntılı devir rehberi
+
+Kullanıcının isteğiyle [AI devir rehberi](AI-DEVIR-REHBERI.md) hazırlandı. Kaynak yapısı, bütün ana ekran/tuşların görevi, temel kayıt akışı, vagon ziyaret kimliği, saha işçiliği ile sürüm 2 kapasite/verimlilik ve legacy hesapların farkları, güncel 55 Fren işi ve eski 49 standart, API sözleşmeleri, SQLite tabloları, GitHub'ın kod/canlı veri/CI rolleri, PWA, yerel kurulum, yayın, geri dönüş ve güvenli devir adımları tek Markdown belgede toplandı. Dosya envanteri ve veri dosyası dışındaki Git değişiklik günlüğü eklendi. README'den bağlantı verildi; veri README'sindeki eski public depo ifadesi güncellendi.
+
+Gerçek secret değerleri okunmadı veya rapora eklenmedi. Cloudflare'da yalnız canlı/test Worker secret adlarının varlığı sorgulandı. İlk kurulum belgelerinin sözünü ettiği üretim secret/giriş dosyalarının bu çalışma alanında bulunmadığı açıkça belirtildi. Mevcut kodda tam pilot veri export/import aracının bulunmaması ve kaynak incelemesinde görülen rapor/akış sınırları tamamlanmış özellik gibi sunulmadı.
+
+Doğrulama: doküman içi bağlantılar, göreli dosya yolları, 55 etkin iş/11 kategori ve kaynak envanteri kontrol edildi; Git diff kontrolü yapıldı. Yalnız dokümantasyon değiştiğinden uygulama testleri ve derleme yeniden çalıştırılmadı. GitHub hedefi yalnız `maintenance-test`; uygulama yayını yapılmadı, canlı/test çalışma verisi değiştirilmedi.
+
 ## 18 Ekim 2026 — Hava&Fren iş standartları
 
 Kullanıcının sağladığı yeni Fren Postası listesindeki 11 kategori ve 55 etkin iş, dakika standartları ve yalnız “adet” işaretli kalemlerin miktar seçimiyle test kataloğuna işlendi. Mevcut iş kimlikleri sabit tutuldu; beş yeni iş yeni kimliklerle eklendi. Önceki listede olup yeni listede bulunmayan iki iş yeni seçimlerden çıkarıldı, tarihsel bakım satırları ve eski standart sürümleri korundu. Adı değişen compact fren plaka işi yeni sürüm adıyla sunulur. Aynı isim farklı kategorilerde geçiyorsa ayrı iş kalemi olarak kalır.
