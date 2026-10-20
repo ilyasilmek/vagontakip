@@ -1420,3 +1420,8 @@ Kullanıcı, mobil test sitesinin alt menüsünde Demirbaş yanında `Bakım` d�
 `maintenance-test` dalındaki arayüzde vagon durum seçeneği “Parça bekliyor” yeni giriş/düzenleme seçeneği olmaktan çıkarıldı. Eski kayıtlarda bu durum varsa istemci bunu “Bekliyor” olarak gösterir; kaydın kendisi silinmez. Genel bakış sayaçları tıklanabilir ve aynı sayfadaki vagon listesine ilgili filtreyle kaydırır: Tümü, İşlemi devam eden, Bekliyor veya Tamamlandı. Mobil alt gezinmede Vagonlar da artık ayrı liste sayfasına gitmek yerine Genel bakıştaki `#wagon-collection-section` bölümüne kaydırır. Sıralama yalnız Son kaydedilen, İlk kaydedilen ve Son güncellenen seçeneklerini içerir.
 
 Bu değişiklikler test dalı için hazırlanmıştır. En son GitHub Actions çalışması ve `https://vagontakip-test.ilyasilmek.workers.dev/api/health` kontrolü doğrulanmadan yayımlandı denmemeli. Canlı `main` ve `vagontakip` Worker'ı kullanıcı açıkça “Orijinal siteye taşı” demedikçe değiştirilmez.
+
+
+## 20 Ekim 2026 — Vagon durum filtrelerinin son hali
+
+Birleşik “İşlemi devam eden” liste filtresi kaldırıldı. Kullanıcı ayrı ayrı “Bekliyor”, “Bakım devam ediyor” ve “Tamamlandı” kayıtlarını seçebilir; “Tümü” bütün vagonları gösterir. “Parça bekliyor” artık geçerli bir yeni durum değildir; eski kayıtlar istemcide “Bekliyor” olarak normalize edilerek gösterilir. Genel bakıştaki “Atölyedeki vagon” sayısı yalnız `Bakım devam ediyor` durumunu kapsar ve ilgili filtreye gider. Mobil Vagonlar kısayolu Genel bakış içindeki listeye kaydırmalıdır. Test dağıtımı yalnız `maintenance-test` / `vagontakip-test` hedefindedir; canlıya aktarım için kullanıcının açık “Orijinal siteye taşı” onayı gerekir.
