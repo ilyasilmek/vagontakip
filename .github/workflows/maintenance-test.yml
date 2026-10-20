@@ -77,3 +77,24 @@ jobs:
           else if (!r.ok || body.success !== true) throw new Error('Could not delete temporary DBKK Worker: '+JSON.stringify(body.errors||r.status));
           else console.log('Temporary DBKK Worker script deleted.');
           NODE
+
+      - name: Remove superseded DBKK test Worker after restoring the original test site
+        if: github.event_name == 'push' && github.event.head_commit.message == 'Return maintenance test deployment to existing Worker'
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$CLOUDFLARE_API_TOKEN" ]]; then
+            echo "::error::Cannot remove the obsolete DBKK Worker without CLOUDFLARE_API_TOKEN."
+            exit 1
+          fi
+          account_id="$CLOUDFLARE_ACCOUNT_ID"
+          if [[ -z "$account_id" ]]; then
+            accounts="$(curl --fail --silent --show-error https://api.cloudflare.com/client/v4/accounts -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+            account_id="$(printf '%s' "$accounts" | jq -er '.result | if length == 1 then .[0].id else error("Set CLOUDFLARE_ACCOUNT_ID when multiple accounts are available") end')"
+          fi
+          result="$(curl --fail --silent --show-error -X DELETE "https://api.cloudflare.com/client/v4/accounts/$account_id/workers/scripts/dbkk-vagontakip-test" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          printf '%s' "$result" | jq -e '.success == true' >/dev/null
+          echo "Removed the obsolete DBKK test Worker after the original test Worker passed its health check."
