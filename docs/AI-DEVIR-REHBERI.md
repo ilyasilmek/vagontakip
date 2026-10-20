@@ -1435,3 +1435,8 @@ Son CI çalışmasında derleme ve 90 birim/API testi başarılıydı. Dağıtı
 ## 20 Ekim 2026 — mobil Anasayfa ve liste gezinme güncellemesi
 
 Son UI işi yalnızca `maintenance-test` dalında yapılıyor: mobil `Özet` etiketi `Anasayfa` oldu; bu düğme her ekrandan Genel bakışın en üstüne döner. Mobil `Vagonlar` düğmesinin aktif çizgisi hem tıklama ile listeye gidildiğinde hem de Genel bakış sayfasında elle aşağı kaydırılarak listeye ulaşıldığında görünür. Genel bakıştaki tekrar eden `Vagon ekle` kaldırıldı, Vagonlar listesindeki ekleme düğmesi bırakıldı. `tests/navigation.spec.ts` bu davranışları kontrol edecek şekilde güncellendi. Yeni Actions run tamamlanmadan test Worker dağıtımının başarılı olduğu söylenmemeli; canlı `main` ve `vagontakip` Worker'ına dokunulmamalı.
+
+
+## 20 Ekim 2026 — mobil gezinme aktif çizgisi titremesi
+
+Kullanıcı, Anasayfa ile Vagonlar arasında yumuşak kaydırma sırasında sarı aktif çizginin iki düğme arasında hızlıca gidip geldiğini bildirdi. Sebep, tıklamada hedef düğmenin aktif yapılmasına karşın her ara `scroll` olayında bölüm konumunun bu durumu yeniden değiştirebilmesiydi. `client/src/App.tsx` içinde programatik kaydırma hedefi artık `scrollend` olayına (ve yedek zaman aşımına) kadar korunuyor; ara kaydırma konumları aktif öğeyi ezemiyor. Kaydırma bitince hedef durum sabitleniyor; kullanıcı elle kaydırdığında mevcut bölüm algılama davranışı çalışmaya devam ediyor. `tests/navigation.spec.ts` içine gezinme sırasında hedef göstergenin aktif kaldığını doğrulayan kontroller eklendi. Yalnız `maintenance-test` dalı ve `vagontakip-test` hedefi kullanılmalı; canlı `main`/Worker değişmez.
