@@ -99,7 +99,12 @@ test('mobile navigation hides maintenance operations and keeps primary navigatio
   for (const label of ['Anasayfa', 'Vagonlar', 'Parçalar', 'Demirbaş', 'Yönetim']) {
     await expect(mobileNavigation.getByRole('button', { name: label, exact: true })).toBeVisible();
   }
-  await mobileNavigation.getByRole('button', { name: 'Vagonlar', exact: true }).click();
+  const homeButton = mobileNavigation.getByRole('button', { name: 'Anasayfa', exact: true });
+  const wagonsButton = mobileNavigation.getByRole('button', { name: 'Vagonlar', exact: true });
+  await expect(homeButton).toHaveClass(/active/);
+  await expect(wagonsButton).not.toHaveClass(/active/);
+  await expect(page.locator('main .page-heading').first().getByRole('button', { name: 'Vagon ekle', exact: true })).toHaveCount(0);
+  await wagonsButton.click();
   await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
   const wagonSection = page.locator('#wagon-collection-section');
   await expect(wagonSection.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
@@ -107,6 +112,15 @@ test('mobile navigation hides maintenance operations and keeps primary navigatio
     const rect = element.getBoundingClientRect();
     return rect.top < window.innerHeight && rect.bottom > 0;
   })).toBeTruthy();
+  await expect(wagonsButton).toHaveClass(/active/);
+  await homeButton.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(homeButton).toHaveClass(/active/);
+  await expect(wagonsButton).not.toHaveClass(/active/);
+  await page.evaluate(() => document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'instant', block: 'start' }));
+  await expect.poll(() => wagonsButton.evaluate(element => element.classList.contains('active'))).toBe(true);
+  await homeButton.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
 
