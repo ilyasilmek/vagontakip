@@ -1414,3 +1414,9 @@ Bakım testi için hedef adres `https://vagontakip-test.ilyasilmek.workers.dev` 
 ## 20 Ekim 2026 — Mobil menü bakım kısayolu düzeltmesi
 
 Kullanıcı, mobil test sitesinin alt menüsünde Demirbaş yanında `Bakım` düğmesinin görünmeye devam ettiğini bildirdi. `client/src/App.tsx` içindeki mobil navigasyon masaüstüyle tutarlı olacak şekilde yalnız `primaryNavigation` üzerinden oluşturulacak biçimde düzeltildi. `tests/navigation.spec.ts` artık mobil menüde `Bakım` düğmesinin olmadığını, Özet/Vagonlar/Parçalar/Demirbaş/Yönetim öğelerinin bulunduğunu doğruluyor. Bu yalnız gezinme kısayolunu kaldırır; bakım fonksiyonları ve kayıtları korunur. Uzak test dağıtımının başarılı olduğu ayrıca doğrulanmalıdır.
+
+## 20 Ekim 2026 — arayüz davranışı güncellemesi
+
+`maintenance-test` dalındaki arayüzde vagon durum seçeneği “Parça bekliyor” yeni giriş/düzenleme seçeneği olmaktan çıkarıldı. Eski kayıtlarda bu durum varsa istemci bunu “Bekliyor” olarak gösterir; kaydın kendisi silinmez. Genel bakış sayaçları tıklanabilir ve aynı sayfadaki vagon listesine ilgili filtreyle kaydırır: Tümü, İşlemi devam eden, Bekliyor veya Tamamlandı. Mobil alt gezinmede Vagonlar da artık ayrı liste sayfasına gitmek yerine Genel bakıştaki `#wagon-collection-section` bölümüne kaydırır. Sıralama yalnız Son kaydedilen, İlk kaydedilen ve Son güncellenen seçeneklerini içerir.
+
+Bu değişiklikler test dalı için hazırlanmıştır. En son GitHub Actions çalışması ve `https://vagontakip-test.ilyasilmek.workers.dev/api/health` kontrolü doğrulanmadan yayımlandı denmemeli. Canlı `main` ve `vagontakip` Worker'ı kullanıcı açıkça “Orijinal siteye taşı” demedikçe değiştirilmez.
