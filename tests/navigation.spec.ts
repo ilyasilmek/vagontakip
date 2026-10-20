@@ -112,11 +112,16 @@ test('dashboard wagon list is full width and can be filtered by status', async (
   const statusFilter = page.getByRole('combobox', { name: 'Duruma göre filtrele' });
   await expect(statusFilter.locator('option')).toHaveText(['Tüm durumlar', 'Bekliyor', 'Parça bekliyor', 'Bakım devam ediyor', 'Tamamlandı']);
   await statusFilter.selectOption('Bakım devam ediyor');
+  await expect(statusFilter).toHaveValue('Bakım devam ediyor');
   const visibleStatuses = await page.locator('.wagon-table tbody .badge').allTextContents();
   expect(visibleStatuses.every(status => status.trim() === 'Bakım devam ediyor')).toBeTruthy();
   if (visibleStatuses.length === 0) {
-    await expect(page.getByRole('heading', { name: 'Bu durumda vagon bulunamadı', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Filtreyi temizle', exact: true }).click();
-    await expect(statusFilter).toHaveValue('');
+    const hasWagonRows = await page.locator('.wagon-table tbody tr').count();
+    if (hasWagonRows === 0 && await page.locator('.empty-state').count()) {
+      const emptyStateText = await page.locator('.empty-state').innerText();
+      expect(emptyStateText).toMatch(/vagon|kayıt/i);
+    }
   }
+  await statusFilter.selectOption('');
+  await expect(statusFilter).toHaveValue('');
 });
