@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Wagon } from '../../shared/types';
-import { compareRecords } from '../../client/src/sorting';
+import { compareRecords, SORT_OPTIONS } from '../../client/src/sorting';
 
 const wagon = (id: string, number: string, createdAt: string, updatedAt: string): Wagon => ({
   id, number, createdAt, updatedAt, revision: 1, updatedBy: 'admin',
@@ -16,9 +16,8 @@ describe('record sorting', () => {
     expect([...rows].sort((a, b) => compareRecords(a, b, 'wagons', 'updated-desc')).map(row => row.id)).toEqual(['old', 'new']);
     expect([...rows].sort((a, b) => compareRecords(a, b, 'wagons', 'created-asc')).map(row => row.id)).toEqual(['old', 'new']);
   });
-  it('sorts numbers naturally in both directions without mutating source data', () => {
-    expect([...rows].sort((a, b) => compareRecords(a, b, 'wagons', 'title-asc')).map(row => row.number)).toEqual(['Vagon 2', 'Vagon 10']);
-    expect([...rows].sort((a, b) => compareRecords(a, b, 'wagons', 'title-desc')).map(row => row.number)).toEqual(['Vagon 10', 'Vagon 2']);
+  it('offers only date-based sorting options', () => {
+    expect(SORT_OPTIONS.map(option => option.value)).toEqual(['created-desc', 'created-asc', 'updated-desc']);
     expect(rows.map(row => row.id)).toEqual(['old', 'new']);
   });
   it('uses a consistent tie breaker when dates are equal', () => {
