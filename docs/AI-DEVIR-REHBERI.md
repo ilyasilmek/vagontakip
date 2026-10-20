@@ -1425,3 +1425,8 @@ Bu değişiklikler test dalı için hazırlanmıştır. En son GitHub Actions ç
 ## 20 Ekim 2026 — Vagon durum filtrelerinin son hali
 
 Birleşik “İşlemi devam eden” liste filtresi kaldırıldı. Kullanıcı ayrı ayrı “Bekliyor”, “Bakım devam ediyor” ve “Tamamlandı” kayıtlarını seçebilir; “Tümü” bütün vagonları gösterir. “Parça bekliyor” artık geçerli bir yeni durum değildir; eski kayıtlar istemcide “Bekliyor” olarak normalize edilerek gösterilir. Genel bakıştaki “Atölyedeki vagon” sayısı yalnız `Bakım devam ediyor` durumunu kapsar ve ilgili filtreye gider. Mobil Vagonlar kısayolu Genel bakış içindeki listeye kaydırmalıdır. Test dağıtımı yalnız `maintenance-test` / `vagontakip-test` hedefindedir; canlıya aktarım için kullanıcının açık “Orijinal siteye taşı” onayı gerekir.
+
+
+## 20 Ekim 2026 — durum filtresi regresyon testi notu
+
+Son CI çalışmasında derleme ve 90 birim/API testi başarılıydı. Dağıtım öncesi Playwright gezinme testi, kartın eski `İşlemi devam eden vagonları göster` erişilebilir adını beklediği için başarısız oldu; bu ifade artık geçerli değil. `tests/navigation.spec.ts`, güncel `Bakım devam eden vagonları göster` metnini bekleyecek ve filtrede yalnız `Bakım devam ediyor` durumunun kaldığını doğrulayacak şekilde düzeltildi. Düzeltme `fdd14de` commit'inde `maintenance-test` dalına kaydedildi. Sonraki Actions sonucu doğrulanmadan yayın başarılı sayılmaz.
