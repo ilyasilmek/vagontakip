@@ -41,8 +41,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          if [[ -z "$TEST_ADMIN_PASSWORD" || -z "$CLOUDFLARE_API_TOKEN" || -z "$CLOUDFLARE_ACCOUNT_ID" ]]; then
-            echo "::warning::Test Worker deployment skipped because TEST_ADMIN_PASSWORD, CLOUDFLARE_API_TOKEN, and/or CLOUDFLARE_ACCOUNT_ID GitHub Actions secrets are not configured."
+          if [[ -z "$TEST_ADMIN_PASSWORD" || -z "$CLOUDFLARE_API_TOKEN" ]]; then
+            echo "::warning::Test Worker deployment skipped because TEST_ADMIN_PASSWORD (or ADMIN_PASSWORD) and/or CLOUDFLARE_API_TOKEN GitHub Actions secrets are not configured."
             exit 0
           fi
           npm run deploy:test
