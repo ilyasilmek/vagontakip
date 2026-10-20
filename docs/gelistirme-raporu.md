@@ -8,7 +8,7 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 
 | Konu | Canlı uygulama | Bakım test uygulaması |
 | --- | --- | --- |
-| Adres | https://vagontakip.ilyasilmek.workers.dev | https://dbkk-vagontakip-test.workers.dev |
+| Adres | https://vagontakip.ilyasilmek.workers.dev | https://dbkk-vagontakip-test.ilyasilmek.workers.dev |
 | Cloudflare Worker | `vagontakip` | `dbkk-vagontakip-test` |
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
@@ -23,7 +23,7 @@ Güncel posta seçimleri yalnız **Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Tor
 
 ## 20 Ekim 2026 — DBKK için ayrı test adresi denemesi
 
-Kullanıcının isteğiyle bakım pilotunun test Worker adı `dbkk-vagontakip-test` olacak şekilde `wrangler.test.jsonc` ve `scripts/deploy-test.mjs` güncellendi. Hedef adres: https://dbkk-vagontakip-test.workers.dev. Yalnız `maintenance-test` dalı değiştirildi; `main` ve canlı `vagontakip` Worker'ı hedeflenmedi.
+Kullanıcının isteğiyle bakım pilotunun test Worker adı `dbkk-vagontakip-test` olacak şekilde `wrangler.test.jsonc` ve `scripts/deploy-test.mjs` güncellendi. Hedef adres: https://dbkk-vagontakip-test.ilyasilmek.workers.dev. Yalnız `maintenance-test` dalı değiştirildi; `main` ve canlı `vagontakip` Worker'ı hedeflenmedi.
 
 **Önemli veri ayrımı:** Yeni Worker adı yeni bir izole Worker/SQLite Durable Object alanı oluşturur. Eski `vagontakip-test` Worker'ındaki kayıtların yeni adrese otomatik taşınması beklenmemelidir. Eski test adresi, yeni yayın doğrulanana kadar korunmalıdır. Yeni adrese deploy ve sağlık kontrolü başarılı olana kadar adresin kullanılabilir olduğu veya yayının tamamlandığı iddia edilmez.
 
