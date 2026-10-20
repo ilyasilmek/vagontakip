@@ -4,7 +4,17 @@ import { spawn } from 'node:child_process';
 
 // Only the explicitly named test Worker is ever deployed by this helper.
 if (!process.env.TEST_ADMIN_PASSWORD) throw new Error('Set TEST_ADMIN_PASSWORD securely in environment settings before deploying the test environment.');
-if (!process.env.CLOUDFLARE_API_TOKEN || !process.env.CLOUDFLARE_ACCOUNT_ID) throw new Error('Cloudflare deployment bindings are missing.');
+if (!process.env.CLOUDFLARE_API_TOKEN) throw new Error('Cloudflare API token is missing.');
+if (!process.env.CLOUDFLARE_ACCOUNT_ID) {
+ const response = await fetch('https://api.cloudflare.com/client/v4/accounts', { headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` } });
+ if (!response.ok) throw new Error('Cannot resolve the Cloudflare account from the API token.');
+ const payload = await response.json();
+ if (!payload.success || !Array.isArray(payload.result) || payload.result.length !== 1 || typeof payload.result[0]?.id !== 'string') {
+  throw new Error('Set CLOUDFLARE_ACCOUNT_ID because the API token does not identify exactly one accessible Cloudflare account.');
+ }
+ process.env.CLOUDFLARE_ACCOUNT_ID = payload.result[0].id;
+ console.log('Resolved the Cloudflare account automatically because the token has exactly one accessible account.');
+}
 const config = 'wrangler.test.jsonc';
 const parsed = JSON.parse(await readFile(config, 'utf8'));
 if (parsed.name !== 'vagontakip-test' || parsed.vars.STORAGE_MODE !== 'local' || parsed.vars.MAINTENANCE_ENABLED !== 'true' || parsed.vars.GITHUB_REPOSITORY || parsed.vars.GITHUB_DATABASE_PATH) throw new Error('Test deployment isolation check failed.');
