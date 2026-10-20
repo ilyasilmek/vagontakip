@@ -18,7 +18,7 @@ import { useStartupAnimation } from './startupPreference';
 
 import { usePageNavigation, type Page } from './navigation';
 const primaryNavigation = [
-  { page: 'dashboard', label: 'Genel bakış', mobile: 'Özet', Icon: LayoutDashboard },
+  { page: 'dashboard', label: 'Genel bakış', mobile: 'Anasayfa', Icon: LayoutDashboard },
   { page: 'wagons', label: 'Vagonlar', mobile: 'Vagonlar', Icon: TrainFront },
   { page: 'parts', label: 'Parçalar', mobile: 'Parçalar', Icon: Package },
   { page: 'inventory', label: 'Demirbaşlar', mobile: 'Demirbaş', Icon: Wrench },
@@ -46,6 +46,7 @@ export default function App() {
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
   const [maintenanceRefreshKey, setMaintenanceRefreshKey] = useState(0);
   const [wagonScrollRequest, setWagonScrollRequest] = useState(0);
+  const [mobileActiveTarget, setMobileActiveTarget] = useState<Page>('dashboard');
   const handledWagonScroll = useRef(0);
   const [installOpen, setInstallOpen] = useState(false);
   const install = useInstall();
@@ -137,6 +138,20 @@ export default function App() {
     handledWagonScroll.current = wagonScrollRequest;
     document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [page, wagonScrollRequest]);
+  useEffect(() => {
+    if (page !== 'dashboard') return;
+    const updateActiveSection = () => {
+      const section = document.getElementById('wagon-collection-section');
+      if (!section) { setMobileActiveTarget('dashboard'); return; }
+      const rect = section.getBoundingClientRect();
+      const next: Page = rect.top <= 160 && rect.bottom > 160 ? 'wagons' : 'dashboard';
+      setMobileActiveTarget(current => current === next ? current : next);
+    };
+    updateActiveSection();
+    window.addEventListener('scroll', updateActiveSection, { passive: true });
+    window.addEventListener('resize', updateActiveSection);
+    return () => { window.removeEventListener('scroll', updateActiveSection); window.removeEventListener('resize', updateActiveSection); };
+  }, [page]);
   useEffect(() => { if ((page === 'admin'||page === 'planning') && user?.role !== 'admin') setPage('account'); }, [page, user?.role, setPage]);
 
   async function login(nextUser: SafeUser) {
@@ -155,11 +170,19 @@ export default function App() {
   async function saved(message: string) { setEditor(null); await refresh(); notify(message); }
   const edit = (collection: CollectionName, record: OperationalRecord | null) => setEditor({ collection, record });
   const handleNavigation = (target: Page) => {
+    if (target === 'dashboard') {
+      setMobileActiveTarget('dashboard');
+      setPage('dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     if (target === 'wagons') {
+      setMobileActiveTarget('wagons');
       setPage('dashboard');
       setWagonScrollRequest(value => value + 1);
       return;
     }
+    setMobileActiveTarget(target);
     setPage(target);
   };
   const navigation = primaryNavigation;
@@ -183,5 +206,5 @@ export default function App() {
     {page === 'planning' && data.maintenanceEnabled && user.role==='admin' && <Maintenance planning user={user} online={online} onExpired={expired} notify={notify} />}
     {page === 'admin' && user.role === 'admin' && <Admin online={online} onExpired={expired} notify={notify} />}
     {page === 'account' && <Account startupAnimation={startupAnimation} onStartupAnimationChange={changeStartupAnimation} theme={theme} onThemeChange={changeTheme} onUpdated={setUser} user={user} online={online} onLogout={logout} onExpired={expired} notify={notify} />}
-  </main></div><nav className="mobile-bottom" aria-label="Mobil gezinme">{mobileNavigation.map(({ page: target, mobile, Icon }) => <button key={target} className={`mobile-nav-button ${page === target ? 'active' : ''}`} onClick={() => handleNavigation(target)} aria-current={page === target ? 'page' : undefined}><Icon /><span>{mobile}</span></button>)}<button className={`mobile-nav-button ${page === 'admin' || page === 'account' ? 'active' : ''}`} onClick={() => setPage(user.role === 'admin' ? 'admin' : 'account')} aria-current={page === 'admin' || page === 'account' ? 'page' : undefined}>{user.role === 'admin' ? <ShieldCheck /> : <CircleUserRound />}<span>{user.role === 'admin' ? 'Yönetim' : 'Hesabım'}</span></button></nav>{editor && <div inert={!!maintenanceDraft}><RecordEditor {...editor} wagons={data.wagons} onOpenExisting={wagon=>setEditor({collection:'wagons',record:wagon})} onNewMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && !editor.record ? fields => void startWagonMaintenance(fields) : undefined} maintenanceLoading={maintenanceLoading} maintenanceRefreshKey={maintenanceRefreshKey} onAddMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && editor.record ? () => void startWagonMaintenance() : undefined} user={user} online={online} onClose={() => setEditor(null)} onSaved={saved} onExpired={expired} onConflict={() => refresh()} /></div>}{maintenanceDraft && <SimpleWorkEntry user={user} wagonNumber={maintenanceDraft.wagonNumber} wagonId={maintenanceDraft.wagonId} newWagon={maintenanceDraft.newWagon} online={online} onExpired={expired} onClose={() => setMaintenanceDraft(null)} onSaved={async () => {setMaintenanceDraft(null); if(maintenanceDraft.newWagon) setEditor(null); await refresh(); setMaintenanceRefreshKey(value => value + 1); notify('Yapılan iş kaydedildi.');}} />}{installOpen && <Install {...install} onClose={() => setInstallOpen(false)} />}{toast && <div className="toast" role="status"><Check /><span>{toast}</span></div>}</div>;
+  </main></div><nav className="mobile-bottom" aria-label="Mobil gezinme">{mobileNavigation.map(({ page: target, mobile, Icon }) => { const active = target === 'dashboard' || target === 'wagons' ? page === 'dashboard' && mobileActiveTarget === target : page === target; return <button key={target} className={`mobile-nav-button ${active ? 'active' : ''}`} onClick={() => handleNavigation(target)} aria-current={active ? 'page' : undefined}><Icon /><span>{mobile}</span></button>; })}<button className={`mobile-nav-button ${page === 'admin' || page === 'account' ? 'active' : ''}`} onClick={() => setPage(user.role === 'admin' ? 'admin' : 'account')} aria-current={page === 'admin' || page === 'account' ? 'page' : undefined}>{user.role === 'admin' ? <ShieldCheck /> : <CircleUserRound />}<span>{user.role === 'admin' ? 'Yönetim' : 'Hesabım'}</span></button></nav>{editor && <div inert={!!maintenanceDraft}><RecordEditor {...editor} wagons={data.wagons} onOpenExisting={wagon=>setEditor({collection:'wagons',record:wagon})} onNewMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && !editor.record ? fields => void startWagonMaintenance(fields) : undefined} maintenanceLoading={maintenanceLoading} maintenanceRefreshKey={maintenanceRefreshKey} onAddMaintenance={data.maintenanceEnabled && editor.collection === 'wagons' && editor.record ? () => void startWagonMaintenance() : undefined} user={user} online={online} onClose={() => setEditor(null)} onSaved={saved} onExpired={expired} onConflict={() => refresh()} /></div>}{maintenanceDraft && <SimpleWorkEntry user={user} wagonNumber={maintenanceDraft.wagonNumber} wagonId={maintenanceDraft.wagonId} newWagon={maintenanceDraft.newWagon} online={online} onExpired={expired} onClose={() => setMaintenanceDraft(null)} onSaved={async () => {setMaintenanceDraft(null); if(maintenanceDraft.newWagon) setEditor(null); await refresh(); setMaintenanceRefreshKey(value => value + 1); notify('Yapılan iş kaydedildi.');}} />}{installOpen && <Install {...install} onClose={() => setInstallOpen(false)} />}{toast && <div className="toast" role="status"><Check /><span>{toast}</span></div>}</div>;
 }
