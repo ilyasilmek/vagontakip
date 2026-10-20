@@ -543,3 +543,7 @@ Test Worker yayın adımında `CLOUDFLARE_ACCOUNT_ID` secret'ı tanımlı değil
 ## 20 Ekim 2026 — Genel bakışta yinelenen son hareketler panelinin kaldırılması (test)
 
 Kullanıcının isteğiyle Genel bakış sayfasının sağındaki **Son hareketler / Ekibinizin en güncel kayıtları** paneli kaldırıldı. Ortadaki vagon özeti, sıralama ve diğer gezinme/özet bağlantıları korundu. Artık yalnızca sağ panelde kullanılan son hareket kayıtlarını hesaplayan kod ve ona ait kullanılmayan içe aktarmalar da kaldırıldı. Kayıtlar veya API davranışı değiştirilmedi. Değişiklik yalnız `maintenance-test` dalında yapılır; otomatik hat hedefli gezinme kontrolleri ve test Worker yayınıyla doğrulayacaktır. Canlı `main` dalı ve canlı Worker'a dokunulmadı.
+
+## 20 Ekim 2026 — Genel bakış vagon listesini ortalama ve durum filtresi
+
+Kullanıcının isteğiyle **Son güncellenen vagonlar** bölümü sağdaki boşluğu bırakmayacak şekilde içerik alanının tam genişliğine alındı. Mevcut **Sıralama** kontrolü korundu ve yanına **Durum** filtresi eklendi: Tüm durumlar, Bekliyor, Parça bekliyor, Bakım devam ediyor ve Tamamlandı. Filtre seçilen duruma uyan vagonları gösterir; eşleşme yoksa açıklayıcı boş durum ve filtreyi temizleme düğmesi görünür. Liste yine seçili sıralamaya göre en fazla ilk beş vagonu gösterir. Hedefli tarayıcı testine genişlik ve filtre doğrulaması eklendi. Değişiklik yalnız `maintenance-test` dalında; canlı uygulama ve veriler değiştirilmedi.

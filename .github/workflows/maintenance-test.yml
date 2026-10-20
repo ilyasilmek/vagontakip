@@ -32,7 +32,7 @@ jobs:
             sleep 1
           done
           # Run the navigation regression suite only; the full maintenance/PWA suite has unrelated baseline failures.
-          E2E_BASE_URL=http://127.0.0.1:8788 npx playwright test tests/navigation.spec.ts --grep "desktop sidebar hides maintenance operations|mobile navigation keeps the maintenance shortcut"
+          E2E_BASE_URL=http://127.0.0.1:8788 npx playwright test tests/navigation.spec.ts --grep "desktop sidebar hides maintenance operations|mobile navigation keeps the maintenance shortcut|dashboard wagon list is full width and can be filtered by status"
       - name: Deploy only the isolated test Worker
         shell: bash
         env:

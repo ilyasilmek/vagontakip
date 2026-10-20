@@ -205,3 +205,11 @@ button:active:not(:disabled) {transform:translateY(1px)}
 .duplicate-wagon-prompt .confirm-actions {display:flex;flex-wrap:wrap;gap:10px}
 .duplicate-wagon-prompt .confirm-actions button {flex:1 1 220px;min-height:44px;white-space:normal}
 .work-entry-wagon {display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;font-size:14px}
+
+
+/* Genel bakış vagon listesi tam genişlikte ortalansın; sıralama ve durum filtresi yan yana dursun. */
+.dashboard-columns {grid-template-columns:minmax(0,1fr)}
+.dashboard-filters {display:flex;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.dashboard-filters .sort-control {flex:1 1 240px;min-width:220px;margin:0}
+.dashboard-filters .sort-control select {max-width:none}
+@media(max-width:700px){.dashboard-filters {gap:10px}.dashboard-filters .sort-control {flex:1 1 100%;min-width:0}.dashboard-filters .sort-control select {max-width:none}}

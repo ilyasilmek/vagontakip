@@ -99,3 +99,24 @@ test('mobile navigation keeps the maintenance shortcut in the test pilot', async
   const mobileNavigation = page.getByRole('navigation', { name: 'Mobil gezinme' });
   await expect(mobileNavigation.getByRole('button', { name: 'Bakım', exact: true })).toBeVisible();
 });
+
+
+test('dashboard wagon list is full width and can be filtered by status', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await loginThroughPage(page, await credentials());
+
+  await expect(page.getByRole('heading', { name: 'Son güncellenen vagonlar', exact: true })).toBeVisible();
+  await expect(page.locator('.dashboard-columns')).toHaveCSS('grid-template-columns', /\d+(?:\.\d+)?px/);
+  const statusFilter = page.getByRole('combobox', { name: 'Duruma göre filtrele' });
+  await expect(statusFilter.locator('option')).toHaveText(['Tüm durumlar', 'Bekliyor', 'Parça bekliyor', 'Bakım devam ediyor', 'Tamamlandı']);
+  await statusFilter.selectOption('Bakım devam ediyor');
+  const visibleStatuses = await page.locator('.wagon-table tbody .badge').allTextContents();
+  expect(visibleStatuses.every(status => status.trim() === 'Bakım devam ediyor')).toBeTruthy();
+  if (visibleStatuses.length === 0) {
+    await expect(page.getByRole('heading', { name: 'Bu durumda vagon bulunamadı', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Filtreyi temizle', exact: true }).click();
+    await expect(statusFilter).toHaveValue('');
+  }
+});
