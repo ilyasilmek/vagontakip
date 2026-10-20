@@ -90,14 +90,17 @@ test('desktop sidebar hides maintenance operations and keeps primary navigation'
   }
 });
 
-test('mobile navigation keeps the maintenance shortcut in the test pilot', async ({ page }) => {
+test('mobile navigation hides maintenance operations and keeps primary navigation', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await loginThroughPage(page, await credentials());
 
   const mobileNavigation = page.getByRole('navigation', { name: 'Mobil gezinme' });
-  await expect(mobileNavigation.getByRole('button', { name: 'Bakım', exact: true })).toBeVisible();
+  await expect(mobileNavigation.getByRole('button', { name: 'Bakım', exact: true })).toHaveCount(0);
+  for (const label of ['Özet', 'Vagonlar', 'Parçalar', 'Demirbaş', 'Yönetim']) {
+    await expect(mobileNavigation.getByRole('button', { name: label, exact: true })).toBeVisible();
+  }
 });
 
 
