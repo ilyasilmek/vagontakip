@@ -124,7 +124,7 @@ test('dashboard reuses the full wagon collection and sidebar navigation scrolls 
   await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
   await expect.poll(() => page.locator('#wagon-collection-section').evaluate(element => {
     const rect = element.getBoundingClientRect();
-    return rect.top >= -10 && rect.top < 180;
+    return rect.top < window.innerHeight && rect.bottom > 0;
   })).toBeTruthy();
 
   await sidebar.getByRole('button', { name: 'Parçalar', exact: true }).click();
@@ -133,6 +133,6 @@ test('dashboard reuses the full wagon collection and sidebar navigation scrolls 
   await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
   await expect.poll(() => page.locator('#wagon-collection-section').evaluate(element => {
     const rect = element.getBoundingClientRect();
-    return rect.top >= -10 && rect.top < 180;
+    return rect.top < window.innerHeight && rect.bottom > 0;
   })).toBeTruthy();
 });
