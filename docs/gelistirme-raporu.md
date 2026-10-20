@@ -534,3 +534,8 @@ Doğrulama: test hattının ilk denemesinde mevcut uçtan uca testlerin bir kıs
 ## 20 Ekim 2026 — Sol menü değişikliği için hedefli yayın kontrolü
 
 Önceki yayın hattı, bu küçük gezinme değişikliği için bakım pilotunun tamamını ve ilgisiz PWA/arayüz testlerini çalıştırdığı için yayın adımına ulaşamıyordu. Kontrol adımı, masaüstü sol menüde Bakım operasyonları bağlantısının olmadığını ve diğer ana bağlantıların korunduğunu doğrulayan hedefli tarayıcı testleriyle sınırlandı. Test pilotundaki mobil Bakım kısayolunun korunması da doğrulanır. Yayın adımında test yönetici parolası için önce `TEST_ADMIN_PASSWORD`, yoksa mevcut `ADMIN_PASSWORD` GitHub Actions secret'ı kullanılır; token/parola değerleri rapora yazılmaz. Değişiklikler yalnız `maintenance-test` dalındadır. Bu kayıt oluşturulurken hedefli Actions çalıştırmasının sonucu ve test Worker yayını henüz doğrulanmamıştır; canlı Worker'a yayın yapılmamıştır.
+
+
+## 20 Ekim 2026 — Test yayını için hesap kimliği çözümlemesi
+
+Test Worker yayın adımında `CLOUDFLARE_ACCOUNT_ID` secret'ı tanımlı değilse yayın betiği, mevcut `CLOUDFLARE_API_TOKEN` ile Cloudflare hesap listesini sorgular. Yalnızca token tam olarak bir erişilebilir hesap döndürürse hesap kimliği süreç ortamına alınır; sıfır veya birden fazla hesapta betik güvenli biçimde durur ve elle hesap kimliği ister. Token ve hesap kimliği rapora yazılmaz. Bu, canlı Worker adını/depolamasını değiştirmez; yayın hedefi hâlâ `wrangler.test.jsonc` içindeki `vagontakip-test` Worker'ıdır. Hedefli menü testleri ve bu yayın adımını içeren Actions çalıştırmasının sonucu henüz doğrulanmış değildir.
