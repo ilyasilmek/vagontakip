@@ -7,7 +7,7 @@ export const fields: Record<CollectionName, FieldDefinition[]> = {
   wagons: [
     { key: 'number', label: 'Vagon numarası', required: true },
     { key: 'wagonType', label: 'Vagon tipi', kind: 'select', options: WAGON_TYPES },
-    { key: 'status', label: 'Durum', kind: 'select', options: WAGON_STATUSES.filter(status => status !== 'Parça bekliyor'), required: true },
+    { key: 'status', label: 'Durum', kind: 'select', options: WAGON_STATUSES, required: true },
     { key: 'entryDate', label: 'Giriş tarihi', kind: 'date', required: true },
     { key: 'channelDate', label: 'Kanala giriş tarihi', kind: 'date' },
     { key: 'completedDate', label: 'Tamamlanma tarihi', kind: 'date' },
