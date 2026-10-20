@@ -106,6 +106,10 @@ test('mobile navigation hides maintenance operations and keeps primary navigatio
   await expect(page.locator('main .page-heading').first().getByRole('button', { name: 'Vagon ekle', exact: true })).toHaveCount(0);
   await wagonsButton.click();
   await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+  // During programmatic smooth scrolling, the active indicator must follow the requested destination
+  // instead of being repeatedly overwritten by intermediate scroll positions.
+  await expect(wagonsButton).toHaveClass(/active/);
+  await expect(homeButton).not.toHaveClass(/active/);
   const wagonSection = page.locator('#wagon-collection-section');
   await expect(wagonSection.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
   await expect.poll(() => wagonSection.evaluate(element => {
