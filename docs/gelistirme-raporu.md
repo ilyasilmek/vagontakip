@@ -583,3 +583,8 @@ Hava&Fren iş listesinin seçilebilir iş/adet yaklaşımı temel alınarak Boji
 ## 20 Ekim 2026 — Test ortamını eski Worker'a geri döndürme
 
 Kullanıcının onayıyla bakım test dağıtım hedefi tekrar `vagontakip-test` Worker'ına alındı. `wrangler.test.jsonc` ve dağıtım betiği yalnız bu Worker adına dağıtım yapacak şekilde güncellendi. GitHub Actions önce eski test adresinin `/api/health` yanıtını doğrular; başarılı olursa geçici `dbkk-vagontakip-test` Worker'ını Cloudflare API üzerinden silmeyi dener. Eski test sitesinin sağlık kontrolü veya geçici Worker'ın silinmesi ancak ilgili GitHub Actions çalışması tamamlandıktan sonra doğrulanmış sayılır. Canlı `vagontakip` Worker'ı ve `main` dalı bu işlem kapsamı dışındadır.
+
+
+## 20 Ekim 2026 — Mobil gezinme menüsünden Bakım kısayolunun kaldırılması
+
+Kullanıcı geri bildirimiyle mobil alt menüde `Bakım` düğmesinin masaüstü menüsünden kaldırılmış olmasına rağmen kaldığı fark edildi. `client/src/App.tsx` içindeki `mobileNavigation` artık yalnız `primaryNavigation` öğelerini kullanıyor; böylece Bakım kısayolu hem masaüstü hem mobil ana gezinmeden kaldırılıyor. Bakım sayfası, bakım kayıtları, vagon formundan bakım işi başlatma ve yönetici planlama akışı silinmedi. `tests/navigation.spec.ts` mobil testinin beklentisi de görünür Bakım düğmesinden, düğmenin bulunmamasına ve temel mobil menü öğelerinin görünmesine çevrildi. Değişiklik yalnız `maintenance-test` dalındadır; dağıtım ve uzak kontrol tamamlanmadan mobil test sitesinde canlı olduğu varsayılmamalıdır.
