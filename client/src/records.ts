@@ -7,7 +7,7 @@ export const fields: Record<CollectionName, FieldDefinition[]> = {
   wagons: [
     { key: 'number', label: 'Vagon numarası', required: true },
     { key: 'wagonType', label: 'Vagon tipi', kind: 'select', options: WAGON_TYPES },
-    { key: 'status', label: 'Durum', kind: 'select', options: WAGON_STATUSES, required: true },
+    { key: 'status', label: 'Durum', kind: 'select', options: WAGON_STATUSES.filter(status => status !== 'Parça bekliyor'), required: true },
     { key: 'entryDate', label: 'Giriş tarihi', kind: 'date', required: true },
     { key: 'channelDate', label: 'Kanala giriş tarihi', kind: 'date' },
     { key: 'completedDate', label: 'Tamamlanma tarihi', kind: 'date' },
@@ -34,13 +34,15 @@ export const fields: Record<CollectionName, FieldDefinition[]> = {
 
 export function rowValue(record: OperationalRecord, key: string): string {
   const value = (record as unknown as Record<string, string | number>)[key];
+  if (key === 'status' && collectionForStatus(record) && value === 'Parça bekliyor') return 'Bekliyor';
   return value === undefined || value === null ? '' : String(value);
 }
+function collectionForStatus(record: OperationalRecord): boolean { return 'number' in record && 'status' in record; }
 export function rowTitle(record: OperationalRecord, collection: CollectionName): string {
   return collection === 'wagons' ? (record as Wagon).number : (record as Part | Inventory).type;
 }
 export function rowStatus(record: OperationalRecord, collection: CollectionName): string {
-  if (collection === 'wagons') return (record as Wagon).status;
+  if (collection === 'wagons') return (record as Wagon).status === 'Parça bekliyor' ? 'Bekliyor' : (record as Wagon).status;
   if (collection === 'parts') {
     const part = record as Part;
     return part.returnedDate ? 'Geri döndü' : part.sentDate ? 'Sevk edildi' : 'Bekliyor';
@@ -50,7 +52,7 @@ export function rowStatus(record: OperationalRecord, collection: CollectionName)
 export function statusColor(status: string): string {
   if (['Tamamlandı', 'Geri döndü'].includes(status)) return 'teal';
   if (['Bakım devam ediyor', 'Sevk edildi'].includes(status)) return 'blue';
-  if (['Bekliyor', 'Parça bekliyor'].includes(status)) return 'amber';
+  if (status === 'Bekliyor') return 'amber';
   return 'teal';
 }
 export function formatDate(value?: string, withTime = false): string {
