@@ -528,4 +528,4 @@ Saha Bakım ekle formunda **Ek iş ekle** ve **Ağır bakım** düğmeleri eşit
 
 Kullanıcının isteğiyle ana uygulamanın sol gezinme menüsünden **Bakım operasyonları** bağlantısı kaldırıldı. Genel bakış, Vagonlar, Parçalar ve Demirbaşlar bağlantıları aynı kaldı. Değişiklik yalnız `maintenance-test` dalında hazırlanır; bakım pilotunun ekranları/API'leri veya test verisi silinmedi ve canlı ortama aktarım yapılmadı.
 
-Doğrulama: kaynak değişikliği ve mevcut gezinme tanımı incelendi. Bu düzenleme GitHub üzerinden yapıldığından yerel TypeScript kontrolü, otomatik testler ve test Worker yayını henüz çalıştırılmadı; test ortamında görsel doğrulama bekliyor. Canlı uygulama değiştirilmedi.
+Doğrulama: test hattının ilk denemesinde mevcut uçtan uca testlerin bir kısmı başarısız oldu; test Worker yayını bu nedenle atlandı. Sol menü kaldırılırken mobil alt gezinmedeki Bakım kısayolu korundu; masaüstü sol menüde Bakım operasyonları görünmez. Düzeltme yalnız `maintenance-test` dalındadır; canlı uygulama değiştirilmedi. Otomatik doğrulama ve test Worker yayını yeni GitHub Actions çalıştırmasında izlenecek.
