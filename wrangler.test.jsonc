@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "vagontakip-test",
+  "name": "dbkk-vagontakip-test",
   "main": "server/index.ts",
   "compatibility_date": "2026-10-06",
   "compatibility_flags": [
