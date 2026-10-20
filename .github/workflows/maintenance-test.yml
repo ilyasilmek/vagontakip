@@ -47,12 +47,33 @@ jobs:
           fi
           npm run deploy:test
           for attempt in {1..12}; do
-            if curl --fail --silent --show-error https://dbkk-vagontakip-test.ilyasilmek.workers.dev/api/health; then
+            if curl --fail --silent --show-error https://vagontakip-test.ilyasilmek.workers.dev/api/health; then
               echo
-              echo "DBKK test Worker health check passed."
-              exit 0
+              echo "Original test Worker health check passed."
+              break
             fi
             sleep 5
           done
-          echo "::error::DBKK test Worker did not pass its remote health check."
+          echo "::error::Original test Worker did not pass its remote health check."
           exit 1
+          if ! curl --fail --silent --show-error https://vagontakip-test.ilyasilmek.workers.dev/api/health; then
+            echo "::error::Original test Worker health check failed after retry loop."
+            exit 1
+          fi
+          echo "Original test Worker is healthy; removing the temporary DBKK test Worker."
+          node --input-type=module <<'NODE'
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          let accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+          if (!accountId) {
+            const r = await fetch('https://api.cloudflare.com/client/v4/accounts', {headers:{Authorization:'Bearer '+token}});
+            const j = await r.json();
+            if (!r.ok || !j.success || !Array.isArray(j.result) || j.result.length !== 1) throw new Error('Cannot safely resolve exactly one Cloudflare account for cleanup.');
+            accountId = j.result[0].id;
+          }
+          const url = 'https://api.cloudflare.com/client/v4/accounts/'+accountId+'/workers/scripts/dbkk-vagontakip-test';
+          const r = await fetch(url,{method:'DELETE',headers:{Authorization:'Bearer '+token}});
+          const body = await r.json().catch(()=>({}));
+          if (r.status === 404) console.log('Temporary DBKK Worker was already absent.');
+          else if (!r.ok || body.success !== true) throw new Error('Could not delete temporary DBKK Worker: '+JSON.stringify(body.errors||r.status));
+          else console.log('Temporary DBKK Worker script deleted.');
+          NODE
