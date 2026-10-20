@@ -30,7 +30,7 @@ export const BOJI_POSTASI_JOBS = [
  ['Teker İşlemleri', 'Teker değişti', 0, 2006, true],
  ['ULM İşlemleri', 'ULM yapıldı', 0, 2026, true],
 ] as const;
-export const BOJI_POSTASI_JOB_IDS = BOJI_POSTASI_JOBS.map(([, , , id]) => id);
+export const BOJI_POSTASI_JOB_IDS: number[] = BOJI_POSTASI_JOBS.map(([, , , id]) => id);
 export const BOJI_WHEEL_CHANGE_JOB_ID = 2006;
 export const BOJI_ULM_JOB_ID = 2026;
 export function isBojiPostasiJob(id:number):boolean { return BOJI_POSTASI_JOB_IDS.includes(id); }
