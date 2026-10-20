@@ -70,7 +70,7 @@ test('back keeps a saving form open and closes it once the request completes', a
     await expect(dialog.getByRole('button', { name: 'Kaydet', exact: true })).toBeEnabled();
     await page.goBack();
     await expect(dialog).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
   } finally { release(); }
 });
 
