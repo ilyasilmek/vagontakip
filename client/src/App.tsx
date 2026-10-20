@@ -48,6 +48,8 @@ export default function App() {
   const [wagonScrollRequest, setWagonScrollRequest] = useState(0);
   const [mobileActiveTarget, setMobileActiveTarget] = useState<Page>('dashboard');
   const handledWagonScroll = useRef(0);
+  const programmaticScrollTarget = useRef<Page | null>(null);
+  const programmaticScrollTimer = useRef<number | null>(null);
   const [installOpen, setInstallOpen] = useState(false);
   const install = useInstall();
   const snapshot = useRef<DataResponse | null>(null);
@@ -138,9 +140,25 @@ export default function App() {
     handledWagonScroll.current = wagonScrollRequest;
     document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [page, wagonScrollRequest]);
+  const finishProgrammaticScroll = useCallback(() => {
+    const target = programmaticScrollTarget.current;
+    if (!target) return;
+    programmaticScrollTarget.current = null;
+    if (programmaticScrollTimer.current !== null) {
+      window.clearTimeout(programmaticScrollTimer.current);
+      programmaticScrollTimer.current = null;
+    }
+    setMobileActiveTarget(target);
+  }, []);
+  const beginProgrammaticScroll = useCallback((target: Page) => {
+    programmaticScrollTarget.current = target;
+    if (programmaticScrollTimer.current !== null) window.clearTimeout(programmaticScrollTimer.current);
+    programmaticScrollTimer.current = window.setTimeout(finishProgrammaticScroll, 2000);
+  }, [finishProgrammaticScroll]);
   useEffect(() => {
     if (page !== 'dashboard') return;
     const updateActiveSection = () => {
+      if (programmaticScrollTarget.current) return;
       const section = document.getElementById('wagon-collection-section');
       if (!section) { setMobileActiveTarget('dashboard'); return; }
       const rect = section.getBoundingClientRect();
@@ -150,8 +168,13 @@ export default function App() {
     updateActiveSection();
     window.addEventListener('scroll', updateActiveSection, { passive: true });
     window.addEventListener('resize', updateActiveSection);
-    return () => { window.removeEventListener('scroll', updateActiveSection); window.removeEventListener('resize', updateActiveSection); };
-  }, [page]);
+    window.addEventListener('scrollend', finishProgrammaticScroll);
+    return () => {
+      window.removeEventListener('scroll', updateActiveSection);
+      window.removeEventListener('resize', updateActiveSection);
+      window.removeEventListener('scrollend', finishProgrammaticScroll);
+    };
+  }, [page, finishProgrammaticScroll]);
   useEffect(() => { if ((page === 'admin'||page === 'planning') && user?.role !== 'admin') setPage('account'); }, [page, user?.role, setPage]);
 
   async function login(nextUser: SafeUser) {
@@ -171,12 +194,14 @@ export default function App() {
   const edit = (collection: CollectionName, record: OperationalRecord | null) => setEditor({ collection, record });
   const handleNavigation = (target: Page) => {
     if (target === 'dashboard') {
+      beginProgrammaticScroll('dashboard');
       setMobileActiveTarget('dashboard');
       setPage('dashboard');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (target === 'wagons') {
+      beginProgrammaticScroll('wagons');
       setMobileActiveTarget('wagons');
       setPage('dashboard');
       setWagonScrollRequest(value => value + 1);
