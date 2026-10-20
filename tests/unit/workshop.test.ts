@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FREN_POSTASI_JOBS, ensureFrenPostasiStandards, isFrenPostasiQuantityJob } from '../../shared/fren-postasi';
+import { BOJI_POSTASI_JOBS, BOJI_POSTASI_JOB_IDS, isBojiPostasiQuantityJob } from '../../shared/boji-postasi';
 import { JOB_TYPES } from '../../shared/maintenance';
 import { calculateOperation, emptyWorkshop, netMinutes, ratio, summarizeWorkshop, turkeyTime, type WorkshopData, type WorkshopDay, type WorkshopOperation } from '../../shared/workshop';
 import { resolveStandardLines, validateWorkshop } from '../../server/workshop';
@@ -13,6 +14,7 @@ function fixture(){
  return{data,day,operation};
 }
 const month={startedAt:at('00:00','2026-10-01'),finishedAt:at('00:00','2026-11-01')};
+describe('Boji Postası iş kataloğu',()=>{it('listeler beş yan yastık işini ve teker değişimini; tümü adetlidir',()=>{const data=emptyWorkshop();const jobs=data.standards.filter(s=>BOJI_POSTASI_JOB_IDS.includes(s.id));expect(BOJI_POSTASI_JOBS).toHaveLength(6);expect(jobs.map(j=>j.name)).toEqual(BOJI_POSTASI_JOBS.map(j=>j[1]));expect(jobs.every(j=>j.category==='Yan Yastık'||j.category==='Teker İşlemleri')).toBe(true);expect(BOJI_POSTASI_JOB_IDS.every(isBojiPostasiQuantityJob)).toBe(true);});});
 describe('specification v2 acceptance calculations',()=>{
  it('test 1: uses a single-person standard without intermediate rounding',()=>{const {data,operation}=fixture();operation.jobs=resolveStandardLines([{jobTypeId:1,quantity:16}],data.standards,operation.finishedAt);const c=calculateOperation(operation,data.days);expect(c.workload).toBe(80/60);expect(c.workload.toFixed(2)).toBe('1.33');});
  it('tests 2–6: separates 302 net minutes, 31 waiting minutes, gross/net labor and efficiencies',()=>{const {data,operation}=fixture();validateWorkshop(data);const c=calculateOperation(operation,data.days);expect(c.elapsedMinutes).toBe(332);expect(c.actualLabor).toBeCloseTo(15.1,12);expect(c.waitingMinutes).toBe(31);expect(c.waitingLabor).toBe(1.55);expect(c.workingLabor).toBeCloseTo(13.55,12);expect(c.estimatedMinutes).toBe(190);expect(c.netEfficiency?.toFixed(2)).toBe('70.11');expect(c.grossEfficiency?.toFixed(2)).toBe('62.91');});
