@@ -58,6 +58,9 @@ Belge önceliği: çalışılan commit'in kodu ve testleri → bu güncel devir 
 
 20 Ekim 2026 notu: kullanıcı talebiyle test Worker adı `dbkk-vagontakip-test` olarak değiştirildi. `wrangler.test.jsonc` ve `scripts/deploy-test.mjs` bunu hedefler. Bu, yeni ve ayrı bir test Worker alanıdır; eski `vagontakip-test` Worker'ının SQLite verisi otomatik taşınmaz ve eski Worker doğrulama tamamlanana kadar silinmemelidir. Yeni adres yalnız ilgili GitHub Actions dağıtımı ve uzak `/api/health` kontrolü başarılı olduktan sonra doğrulanmış kabul edilir. Canlı Worker adı/adresi değişmez.
 
+
+20 Ekim 2026 güncel durum notu: kullanıcı geçici DBKK test Worker'ından vazgeçip eski `vagontakip-test` adresine dönülmesini istedi. Güncel test yapılandırması ve deploy yardımcısı yalnız `vagontakip-test` hedeflemelidir. GitHub Actions önce eski test Worker'ını yayımlar ve sağlık kontrolünü doğrular; ardından geçici `dbkk-vagontakip-test` Worker script'ini silmeyi dener. Son Actions sonucu görülmeden silmenin tamamlandığını varsaymayın. Canlı `vagontakip` Worker'ı değiştirilmeyecek.
+
 ## 2. Araçlar ve ilk çalıştırma
 
 ### 2.1 Gerekli ve isteğe bağlı araçlar
