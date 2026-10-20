@@ -588,3 +588,11 @@ Kullanıcının onayıyla bakım test dağıtım hedefi tekrar `vagontakip-test`
 ## 20 Ekim 2026 — Mobil gezinme menüsünden Bakım kısayolunun kaldırılması
 
 Kullanıcı geri bildirimiyle mobil alt menüde `Bakım` düğmesinin masaüstü menüsünden kaldırılmış olmasına rağmen kaldığı fark edildi. `client/src/App.tsx` içindeki `mobileNavigation` artık yalnız `primaryNavigation` öğelerini kullanıyor; böylece Bakım kısayolu hem masaüstü hem mobil ana gezinmeden kaldırılıyor. Bakım sayfası, bakım kayıtları, vagon formundan bakım işi başlatma ve yönetici planlama akışı silinmedi. `tests/navigation.spec.ts` mobil testinin beklentisi de görünür Bakım düğmesinden, düğmenin bulunmamasına ve temel mobil menü öğelerinin görünmesine çevrildi. Değişiklik yalnız `maintenance-test` dalındadır; dağıtım ve uzak kontrol tamamlanmadan mobil test sitesinde canlı olduğu varsayılmamalıdır.
+
+## 20 Ekim 2026 — vagon durumu, genel bakış kısayolları ve mobil gezinme
+
+Yalnız `maintenance-test` dalında vagon durum listesinden yeni kayıt/düzenleme seçeneği olarak “Parça bekliyor” kaldırıldı; geçmişte bu değerle kaydedilmiş vagonlar listede ve düzenleme formunda “Bekliyor” olarak gösterilir. Bekleyen vagon sayısı bu eski kayıtları da kapsar. Bakım devam ediyor ve Tamamlandı durumları ayrı kalır.
+
+Genel bakıştaki dört vagon özeti tıklanabilir oldu: Toplam vagon → Tümü, Atölyedeki vagon → işlemi devam edenler, Bekleyen vagon → Bekliyor, Tamamlanan → Tamamlandı filtresi. Tıklama vagon listesini sayfa içinde görünür alana kaydırır. Mobil alt menüde Vagonlar düğmesi artık ayrı sayfa açmak yerine Genel bakış altındaki aynı vagon listesine kaydırır. Sıralama seçeneklerinden Numara/tür A→Z ve Z→A kaldırıldı; tarih temelli üç seçenek korundu.
+
+Bakım işlevleri ve kayıtları silinmedi. Bu değişiklikler yalnız test dalındadır; canlı `vagontakip` Worker'ına aktarım yapılmadı. CI sonucu doğrulanmadan dağıtımın başarılı olduğu varsayılmamalıdır.
