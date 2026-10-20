@@ -539,3 +539,7 @@ Doğrulama: test hattının ilk denemesinde mevcut uçtan uca testlerin bir kıs
 ## 20 Ekim 2026 — Test yayını için hesap kimliği çözümlemesi
 
 Test Worker yayın adımında `CLOUDFLARE_ACCOUNT_ID` secret'ı tanımlı değilse yayın betiği, mevcut `CLOUDFLARE_API_TOKEN` ile Cloudflare hesap listesini sorgular. Yalnızca token tam olarak bir erişilebilir hesap döndürürse hesap kimliği süreç ortamına alınır; sıfır veya birden fazla hesapta betik güvenli biçimde durur ve elle hesap kimliği ister. Token ve hesap kimliği rapora yazılmaz. Bu, canlı Worker adını/depolamasını değiştirmez; yayın hedefi hâlâ `wrangler.test.jsonc` içindeki `vagontakip-test` Worker'ıdır. Hedefli menü testleri ve bu yayın adımını içeren Actions çalıştırmasının sonucu henüz doğrulanmış değildir.
+
+## 20 Ekim 2026 — Genel bakışta yinelenen son hareketler panelinin kaldırılması (test)
+
+Kullanıcının isteğiyle Genel bakış sayfasının sağındaki **Son hareketler / Ekibinizin en güncel kayıtları** paneli kaldırıldı. Ortadaki vagon özeti, sıralama ve diğer gezinme/özet bağlantıları korundu. Artık yalnızca sağ panelde kullanılan son hareket kayıtlarını hesaplayan kod ve ona ait kullanılmayan içe aktarmalar da kaldırıldı. Kayıtlar veya API davranışı değiştirilmedi. Değişiklik yalnız `maintenance-test` dalında yapılır; otomatik hat hedefli gezinme kontrolleri ve test Worker yayınıyla doğrulayacaktır. Canlı `main` dalı ve canlı Worker'a dokunulmadı.
