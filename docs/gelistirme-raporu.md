@@ -8,8 +8,8 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 
 | Konu | Canlı uygulama | Bakım test uygulaması |
 | --- | --- | --- |
-| Adres | https://vagontakip.ilyasilmek.workers.dev | https://vagontakip-test.ilyasilmek.workers.dev |
-| Cloudflare Worker | `vagontakip` | `vagontakip-test` |
+| Adres | https://vagontakip.ilyasilmek.workers.dev | https://dbkk-vagontakip-test.workers.dev |
+| Cloudflare Worker | `vagontakip` | `dbkk-vagontakip-test` |
 | GitHub dalı | `main` | `maintenance-test` |
 | Veri kaydı | GitHub'daki şifreli `data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object alanı |
 | Bakım operasyonları | Pilot henüz aktarılmadı | Etkin |
@@ -20,6 +20,12 @@ Güncel yeni vagon numarası giriş biçimi **`1234 5678 901-2`** (12 rakam). Es
 Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon ve bakım kayıtları GitHub veritabanına yazılmaz. Test verisi yayınlar arasında korunur ve canlı veriyle karıştırılmaz. Depo kullanıcı tarafından private yapılmıştır; kullanıcı daha sonra kayıt oluşturup silerek uygulamanın çalıştığını bildirmiştir.
 
 Güncel posta seçimleri yalnız **Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro** adlarıdır. Yöneticiye özel Planlama, Genel bakışta Vagon ekle yanındadır; Bakım ekle yönetici ve kullanıcı için aynı saha iş formudur.
+
+## 20 Ekim 2026 — DBKK için ayrı test adresi denemesi
+
+Kullanıcının isteğiyle bakım pilotunun test Worker adı `dbkk-vagontakip-test` olacak şekilde `wrangler.test.jsonc` ve `scripts/deploy-test.mjs` güncellendi. Hedef adres: https://dbkk-vagontakip-test.workers.dev. Yalnız `maintenance-test` dalı değiştirildi; `main` ve canlı `vagontakip` Worker'ı hedeflenmedi.
+
+**Önemli veri ayrımı:** Yeni Worker adı yeni bir izole Worker/SQLite Durable Object alanı oluşturur. Eski `vagontakip-test` Worker'ındaki kayıtların yeni adrese otomatik taşınması beklenmemelidir. Eski test adresi, yeni yayın doğrulanana kadar korunmalıdır. Yeni adrese deploy ve sağlık kontrolü başarılı olana kadar adresin kullanılabilir olduğu veya yayının tamamlandığı iddia edilmez.
 
 ## 20 Ekim 2026 — Boji Postası iş kataloğunun genişletilmesi
 
