@@ -596,3 +596,8 @@ Yalnız `maintenance-test` dalında vagon durum listesinden yeni kayıt/düzenle
 Genel bakıştaki dört vagon özeti tıklanabilir oldu: Toplam vagon → Tümü, Atölyedeki vagon → işlemi devam edenler, Bekleyen vagon → Bekliyor, Tamamlanan → Tamamlandı filtresi. Tıklama vagon listesini sayfa içinde görünür alana kaydırır. Mobil alt menüde Vagonlar düğmesi artık ayrı sayfa açmak yerine Genel bakış altındaki aynı vagon listesine kaydırır. Sıralama seçeneklerinden Numara/tür A→Z ve Z→A kaldırıldı; tarih temelli üç seçenek korundu.
 
 Bakım işlevleri ve kayıtları silinmedi. Bu değişiklikler yalnız test dalındadır; canlı `vagontakip` Worker'ına aktarım yapılmadı. CI sonucu doğrulanmadan dağıtımın başarılı olduğu varsayılmamalıdır.
+
+
+## 20 Ekim 2026 — Vagon filtrelerini sadeleştirme
+
+Vagon listesindeki birleşik “İşlemi devam eden” filtresi kaldırıldı. Liste artık “Tümü”, “Bekliyor”, “Bakım devam ediyor” ve “Tamamlandı” durumlarını ayrı ayrı gösterir. Eski “Parça bekliyor” kayıtları “Bekliyor” olarak görüntülenir; durum seçeneği ve tür listesinden çıkarılmıştır. Genel bakıştaki “Atölyedeki vagon” sayacı ve kısayolu yalnız “Bakım devam ediyor” durumundaki vagonları sayar/gösterir. Bu değişiklikler yalnız `maintenance-test` dalında hazırlanmıştır; test dağıtımı doğrulanmadan yayımlandığı söylenmemelidir.
