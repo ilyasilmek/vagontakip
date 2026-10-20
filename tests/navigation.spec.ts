@@ -75,3 +75,27 @@ test('back keeps a saving form open and closes it once the request completes', a
     await expect(page.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
   } finally { release(); }
 });
+
+
+test('desktop sidebar hides maintenance operations and keeps primary navigation', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await loginThroughPage(page, await credentials());
+
+  const sidebar = page.getByRole('navigation', { name: 'Ana gezinme' });
+  await expect(sidebar.getByRole('button', { name: 'Bakım operasyonları', exact: true })).toHaveCount(0);
+  for (const label of ['Genel bakış', 'Vagonlar', 'Parçalar', 'Demirbaşlar', 'Yönetim', 'Hesabım']) {
+    await expect(sidebar.getByRole('button', { name: label, exact: true })).toBeVisible();
+  }
+});
+
+test('mobile navigation keeps the maintenance shortcut in the test pilot', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await loginThroughPage(page, await credentials());
+
+  const mobileNavigation = page.getByRole('navigation', { name: 'Mobil gezinme' });
+  await expect(mobileNavigation.getByRole('button', { name: 'Bakım', exact: true })).toBeVisible();
+});
