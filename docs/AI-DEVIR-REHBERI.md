@@ -36,7 +36,7 @@ Bu rehberde gerçek parola, API tokenı, oturum çerezi, veri şifreleme anahtar
 
 | Başlık | Canlı uygulama | Bakım test uygulaması |
 | --- | --- | --- |
-| Adres | https://vagontakip.ilyasilmek.workers.dev | https://dbkk-vagontakip-test.workers.dev |
+| Adres | https://vagontakip.ilyasilmek.workers.dev | https://dbkk-vagontakip-test.ilyasilmek.workers.dev |
 | Worker adı | `vagontakip` | `dbkk-vagontakip-test` |
 | Kod dalı | `main` | `maintenance-test` |
 | Yapılandırma | `wrangler.jsonc` | `wrangler.test.jsonc` |
