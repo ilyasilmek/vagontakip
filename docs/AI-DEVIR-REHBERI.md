@@ -36,8 +36,8 @@ Bu rehberde gerçek parola, API tokenı, oturum çerezi, veri şifreleme anahtar
 
 | Başlık | Canlı uygulama | Bakım test uygulaması |
 | --- | --- | --- |
-| Adres | https://vagontakip.ilyasilmek.workers.dev | https://vagontakip-test.ilyasilmek.workers.dev |
-| Worker adı | `vagontakip` | `vagontakip-test` |
+| Adres | https://vagontakip.ilyasilmek.workers.dev | https://dbkk-vagontakip-test.workers.dev |
+| Worker adı | `vagontakip` | `dbkk-vagontakip-test` |
 | Kod dalı | `main` | `maintenance-test` |
 | Yapılandırma | `wrangler.jsonc` | `wrangler.test.jsonc` |
 | Kalıcı iş verisi | GitHub `main:data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object |
@@ -53,6 +53,10 @@ Bu rehberde gerçek parola, API tokenı, oturum çerezi, veri şifreleme anahtar
 19 Ekim'de bu dokümantasyon için kaynaklar, Git durumu ve yalnız Worker secret **adları** incelendi. Canlı Worker'da `ADMIN_PASSWORD`, `DB_ENCRYPTION_KEY`, `GITHUB_TOKEN`, `SESSION_SECRET`; test Worker'da `ADMIN_PASSWORD`, `SESSION_SECRET` adlarının bulunduğu doğrulandı. Değerleri okunmadı. Bu adların bulunması her değerin doğruluğunun ayrıca sınandığı anlamına gelmez.
 
 Belge önceliği: çalışılan commit'in kodu ve testleri → bu güncel devir rehberi → geliştirme raporunun ilgili tarihli kaydı → ilk kurulum belgeleri. Eski belgelerdeki “depo public”, “erişim bağları eksik”, “52 iş”, “11 veya 12 rakam” ve “G/P'den biri seçilir” gibi ifadeler tarihsel olabilir. Güncel durum aşağıda açıklanır.
+
+
+
+20 Ekim 2026 notu: kullanıcı talebiyle test Worker adı `dbkk-vagontakip-test` olarak değiştirildi. `wrangler.test.jsonc` ve `scripts/deploy-test.mjs` bunu hedefler. Bu, yeni ve ayrı bir test Worker alanıdır; eski `vagontakip-test` Worker'ının SQLite verisi otomatik taşınmaz ve eski Worker doğrulama tamamlanana kadar silinmemelidir. Yeni adres yalnız ilgili GitHub Actions dağıtımı ve uzak `/api/health` kontrolü başarılı olduktan sonra doğrulanmış kabul edilir. Canlı Worker adı/adresi değişmez.
 
 ## 2. Araçlar ve ilk çalıştırma
 
