@@ -136,9 +136,9 @@ test('dashboard reuses the full wagon collection and sidebar navigation scrolls 
   await page.getByRole('button', { name: /Toplam vagon:.*Tüm vagonları göster/ }).click();
   await expect(statusGroup.getByRole('button', { name: /Tümü/ })).toHaveAttribute('aria-pressed', 'true');
 
-  await page.getByRole('button', { name: /Atölyedeki vagon:.*İşlemi devam eden vagonları göster/ }).click();
+  await page.getByRole('button', { name: /Atölyedeki vagon:.*Bakım devam eden vagonları göster/ }).click();
   const activeStatuses = await wagonSection.locator('.record-card .badge').allTextContents();
-  expect(activeStatuses.every(status => status.trim() !== 'Tamamlandı')).toBeTruthy();
+  expect(activeStatuses.every(status => status.trim() === 'Bakım devam ediyor')).toBeTruthy();
 
   await page.getByRole('button', { name: /Bekleyen vagon:.*Bekleyen vagonları göster/ }).click();
   await expect(statusGroup.getByRole('button', { name: /^Bekliyor/ })).toHaveAttribute('aria-pressed', 'true');
