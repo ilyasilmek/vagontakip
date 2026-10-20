@@ -1,14 +1,15 @@
 import { ArrowRight, CheckCheck, Clock3, FileSpreadsheet, Package, Plus, RefreshCw, TrainFront, Wrench } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CollectionName, DataResponse, OperationalRecord } from '../../shared/types';
 import { dateToday, daysBetween } from './records';
 import Collection from './Collection';
 import { exportExcel } from './Reports';
 
 
-export default function Dashboard({ data, online, isAdmin, onPlan, onNavigate, onEdit, notify }: { data: DataResponse; online: boolean; isAdmin:boolean; onPlan:()=>void; onNavigate: (collection: CollectionName) => void; onEdit: (collection: CollectionName, record: OperationalRecord | null) => void; notify: (message: string) => void }) {
+export default function Dashboard({ data, online, isAdmin, onPlan, onNavigate, onEdit, notify }: { data: DataResponse; online: boolean; isAdmin:boolean; onPlan:()=>void; onNavigate: (collection: CollectionName) => void; onEdit: (collection: CollectionName, record: OperationalRecord | null) => void; notify: (message: string) => void; wagonScrollRequest?: number }) {
   const [exporting, setExporting] = useState(false);
   const [filterRequest, setFilterRequest] = useState<{ filter: string; sequence: number } | undefined>();
+  useEffect(() => { if (wagonScrollRequest > 0) document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [wagonScrollRequest]);
   function showWagons(filter: string) {
     setFilterRequest(current => ({ filter, sequence: (current?.sequence ?? 0) + 1 }));
     document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
