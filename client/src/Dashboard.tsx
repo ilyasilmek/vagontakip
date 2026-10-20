@@ -9,7 +9,7 @@ import { exportExcel } from './Reports';
 export default function Dashboard({ data, online, isAdmin, onPlan, onNavigate, onEdit, notify, wagonScrollRequest }: { data: DataResponse; online: boolean; isAdmin:boolean; onPlan:()=>void; onNavigate: (collection: CollectionName) => void; onEdit: (collection: CollectionName, record: OperationalRecord | null) => void; notify: (message: string) => void; wagonScrollRequest?: number }) {
   const [exporting, setExporting] = useState(false);
   const [filterRequest, setFilterRequest] = useState<{ filter: string; sequence: number } | undefined>();
-  useEffect(() => { if (wagonScrollRequest > 0) document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [wagonScrollRequest]);
+  useEffect(() => { if (wagonScrollRequest && wagonScrollRequest > 0) document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [wagonScrollRequest]);
   function showWagons(filter: string) {
     setFilterRequest(current => ({ filter, sequence: (current?.sequence ?? 0) + 1 }));
     document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
