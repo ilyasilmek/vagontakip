@@ -36,7 +36,7 @@ Bu rehberde gerçek parola, API tokenı, oturum çerezi, veri şifreleme anahtar
 
 | Başlık | Canlı uygulama | Bakım test uygulaması |
 | --- | --- | --- |
-| Adres | https://vagontakip.ilyasilmek.workers.dev | https://dbkk-vagontakip-test.ilyasilmek.workers.dev |
+| Adres | https://vagontakip.ilyasilmek.workers.dev | https://vagontakip-test.ilyasilmek.workers.dev |
 | Worker adı | `vagontakip` | `dbkk-vagontakip-test` |
 | Kod dalı | `main` | `maintenance-test` |
 | Yapılandırma | `wrangler.jsonc` | `wrangler.test.jsonc` |
@@ -1401,3 +1401,8 @@ Bu liste rehber yazılmadan önceki `maintenance-test` geçmişindeki bütün ko
 | `873c334` | 2026-10-18 16:47 | Record Hava Fren pilot deployment |
 
 Bu rehberin doğrulaması: kaynak bağlantıları/dosya yolları, katalogdan alınan 55 etkin iş/11 kategori ve dosya/commit envanteri karşılaştırılmıştır. Bu dokümantasyon değişikliği için yeni uygulama dağıtımı yapılmaz. Gelecek değişikliklerde rehberin ilgili bölümü ve geliştirme raporu birlikte güncellenmelidir.
+
+
+## 20 Ekim 2026 — Test hedefi geri alındı
+
+Bakım testi için hedef adres `https://vagontakip-test.ilyasilmek.workers.dev` olarak geri alındı. `wrangler.test.jsonc` yalnız `vagontakip-test` adına dağıtım yapar. GitHub Actions, eski test Worker'ının `/api/health` kontrolü başarılı olduktan sonra geçici `dbkk-vagontakip-test` Worker'ını silmeyi dener. Son dağıtım çalışmasının sonucunu kontrol etmeden sağlık doğrulaması veya silme işlemi tamamlandı kabul edilmemelidir. Canlı `vagontakip` Worker'ına ve `main` dalına dokunulmaz.
