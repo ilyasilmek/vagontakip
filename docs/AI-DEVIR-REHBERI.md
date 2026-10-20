@@ -1430,3 +1430,8 @@ Birleşik “İşlemi devam eden” liste filtresi kaldırıldı. Kullanıcı ay
 ## 20 Ekim 2026 — durum filtresi regresyon testi notu
 
 Son CI çalışmasında derleme ve 90 birim/API testi başarılıydı. Dağıtım öncesi Playwright gezinme testi, kartın eski `İşlemi devam eden vagonları göster` erişilebilir adını beklediği için başarısız oldu; bu ifade artık geçerli değil. `tests/navigation.spec.ts`, güncel `Bakım devam eden vagonları göster` metnini bekleyecek ve filtrede yalnız `Bakım devam ediyor` durumunun kaldığını doğrulayacak şekilde düzeltildi. Düzeltme `fdd14de` commit'inde `maintenance-test` dalına kaydedildi. Sonraki Actions sonucu doğrulanmadan yayın başarılı sayılmaz.
+
+
+## 20 Ekim 2026 — mobil Anasayfa ve liste gezinme güncellemesi
+
+Son UI işi yalnızca `maintenance-test` dalında yapılıyor: mobil `Özet` etiketi `Anasayfa` oldu; bu düğme her ekrandan Genel bakışın en üstüne döner. Mobil `Vagonlar` düğmesinin aktif çizgisi hem tıklama ile listeye gidildiğinde hem de Genel bakış sayfasında elle aşağı kaydırılarak listeye ulaşıldığında görünür. Genel bakıştaki tekrar eden `Vagon ekle` kaldırıldı, Vagonlar listesindeki ekleme düğmesi bırakıldı. `tests/navigation.spec.ts` bu davranışları kontrol edecek şekilde güncellendi. Yeni Actions run tamamlanmadan test Worker dağıtımının başarılı olduğu söylenmemeli; canlı `main` ve `vagontakip` Worker'ına dokunulmamalı.
