@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Wagon } from '../../shared/types';
+import { WAGON_STATUSES, type Wagon } from '../../shared/types';
 import { compareRecords, SORT_OPTIONS } from '../../client/src/sorting';
 import { rowStatus, rowValue } from '../../client/src/records';
 
@@ -20,6 +20,10 @@ describe('record sorting', () => {
   it('offers only date-based sorting options', () => {
     expect(SORT_OPTIONS.map(option => option.value)).toEqual(['created-desc', 'created-asc', 'updated-desc']);
     expect(rows.map(row => row.id)).toEqual(['old', 'new']);
+  });
+  it('offers only the three current wagon statuses', () => {
+    expect(WAGON_STATUSES).toEqual(['Bekliyor', 'Bakım devam ediyor', 'Tamamlandı']);
+    expect(WAGON_STATUSES).not.toContain('Parça bekliyor');
   });
   it('shows legacy Parça bekliyor records as Bekliyor', () => {
     const legacy = { ...rows[0], status: 'Parça bekliyor' as const };
