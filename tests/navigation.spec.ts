@@ -101,6 +101,14 @@ test('mobile navigation hides maintenance operations and keeps primary navigatio
   for (const label of ['Özet', 'Vagonlar', 'Parçalar', 'Demirbaş', 'Yönetim']) {
     await expect(mobileNavigation.getByRole('button', { name: label, exact: true })).toBeVisible();
   }
+  await mobileNavigation.getByRole('button', { name: 'Vagonlar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+  const wagonSection = page.locator('#wagon-collection-section');
+  await expect(wagonSection.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
+  await expect.poll(() => wagonSection.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    return rect.top < window.innerHeight && rect.bottom > 0;
+  })).toBeTruthy();
 });
 
 
