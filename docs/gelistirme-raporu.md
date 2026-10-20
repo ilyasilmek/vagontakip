@@ -611,3 +611,8 @@ Vagon listesindeki birleşik “İşlemi devam eden” filtresi kaldırıldı. L
 ## 20 Ekim 2026 — mobil Anasayfa ve Vagonlar gezinmesi
 
 `maintenance-test` dalında mobil alt menüdeki `Özet` etiketi `Anasayfa` olarak değiştirildi. Anasayfa düğmesi hangi ekranda olursa olsun Genel bakış ekranına döner ve sayfayı en üste kaydırır. Vagonlar düğmesi, listeye kaydırırken aktif gezinme durumunu alır; Genel bakış ekranında kullanıcı elle Vagonlar listesine indiğinde de kaydırma konumuna göre üst sarı aktif çizgi görünür. Genel bakış başlığındaki yinelenen `Vagon ekle` düğmesi kaldırıldı; liste başlığındaki düğme korunuyor. Mobil gezinme regresyon testleri etiket, aktif durum, yukarı dönüş, elle kaydırma ve yinelenen düğmenin kaldırılması için genişletildi. Test Worker dağıtımı ancak son Actions çalışması başarılı ve sağlık kontrolü onaylı olduğunda tamamlanmış sayılır. Canlı `main`/Worker değiştirilmedi.
+
+
+## 20 Ekim 2026 — mobil gezinme aktif çizgisi titremesi
+
+Kullanıcı, Anasayfa ile Vagonlar arasında yumuşak kaydırma sırasında sarı aktif çizginin iki düğme arasında hızlıca gidip geldiğini bildirdi. Sebep, tıklamada hedef düğmenin aktif yapılmasına karşın her ara `scroll` olayında bölüm konumunun bu durumu yeniden değiştirebilmesiydi. `client/src/App.tsx` içinde programatik kaydırma hedefi artık `scrollend` olayına (ve yedek zaman aşımına) kadar korunuyor; ara kaydırma konumları aktif öğeyi ezemiyor. Kaydırma bitince hedef durum sabitleniyor; kullanıcı elle kaydırdığında mevcut bölüm algılama davranışı çalışmaya devam ediyor. `tests/navigation.spec.ts` içine gezinme sırasında hedef göstergenin aktif kaldığını doğrulayan kontroller eklendi. Yalnız `maintenance-test` dalı ve `vagontakip-test` hedefi kullanılmalı; canlı `main`/Worker değişmez.
