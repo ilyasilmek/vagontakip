@@ -163,8 +163,8 @@ export default function App() {
     setPage(target);
   };
   const navigation = primaryNavigation;
-  // The request removes maintenance from the desktop sidebar; keep its mobile shortcut in the test pilot.
-  const mobileNavigation = data?.maintenanceEnabled ? [...navigation, { page: 'maintenance' as const, mobile: 'Bakım', Icon: Wrench }] : navigation;
+  // Maintenance operations remain available in the app, but are intentionally absent from both desktop and mobile primary navigation.
+  const mobileNavigation = navigation;
   const currentName = page === 'admin' ? 'Yönetim' : page === 'planning' ? 'Planlama' : page === 'account' ? 'Hesabım' : navigation.find(item => item.page === page)?.label || 'Genel bakış';
 
   if (intro && startupAnimation) return <Startup onDone={finishIntro} />;
