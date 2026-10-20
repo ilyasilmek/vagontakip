@@ -576,3 +576,8 @@ Genel bakışın altındaki sınırlı “Son güncellenen vagonlar” tablosu k
 ## 20 Ekim 2026 — Boji Postası iş kalemleri (test)
 
 Hava&Fren iş listesinin seçilebilir iş/adet yaklaşımı temel alınarak Boji postasına Yan Yastık altında beş iş ve Teker İşlemleri altında Teker değişimi eklendi. Teker değişiminde adet sayısına göre sökülen ve yeni takılan teker numaraları için alanlar açılır; dingil yükü (22.5T/20T) ve boji tipi (2 Bojili/3 Bojili/Yaprak sustalı) seçilir. “Teker çapları” düğmesi, seçilen boji tipine göre 4/6/2 isteğe bağlı çap alanını açar. Ayrıntılar bakım kaydında yapılandırılmış olarak saklanır ve sunucuda doğrulanır. İşlerin standart dakika süreleri kullanıcı tarafından henüz verilmediği için sıfır/tanımsız bırakıldı; bu kalemler için A/S standardı varsayılmadı. Değişiklik yalnız maintenance-test dalı ve izole test Worker hedefindedir; canlı sistem/veri değiştirilmez.
+
+
+## 20 Ekim 2026 — Test ortamını eski Worker'a geri döndürme
+
+Kullanıcının onayıyla bakım test dağıtım hedefi tekrar `vagontakip-test` Worker'ına alındı. `wrangler.test.jsonc` ve dağıtım betiği yalnız bu Worker adına dağıtım yapacak şekilde güncellendi. GitHub Actions önce eski test adresinin `/api/health` yanıtını doğrular; başarılı olursa geçici `dbkk-vagontakip-test` Worker'ını Cloudflare API üzerinden silmeyi dener. Eski test sitesinin sağlık kontrolü veya geçici Worker'ın silinmesi ancak ilgili GitHub Actions çalışması tamamlandıktan sonra doğrulanmış sayılır. Canlı `vagontakip` Worker'ı ve `main` dalı bu işlem kapsamı dışındadır.
