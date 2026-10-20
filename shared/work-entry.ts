@@ -1,9 +1,10 @@
 import type { BrakeMode } from './fren-postasi';
+export interface BojiWorkDetails { axleLoad:'22.5T'|'20T'; bogieType:'2 Bojili'|'3 Bojili'|'Yaprak sustalı'; removedWheelNumbers:string[]; installedWheelNumbers:string[]; wheelDiameters:string[]; }
 export interface WorkEntry {
  id:string; wagonId?:string; wagonNumber:string; actorId:string; actorName:string; post:string;
  startedAt:string; finishedAt:string;
  jobs:{id:number;name:string;category:string;quantity:number;brakeMode?:BrakeMode;durationMinutes?:number;durationSeconds?:number;loadDurationSeconds?:number;passengerDurationSeconds?:number;heavyMinutes?:number;standardMinutes?:number;overrideMinutes?:number;durationBasis?:'standard'}[];
- crew?:{id:string;name:string}[]; notes:string; createdAt:string; revision?:number;
+ crew?:{id:string;name:string}[]; bojiDetails?:BojiWorkDetails; notes:string; createdAt:string; revision?:number;
 }
 
 export function workEntryHours(entry:WorkEntry){
