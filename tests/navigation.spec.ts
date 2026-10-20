@@ -130,6 +130,25 @@ test('dashboard reuses the full wagon collection and sidebar navigation scrolls 
   expect(visibleStatuses.every(status => status.trim() === 'Bakım devam ediyor')).toBeTruthy();
   await statusGroup.getByRole('button', { name: /Tümü/ }).click();
 
+  await page.getByRole('button', { name: /Tamamlanan:.*Tamamlanan vagonları göster/ }).click();
+  await expect(statusGroup.getByRole('button', { name: /Tamamlandı/ })).toHaveAttribute('aria-pressed', 'true');
+  const completedStatuses = await wagonSection.locator('.record-card .badge').allTextContents();
+  expect(completedStatuses.every(status => status.trim() === 'Tamamlandı')).toBeTruthy();
+
+  await page.getByRole('button', { name: /Toplam vagon:.*Tüm vagonları göster/ }).click();
+  await expect(statusGroup.getByRole('button', { name: /Tümü/ })).toHaveAttribute('aria-pressed', 'true');
+
+  await page.getByRole('button', { name: /Atölyedeki vagon:.*İşlemi devam eden vagonları göster/ }).click();
+  const activeStatuses = await wagonSection.locator('.record-card .badge').allTextContents();
+  expect(activeStatuses.every(status => status.trim() !== 'Tamamlandı')).toBeTruthy();
+
+  await page.getByRole('button', { name: /Bekleyen vagon:.*Bekleyen vagonları göster/ }).click();
+  await expect(statusGroup.getByRole('button', { name: /^Bekliyor/ })).toHaveAttribute('aria-pressed', 'true');
+  const waitingStatuses = await wagonSection.locator('.record-card .badge').allTextContents();
+  expect(waitingStatuses.every(status => status.trim() === 'Bekliyor')).toBeTruthy();
+
+  await page.getByRole('button', { name: /Toplam vagon:.*Tüm vagonları göster/ }).click();
+
   const sidebar = page.getByRole('navigation', { name: 'Ana gezinme' });
   await sidebar.getByRole('button', { name: 'Vagonlar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
