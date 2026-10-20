@@ -4,6 +4,8 @@ Bu rapor, uygulamanın kurulumu ve mevcut bakım pilotunda yapılan değişiklik
 
 ## Güncel durum
 
+**20 Ekim 2026 geri dönüş kararı:** Tek test hedefi yeniden `vagontakip-test.ilyasilmek.workers.dev` olarak ayarlandı. `dbkk-vagontakip-test` geçici denemesidir; eski test verisiyle birleştirilmez. Eski test adresi uzak sağlık kontrolü başarıyla doğrulanana kadar son durum kesin kabul edilmez.
+
 **Bakım geliştirmesi hâlâ test aşamasındadır. Kullanıcının açık onayı olmadan `main` dalına birleştirilmez veya canlı Worker'a yayımlanmaz.** Test yayını için verilen izin, canlı yayın izni değildir.
 
 | Konu | Canlı uygulama | Bakım test uygulaması |
@@ -28,11 +30,11 @@ Kullanıcının kararıyla geçici DBKK hedefinden vazgeçildi. `wrangler.test.j
 
 Eski test alanı ile verileri korunur. DBKK Worker silme adımının tamamlandığı, ilgili Actions çalışması bitip sonucu kontrol edilmeden varsayılmaz. Cloudflare API tokenında Worker silme izni yoksa eski test yayınını geri getirme başarılı olsa bile temizlik adımı başarısız olabilir; bu durumda panelden yalnız `dbkk-vagontakip-test` script'i ayrıca silinmelidir.
 
-## 20 Ekim 2026 — DBKK için ayrı test adresi denemesi
+## 20 Ekim 2026 — DBKK test adresi denemesi ve geri dönüş
 
-Kullanıcının isteğiyle bakım pilotunun test Worker adı `dbkk-vagontakip-test` olacak şekilde `wrangler.test.jsonc` ve `scripts/deploy-test.mjs` güncellendi. Hedef adres: https://dbkk-vagontakip-test.ilyasilmek.workers.dev. Yalnız `maintenance-test` dalı değiştirildi; `main` ve canlı `vagontakip` Worker'ı hedeflenmedi.
+Kullanıcı önce ayrı `dbkk-vagontakip-test` Worker'ı denemeyi istedi; bu Worker yayımlandı ve `/api/health` kontrolü `ok: true`, `storage: local` döndürdü. Ardından kullanıcı DBKK'lı ortama ihtiyaç olmadığını belirterek eski `vagontakip-test` adresine geri dönülmesini istedi. Yapılandırma ve otomatik test dağıtımı yeniden `vagontakip-test` hedefine çevrildi. Yalnız `maintenance-test` dalı hedeflenir; `main` ve canlı `vagontakip` Worker'ı hedeflenmez. DBKK Worker'ın Cloudflare hesabından ayrıca silinmesi, eski Worker dağıtımı doğrulandıktan sonra yapılacak temizlik adımıdır.
 
-**Önemli veri ayrımı:** Yeni Worker adı yeni bir izole Worker/SQLite Durable Object alanı oluşturur. Eski `vagontakip-test` Worker'ındaki kayıtların yeni adrese otomatik taşınması beklenmemelidir. Eski test adresi, yeni yayın doğrulanana kadar korunmalıdır. Yeni adrese deploy ve sağlık kontrolü başarılı olana kadar adresin kullanılabilir olduğu veya yayının tamamlandığı iddia edilmez.
+**Veri ayrımı:** `dbkk-vagontakip-test` ve `vagontakip-test` ayrı Worker/SQLite Durable Object alanlarıdır. DBKK'lı alandaki kayıtlar eski test alanına otomatik taşınmaz. Eski test verisini korumak için eski Worker adı kullanılır.
 
 ## 20 Ekim 2026 — Boji Postası iş kataloğunun genişletilmesi
 

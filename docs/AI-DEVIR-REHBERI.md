@@ -56,10 +56,10 @@ Belge önceliği: çalışılan commit'in kodu ve testleri → bu güncel devir 
 
 
 
-20 Ekim 2026 notu: kullanıcı talebiyle test Worker adı `dbkk-vagontakip-test` olarak değiştirildi. `wrangler.test.jsonc` ve `scripts/deploy-test.mjs` bunu hedefler. Bu, yeni ve ayrı bir test Worker alanıdır; eski `vagontakip-test` Worker'ının SQLite verisi otomatik taşınmaz ve eski Worker doğrulama tamamlanana kadar silinmemelidir. Yeni adres yalnız ilgili GitHub Actions dağıtımı ve uzak `/api/health` kontrolü başarılı olduktan sonra doğrulanmış kabul edilir. Canlı Worker adı/adresi değişmez.
+20 Ekim 2026 notu: kısa süreli DBKK test Worker denemesinden sonra kullanıcı eski test ortamına dönülmesini istedi. `wrangler.test.jsonc`, `scripts/deploy-test.mjs` ve GitHub Actions sağlık kontrolü tekrar `vagontakip-test` hedefine ayarlandı. Bu mevcut test alanının SQLite verisini korumak için önemlidir. `dbkk-vagontakip-test` ayrı ve geçici bir Worker'dır; eski test verisi oraya taşınmamıştır. DBKK Worker'ı Cloudflare hesabından ayrıca silmek için eski test dağıtımı ve sağlık kontrolü doğrulanmalıdır. Canlı Worker adı/adresi değişmez.
 
 
-20 Ekim 2026 güncel durum notu: kullanıcı geçici DBKK test Worker'ından vazgeçip eski `vagontakip-test` adresine dönülmesini istedi. Güncel test yapılandırması ve deploy yardımcısı yalnız `vagontakip-test` hedeflemelidir. GitHub Actions önce eski test Worker'ını yayımlar ve sağlık kontrolünü doğrular; ardından geçici `dbkk-vagontakip-test` Worker script'ini silmeyi dener. Son Actions sonucu görülmeden silmenin tamamlandığını varsaymayın. Canlı `vagontakip` Worker'ı değiştirilmeyecek.
+20 Ekim 2026 güncel durum notu: kullanıcı geçici DBKK test Worker'ından vazgeçip eski `vagontakip-test` adresine dönülmesini istedi. Güncel test yapılandırması ve deploy yardımcısı yalnız `vagontakip-test` hedeflemelidir. GitHub Actions önce eski test Worker'ını yayımlar ve sağlık kontrolünü doğrular; ardından geçici `vagontakip-test` Worker script'ini silmeyi dener. Son Actions sonucu görülmeden silmenin tamamlandığını varsaymayın. Canlı `vagontakip` Worker'ı değiştirilmeyecek.
 
 ## 2. Araçlar ve ilk çalıştırma
 
@@ -1408,4 +1408,4 @@ Bu rehberin doğrulaması: kaynak bağlantıları/dosya yolları, katalogdan al�
 
 ## 20 Ekim 2026 — Test hedefi geri alındı
 
-Bakım testi için hedef adres `https://vagontakip-test.ilyasilmek.workers.dev` olarak geri alındı. `wrangler.test.jsonc` yalnız `vagontakip-test` adına dağıtım yapar. GitHub Actions, eski test Worker'ının `/api/health` kontrolü başarılı olduktan sonra geçici `dbkk-vagontakip-test` Worker'ını silmeyi dener. Son dağıtım çalışmasının sonucunu kontrol etmeden sağlık doğrulaması veya silme işlemi tamamlandı kabul edilmemelidir. Canlı `vagontakip` Worker'ına ve `main` dalına dokunulmaz.
+Bakım testi için hedef adres `https://vagontakip-test.ilyasilmek.workers.dev` olarak geri alındı. `wrangler.test.jsonc` yalnız `vagontakip-test` adına dağıtım yapar. GitHub Actions, eski test Worker'ının `/api/health` kontrolü başarılı olduktan sonra geçici `vagontakip-test` Worker'ını silmeyi dener. Son dağıtım çalışmasının sonucunu kontrol etmeden sağlık doğrulaması veya silme işlemi tamamlandı kabul edilmemelidir. Canlı `vagontakip` Worker'ına ve `main` dalına dokunulmaz.
