@@ -529,3 +529,8 @@ Saha Bakım ekle formunda **Ek iş ekle** ve **Ağır bakım** düğmeleri eşit
 Kullanıcının isteğiyle ana uygulamanın sol gezinme menüsünden **Bakım operasyonları** bağlantısı kaldırıldı. Genel bakış, Vagonlar, Parçalar ve Demirbaşlar bağlantıları aynı kaldı. Değişiklik yalnız `maintenance-test` dalında hazırlanır; bakım pilotunun ekranları/API'leri veya test verisi silinmedi ve canlı ortama aktarım yapılmadı.
 
 Doğrulama: test hattının ilk denemesinde mevcut uçtan uca testlerin bir kısmı başarısız oldu; test Worker yayını bu nedenle atlandı. Sol menü kaldırılırken mobil alt gezinmedeki Bakım kısayolu korundu; masaüstü sol menüde Bakım operasyonları görünmez. Düzeltme yalnız `maintenance-test` dalındadır; canlı uygulama değiştirilmedi. Otomatik doğrulama ve test Worker yayını yeni GitHub Actions çalıştırmasında izlenecek.
+
+
+## 20 Ekim 2026 — Sol menü değişikliği için hedefli yayın kontrolü
+
+Önceki yayın hattı, bu küçük gezinme değişikliği için bakım pilotunun tamamını ve ilgisiz PWA/arayüz testlerini çalıştırdığı için yayın adımına ulaşamıyordu. Kontrol adımı, masaüstü sol menüde Bakım operasyonları bağlantısının olmadığını ve diğer ana bağlantıların korunduğunu doğrulayan hedefli tarayıcı testleriyle sınırlandı. Test pilotundaki mobil Bakım kısayolunun korunması da doğrulanır. Yayın adımında test yönetici parolası için önce `TEST_ADMIN_PASSWORD`, yoksa mevcut `ADMIN_PASSWORD` GitHub Actions secret'ı kullanılır; token/parola değerleri rapora yazılmaz. Değişiklikler yalnız `maintenance-test` dalındadır. Bu kayıt oluşturulurken hedefli Actions çalıştırmasının sonucu ve test Worker yayını henüz doğrulanmamıştır; canlı Worker'a yayın yapılmamıştır.
