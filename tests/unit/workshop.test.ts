@@ -44,11 +44,11 @@ describe('real person-time validation and period boundaries',()=>{
 describe('Hava-Fren catalog migration',()=>{
  it('keeps 55 active categorized jobs and versions historical standards',()=>{
   const data=emptyWorkshop();expect(FREN_POSTASI_JOBS).toHaveLength(57);expect(new Set(FREN_POSTASI_JOBS.map(([category])=>category)).size).toBe(11);expect(FREN_POSTASI_JOBS.every(([,name])=>!name.includes('(adet)'))).toBe(true);
-  expect(data.standards.filter(s=>s.id<1000)).toHaveLength(49);expect(data.standards.filter(s=>s.id>=1001)).toHaveLength(57);
+  expect(data.standards.filter(s=>s.id<1000)).toHaveLength(49);expect(data.standards.filter(s=>s.id>=1001&&s.id<2001)).toHaveLength(57);
   const initial=data.standards.length;ensureFrenPostasiStandards(data.standards);expect(data.standards).toHaveLength(initial);
   expect(data.standards.find(s=>s.name==='Sabo değişti')?.standardMinutes).toBe(5);
   expect(data.standards.find(s=>s.name==='Sensör hortumları söküldü')?.standardMinutes).toBe(5);
-  expect(data.standards.filter(s=>s.id>=1001&&s.active)).toHaveLength(55);
+  expect(data.standards.filter(s=>s.id>=1001&&s.id<2001&&s.active)).toHaveLength(55);
   const old=data.standards.find(s=>s.id===1001)!;old.versionId='fren-postasi-1001';old.standardMinutes=0;ensureFrenPostasiStandards(data.standards);expect(old.standardMinutes).toBe(0);expect(old.validUntil).toBe('2026-10-18T13:30:00.000Z');expect(data.standards.find(s=>s.id===1001&&s.versionId.endsWith('-2026-10-18'))?.standardMinutes).toBe(30);
  });
  it('opens quantities only for the marked Hava&Fren jobs in both occurrences',()=>{
