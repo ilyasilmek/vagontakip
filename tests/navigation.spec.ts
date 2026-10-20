@@ -9,13 +9,12 @@ test('back closes dialogs before navigating through pages, including after reloa
   await navigation.getByRole('button', { name: 'Vagonlar', exact: true }).click();
   await navigation.getByRole('button', { name: 'Parçalar', exact: true }).click();
   await page.goBack();
-  await expect(page.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+  await expect(page.locator('#wagon-collection-section').getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
   await page.locator('.page-heading').getByRole('button', { name: 'Vagon ekle', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Yeni vagon ekle' })).toBeVisible();
   await page.goBack();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
-  await page.goBack();
   await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
 
   await navigation.getByRole('button', { name: 'Vagonlar', exact: true }).click();
@@ -23,7 +22,6 @@ test('back closes dialogs before navigating through pages, including after reloa
   await page.getByRole('dialog').getByRole('button', { name: 'Vazgeç', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => !!history.state?.vagonNavigation?.modal)).toBe(false);
-  await page.goBack();
   await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
 
   await navigation.getByRole('button', { name: 'Yönetim', exact: true }).click();
