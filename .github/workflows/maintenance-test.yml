@@ -46,18 +46,18 @@ jobs:
             exit 1
           fi
           npm run deploy:test
+          healthy=0
           for attempt in {1..12}; do
             if curl --fail --silent --show-error https://vagontakip-test.ilyasilmek.workers.dev/api/health; then
               echo
               echo "Original test Worker health check passed."
+              healthy=1
               break
             fi
             sleep 5
           done
-          echo "::error::Original test Worker did not pass its remote health check."
-          exit 1
-          if ! curl --fail --silent --show-error https://vagontakip-test.ilyasilmek.workers.dev/api/health; then
-            echo "::error::Original test Worker health check failed after retry loop."
+          if [[ "$healthy" -ne 1 ]]; then
+            echo "::error::Original test Worker did not pass its remote health check; temporary DBKK Worker will be kept."
             exit 1
           fi
           echo "Original test Worker is healthy; removing the temporary DBKK test Worker."
