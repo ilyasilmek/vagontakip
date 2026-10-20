@@ -601,3 +601,8 @@ Bakım işlevleri ve kayıtları silinmedi. Bu değişiklikler yalnız test dal�
 ## 20 Ekim 2026 — Vagon filtrelerini sadeleştirme
 
 Vagon listesindeki birleşik “İşlemi devam eden” filtresi kaldırıldı. Liste artık “Tümü”, “Bekliyor”, “Bakım devam ediyor” ve “Tamamlandı” durumlarını ayrı ayrı gösterir. Eski “Parça bekliyor” kayıtları “Bekliyor” olarak görüntülenir; durum seçeneği ve tür listesinden çıkarılmıştır. Genel bakıştaki “Atölyedeki vagon” sayacı ve kısayolu yalnız “Bakım devam ediyor” durumundaki vagonları sayar/gösterir. Bu değişiklikler yalnız `maintenance-test` dalında hazırlanmıştır; test dağıtımı doğrulanmadan yayımlandığı söylenmemelidir.
+
+
+## 20 Ekim 2026 — gezinme regresyon testindeki eski metin
+
+`85d8e517` commit'inde TypeScript derlemesi ve 90 birim/API testi geçti; dağıtımdan önceki Playwright gezinme testi ise eski erişilebilir ad `İşlemi devam eden vagonları göster` ifadesini aradığı için başarısız oldu. Uygulamadaki güncel erişilebilir ad `Bakım devam eden vagonları göster` olduğundan `tests/navigation.spec.ts` testi yeni etikete göre güncellendi; ayrıca “Atölyedeki vagon” kartının yalnız `Bakım devam ediyor` kayıtlarını gösterdiği daha kesin doğrulanıyor. Düzeltme commit'i `fdd14de` (`maintenance-test`). Yeni Actions çalışması ve uzak test sağlık kontrolü bitmeden test Worker'ının güncellendiği kabul edilmez. Canlı `main`/`vagontakip` değişmedi.
