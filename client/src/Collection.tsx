@@ -13,7 +13,7 @@ export default function Collection({ collection, rows, online, onEdit, updatedAt
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<RecordSort>('created-desc');
   const [filter, setFilter] = useState('Tümü');
-  const filters = collection === 'wagons' ? ['Tümü', ...WAGON_STATUSES.filter(status => status !== 'Parça bekliyor')] : collection === 'parts' ? ['Tümü', 'Bekliyor', 'Sevk edildi', 'Geri döndü'] : [];
+  const filters = collection === 'wagons' ? ['Tümü', ...WAGON_STATUSES] : collection === 'parts' ? ['Tümü', 'Bekliyor', 'Sevk edildi', 'Geri döndü'] : [];
   useEffect(() => { if (filterRequest) setFilter(filterRequest.filter); }, [filterRequest?.sequence, filterRequest?.filter]);
   const filtered = useMemo(() => rows.filter(record => (filter === 'Tümü' || rowStatus(record, collection) === filter) && Object.values(record).some(value => String(value).toLocaleLowerCase('tr-TR').includes(search.toLocaleLowerCase('tr-TR').trim()))).sort((a, b) => compareRecords(a, b, collection, sort)), [rows, search, filter, collection, sort]);
   const Icon = icons[collection];
