@@ -4,7 +4,7 @@ export interface WorkEntry {
  id:string; wagonId?:string; wagonNumber:string; actorId:string; actorName:string; post:string;
  startedAt:string; finishedAt:string;
  jobs:{id:number;name:string;category:string;quantity:number;brakeMode?:BrakeMode;durationMinutes?:number;durationSeconds?:number;loadDurationSeconds?:number;passengerDurationSeconds?:number;heavyMinutes?:number;standardMinutes?:number;overrideMinutes?:number;durationBasis?:'standard'}[];
- crew?:{id:string;name:string}[]; bojiDetails?:BojiWorkDetails; notes:string; createdAt:string; revision?:number;
+ crew?:{id:string;name:string}[]; bojiDetails?:BojiWorkDetails; ulmWheelNumbers?:string[]; notes:string; createdAt:string; revision?:number;
 }
 
 export function workEntryHours(entry:WorkEntry){

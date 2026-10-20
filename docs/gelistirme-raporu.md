@@ -21,6 +21,12 @@ Kod ve dokümantasyon değişiklikleri GitHub'a kaydedilir. Testte girilen vagon
 
 Güncel posta seçimleri yalnız **Hava&Fren, Boji, Kaynak, Vagonaj, Meydan, Torna, Tren Teşkil ve Büro** adlarıdır. Yöneticiye özel Planlama, Genel bakışta Vagon ekle yanındadır; Bakım ekle yönetici ve kullanıcı için aynı saha iş formudur.
 
+## 20 Ekim 2026 — Boji Postası iş kataloğunun genişletilmesi
+
+Kullanıcının onayladığı listeyle Boji Postası kataloğu 26 iş kalemine ve 6 kategoriye genişletildi. Genel İşlemler, Yan Yastık/Boji Göbek Pernosu, T Braga/Topraklama Kablosu, Buatagres/Susta/Mangan Plaka/Menot/Şapka, Teker İşlemleri ve ULM İşlemleri ayrı gruplardır. “Gevşek T bragalar sıkıldı” iki grupta da ayrı iş kalemi olarak bulunur. Önceden kaydedilmiş iş kimlikleri korunurken eski yan yastık adları güncellendi ve “Teker değişimi” etiketi “Teker değişti” olarak yenilendi. Standart süreler kullanıcı tarafından verilmediği için süre uydurulmadı.
+
+ULM kaydında seçilen adet kadar teker numarası girişi zorunludur; numaralar bakım kaydına yazılır ve vagon bakım geçmişinde gösterilir. Teker değişiminde dingil yükü, boji tipi, sökülen/takılan teker numaraları zorunlu kalır. Teker çapları isteğe bağlıdır ve tüm vagon tekerleri için boji tipine göre alanlar açılır. Bu katalog güncellemesi yalnız maintenance-test dalı ve test Worker hedefindedir; canlıya aktarım yapılmaz. CI/Playwright ve uzak test Worker dağıtım sonucu ilgili doğrulama tamamlandıktan sonra rapora eklenir.
+
 ## 19 Ekim 2026 — başka bir AI aracına ayrıntılı devir rehberi
 
 Kullanıcının isteğiyle [AI devir rehberi](AI-DEVIR-REHBERI.md) hazırlandı. Kaynak yapısı, bütün ana ekran/tuşların görevi, temel kayıt akışı, vagon ziyaret kimliği, saha işçiliği ile sürüm 2 kapasite/verimlilik ve legacy hesapların farkları, güncel 55 Fren işi ve eski 49 standart, API sözleşmeleri, SQLite tabloları, GitHub'ın kod/canlı veri/CI rolleri, PWA, yerel kurulum, yayın, geri dönüş ve güvenli devir adımları tek Markdown belgede toplandı. Dosya envanteri ve veri dosyası dışındaki Git değişiklik günlüğü eklendi. README'den bağlantı verildi; veri README'sindeki eski public depo ifadesi güncellendi.
