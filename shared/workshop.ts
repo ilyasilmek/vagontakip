@@ -1,5 +1,6 @@
 import { JOB_TYPES, type JobType, type WorkItem } from './maintenance';
 import { ensureFrenPostasiStandards } from './fren-postasi';
+import { ensureBojiPostasiStandards } from './boji-postasi';
 import type { RecordMetadata } from './types';
 import type { Post } from './types';
 
@@ -36,6 +37,7 @@ export type ActivityInput = Omit<WorkshopActivity,keyof RecordMetadata>;
 export function emptyWorkshop(): WorkshopData {
  const standards:Standard[]=JOB_TYPES.map(j=>({...j,versionId:`initial-${j.id}`,validFrom:'1970-01-01T00:00:00.000Z',validUntil:null,active:true}));
  ensureFrenPostasiStandards(standards);
+ ensureBojiPostasiStandards(standards);
  return {formulaVersion:2,people:[],shifts:structuredClone(DEFAULT_SHIFTS),standards,days:[],operations:[],activities:[]};
 }
 export function turkeyTime(date:string,clock:string):string { return new Date(`${date}T${clock}:00+03:00`).toISOString(); }
