@@ -42,7 +42,17 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -z "$TEST_ADMIN_PASSWORD" || -z "$CLOUDFLARE_API_TOKEN" ]]; then
-            echo "::warning::Test Worker deployment skipped because TEST_ADMIN_PASSWORD (or ADMIN_PASSWORD) and/or CLOUDFLARE_API_TOKEN GitHub Actions secrets are not configured."
-            exit 0
+            echo "::error::Test Worker deployment cannot proceed because TEST_ADMIN_PASSWORD (or ADMIN_PASSWORD) and/or CLOUDFLARE_API_TOKEN GitHub Actions secrets are not configured."
+            exit 1
           fi
           npm run deploy:test
+          for attempt in {1..12}; do
+            if curl --fail --silent --show-error https://dbkk-vagontakip-test.workers.dev/api/health; then
+              echo
+              echo "DBKK test Worker health check passed."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::DBKK test Worker did not pass its remote health check."
+          exit 1
