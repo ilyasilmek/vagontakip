@@ -34,7 +34,7 @@ export const fields: Record<CollectionName, FieldDefinition[]> = {
 
 export function rowValue(record: OperationalRecord, key: string): string {
   const value = (record as unknown as Record<string, string | number>)[key];
-  if (key === 'status' && collectionForStatus(record) && value === 'Parça bekliyor') return 'Bekliyor';
+  if (key === 'status' && collectionForStatus(record) && String(value) === 'Parça bekliyor') return 'Bekliyor';
   return value === undefined || value === null ? '' : String(value);
 }
 function collectionForStatus(record: OperationalRecord): boolean { return 'number' in record && 'status' in record; }
@@ -42,7 +42,7 @@ export function rowTitle(record: OperationalRecord, collection: CollectionName):
   return collection === 'wagons' ? (record as Wagon).number : (record as Part | Inventory).type;
 }
 export function rowStatus(record: OperationalRecord, collection: CollectionName): string {
-  if (collection === 'wagons') return (record as Wagon).status === 'Parça bekliyor' ? 'Bekliyor' : (record as Wagon).status;
+  if (collection === 'wagons') return String((record as Wagon).status) === 'Parça bekliyor' ? 'Bekliyor' : (record as Wagon).status;
   if (collection === 'parts') {
     const part = record as Part;
     return part.returnedDate ? 'Geri döndü' : part.sentDate ? 'Sevk edildi' : 'Bekliyor';
