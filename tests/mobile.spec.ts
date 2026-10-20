@@ -26,8 +26,16 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     await expect(navigation.getByRole('button', { name: 'Yönetim', exact: true })).toBeVisible();
     for (const item of [{ button: 'Vagonlar', heading: 'Vagonlar' }, { button: 'Parçalar', heading: 'Parçalar' }, { button: 'Demirbaş', heading: 'Demirbaşlar' }]) {
       await navigation.getByRole('button', { name: item.button, exact: true }).click();
-      await expect(page.getByRole('heading', { name: item.heading, exact: true })).toBeVisible();
-      await expect(page.getByLabel(`${item.heading} sıralaması`, { exact: true })).toHaveValue('created-desc');
+      if (item.button === 'Vagonlar') {
+        await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+        const wagonSection = page.locator('#wagon-collection-section');
+        await expect(wagonSection.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
+        await expect(wagonSection.getByRole('textbox', { name: 'Vagonlar içinde ara' })).toBeVisible();
+        await expect.poll(() => wagonSection.evaluate(element => element.getBoundingClientRect().top < window.innerHeight)).toBeTruthy();
+      } else {
+        await expect(page.getByRole('heading', { name: item.heading, exact: true })).toBeVisible();
+        await expect(page.getByLabel(`${item.heading} sıralaması`, { exact: true })).toHaveValue('created-desc');
+      }
       await expectNoHorizontalOverflow(page);
     }
 
