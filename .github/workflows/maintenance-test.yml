@@ -47,7 +47,7 @@ jobs:
           fi
           npm run deploy:test
           for attempt in {1..12}; do
-            if curl --fail --silent --show-error https://dbkk-vagontakip-test.workers.dev/api/health; then
+            if curl --fail --silent --show-error https://dbkk-vagontakip-test.ilyasilmek.workers.dev/api/health; then
               echo
               echo "DBKK test Worker health check passed."
               exit 0
