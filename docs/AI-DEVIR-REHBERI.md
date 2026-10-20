@@ -1409,3 +1409,8 @@ Bu rehberin doğrulaması: kaynak bağlantıları/dosya yolları, katalogdan al�
 ## 20 Ekim 2026 — Test hedefi geri alındı
 
 Bakım testi için hedef adres `https://vagontakip-test.ilyasilmek.workers.dev` olarak geri alındı. `wrangler.test.jsonc` yalnız `vagontakip-test` adına dağıtım yapar. GitHub Actions, eski test Worker'ının `/api/health` kontrolü başarılı olduktan sonra geçici `vagontakip-test` Worker'ını silmeyi dener. Son dağıtım çalışmasının sonucunu kontrol etmeden sağlık doğrulaması veya silme işlemi tamamlandı kabul edilmemelidir. Canlı `vagontakip` Worker'ına ve `main` dalına dokunulmaz.
+
+
+## 20 Ekim 2026 — Mobil menü bakım kısayolu düzeltmesi
+
+Kullanıcı, mobil test sitesinin alt menüsünde Demirbaş yanında `Bakım` düğmesinin görünmeye devam ettiğini bildirdi. `client/src/App.tsx` içindeki mobil navigasyon masaüstüyle tutarlı olacak şekilde yalnız `primaryNavigation` üzerinden oluşturulacak biçimde düzeltildi. `tests/navigation.spec.ts` artık mobil menüde `Bakım` düğmesinin olmadığını, Özet/Vagonlar/Parçalar/Demirbaş/Yönetim öğelerinin bulunduğunu doğruluyor. Bu yalnız gezinme kısayolunu kaldırır; bakım fonksiyonları ve kayıtları korunur. Uzak test dağıtımının başarılı olduğu ayrıca doğrulanmalıdır.
