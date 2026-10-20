@@ -59,7 +59,7 @@ test('phone login, all collections, accessible editing, Excel export and ordinar
     const editor = page.getByRole('dialog', { name: 'Yeni vagon ekle' });
     await editor.getByLabel('Vagon numarası', { exact: false }).fill(wagonName);
     await expect(editor.getByLabel('Vagon tipi', { exact: true }).locator('option')).toHaveCount(22);
-    await expect(editor.getByLabel('Durum', { exact: true }).locator('option', { hasText: 'Parça bekliyor' })).toHaveCount(0);
+    await expect(editor.getByLabel(/^Durum/).locator('option', { hasText: 'Parça bekliyor' })).toHaveCount(0);
     await editor.getByLabel('Vagon tipi', { exact: true }).selectOption('Sgss-w');
     await editor.getByLabel(/^Giriş tarihi/).fill('2026-10-06');
     await editor.getByLabel(/^Açıklama/).fill('Created on a phone.');
