@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Wagon } from '../../shared/types';
 import { compareRecords, SORT_OPTIONS } from '../../client/src/sorting';
+import { rowStatus, rowValue } from '../../client/src/records';
 
 const wagon = (id: string, number: string, createdAt: string, updatedAt: string): Wagon => ({
   id, number, createdAt, updatedAt, revision: 1, updatedBy: 'admin',
@@ -19,6 +20,11 @@ describe('record sorting', () => {
   it('offers only date-based sorting options', () => {
     expect(SORT_OPTIONS.map(option => option.value)).toEqual(['created-desc', 'created-asc', 'updated-desc']);
     expect(rows.map(row => row.id)).toEqual(['old', 'new']);
+  });
+  it('shows legacy Parça bekliyor records as Bekliyor', () => {
+    const legacy = { ...rows[0], status: 'Parça bekliyor' as const };
+    expect(rowStatus(legacy, 'wagons')).toBe('Bekliyor');
+    expect(rowValue(legacy, 'status')).toBe('Bekliyor');
   });
   it('uses a consistent tie breaker when dates are equal', () => {
     const a = wagon('a', 'Same', rows[0].createdAt, rows[0].updatedAt);
