@@ -16,7 +16,7 @@ import { rowValue } from './records';
 import { useTheme } from './theme';
 import { useStartupAnimation } from './startupPreference';
 
-import { usePageNavigation } from './navigation';
+import { usePageNavigation, type Page } from './navigation';
 const primaryNavigation = [
   { page: 'dashboard', label: 'Genel bakış', mobile: 'Özet', Icon: LayoutDashboard },
   { page: 'wagons', label: 'Vagonlar', mobile: 'Vagonlar', Icon: TrainFront },
@@ -45,6 +45,8 @@ export default function App() {
   const [maintenanceDraft, setMaintenanceDraft] = useState<{ wagonNumber: string; wagonId?:string; newWagon?: Record<string,string|number> } | null>(null);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
   const [maintenanceRefreshKey, setMaintenanceRefreshKey] = useState(0);
+  const [wagonScrollRequest, setWagonScrollRequest] = useState(0);
+  const handledWagonScroll = useRef(0);
   const [installOpen, setInstallOpen] = useState(false);
   const install = useInstall();
   const snapshot = useRef<DataResponse | null>(null);
@@ -130,6 +132,11 @@ export default function App() {
   }, [user?.id, refresh]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(''), 4500); return () => window.clearTimeout(timer); }, [toast]);
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [page]);
+  useEffect(() => {
+    if (page !== 'dashboard' || wagonScrollRequest === handledWagonScroll.current) return;
+    handledWagonScroll.current = wagonScrollRequest;
+    document.getElementById('wagon-collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [page, wagonScrollRequest]);
   useEffect(() => { if ((page === 'admin'||page === 'planning') && user?.role !== 'admin') setPage('account'); }, [page, user?.role, setPage]);
 
   async function login(nextUser: SafeUser) {
@@ -147,6 +154,14 @@ export default function App() {
   }
   async function saved(message: string) { setEditor(null); await refresh(); notify(message); }
   const edit = (collection: CollectionName, record: OperationalRecord | null) => setEditor({ collection, record });
+  const handleNavigation = (target: Page) => {
+    if (target === 'wagons') {
+      setPage('dashboard');
+      setWagonScrollRequest(value => value + 1);
+      return;
+    }
+    setPage(target);
+  };
   const navigation = primaryNavigation;
   // The request removes maintenance from the desktop sidebar; keep its mobile shortcut in the test pilot.
   const mobileNavigation = data?.maintenanceEnabled ? [...navigation, { page: 'maintenance' as const, mobile: 'Bakım', Icon: Wrench }] : navigation;
@@ -157,7 +172,7 @@ export default function App() {
   if (!user) return <>{import.meta.env.VITE_TEST_ENVIRONMENT === 'true' && <div className="notice test-notice">TEST ORTAMI · Kullanıcı adı: testadmin. Canlı girişten ayrıdır.</div>}{error && <div className="login-session-notice" role="status">{error}</div>}<Login onLogin={login} /></>;
   if (!data) return <div className="loading-screen"><Brand /><div className="notice error"><TriangleAlert /><span>{error || 'Kayıtlar alınamadı. İnternet bağlantınızı kontrol edin.'}</span></div><button className="primary" onClick={() => void refresh()} disabled={syncing}><RefreshCw className={syncing ? 'spin' : ''} /> Tekrar dene</button><button className="secondary" onClick={async () => { try { await api('/logout', 'POST', {}); } finally { expired(); } }}>Giriş ekranına dön</button></div>;
 
-  return <div className="app-shell"><aside className="sidebar"><Brand /><div className="nav-caption">ÇALIŞMA ALANI</div><nav className="side-nav" aria-label="Ana gezinme">{navigation.map(({ page: target, label, Icon }) => <button key={target} className={`nav-button ${page === target ? 'active' : ''}`} onClick={() => setPage(target)} aria-current={page === target ? 'page' : undefined}><Icon /> {label}</button>)}{user.role === 'admin' && <button className={`nav-button ${page === 'admin' ? 'active' : ''}`} onClick={() => setPage('admin')} aria-current={page === 'admin' ? 'page' : undefined}><ShieldCheck /> Yönetim</button>}<button className={`nav-button ${page === 'account' ? 'active' : ''}`} onClick={() => setPage('account')} aria-current={page === 'account' ? 'page' : undefined}><CircleUserRound /> Hesabım</button></nav><div className="sidebar-bottom"><div className="sidebar-tip"><Smartphone size={23} /><h3>Telefona kurulum</h3><p>Ana ekrandan kayıtlara erişin.</p><button className="secondary" onClick={() => setInstallOpen(true)}><ArrowDownToLine /> {install.installed ? 'Yükleme bilgisi' : 'Telefona yükle'}</button></div><div className="profile"><div className="avatar">{initials(user.displayName)}</div><div className="profile-name">{user.displayName}<small>{user.role === 'admin' ? 'Yönetici hesabı' : 'Ekip hesabı'}</small></div><button className="icon-button" aria-label="Çıkış yap" disabled={!online} onClick={() => void logout()}><LogOut size={15} /></button></div></div></aside><div className="main-shell">{data.maintenanceEnabled && <div className="test-watermark" aria-hidden="true"><img src="/images/club-watermark.jpg" alt="" /></div>}<header className="topbar"><div className="breadcrumb"><House /> <span>/</span> <strong>{currentName}</strong></div><div className="mobile-brand"><Brand /></div><div className="topbar-right"><span className="topbar-date">{new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul' }).format(new Date())}</span><span className={`sync-state ${online ? '' : 'offline'}`}>{syncing ? <RefreshCw className="spin" /> : online ? <Cloud /> : <CloudOff />}{syncing ? 'Eşitleniyor' : online ? 'Veriler güncel' : 'Çevrimdışı'}</span><button className="mobile-account-icon" onClick={() => setPage('account')} aria-label="Hesabımı aç"><div className="avatar">{initials(user.displayName)}</div></button></div></header><main className="content">
+  return <div className="app-shell"><aside className="sidebar"><Brand /><div className="nav-caption">ÇALIŞMA ALANI</div><nav className="side-nav" aria-label="Ana gezinme">{navigation.map(({ page: target, label, Icon }) => <button key={target} className={`nav-button ${page === target ? 'active' : ''}`} onClick={() => handleNavigation(target)} aria-current={page === target ? 'page' : undefined}><Icon /> {label}</button>)}{user.role === 'admin' && <button className={`nav-button ${page === 'admin' ? 'active' : ''}`} onClick={() => setPage('admin')} aria-current={page === 'admin' ? 'page' : undefined}><ShieldCheck /> Yönetim</button>}<button className={`nav-button ${page === 'account' ? 'active' : ''}`} onClick={() => setPage('account')} aria-current={page === 'account' ? 'page' : undefined}><CircleUserRound /> Hesabım</button></nav><div className="sidebar-bottom"><div className="sidebar-tip"><Smartphone size={23} /><h3>Telefona kurulum</h3><p>Ana ekrandan kayıtlara erişin.</p><button className="secondary" onClick={() => setInstallOpen(true)}><ArrowDownToLine /> {install.installed ? 'Yükleme bilgisi' : 'Telefona yükle'}</button></div><div className="profile"><div className="avatar">{initials(user.displayName)}</div><div className="profile-name">{user.displayName}<small>{user.role === 'admin' ? 'Yönetici hesabı' : 'Ekip hesabı'}</small></div><button className="icon-button" aria-label="Çıkış yap" disabled={!online} onClick={() => void logout()}><LogOut size={15} /></button></div></div></aside><div className="main-shell">{data.maintenanceEnabled && <div className="test-watermark" aria-hidden="true"><img src="/images/club-watermark.jpg" alt="" /></div>}<header className="topbar"><div className="breadcrumb"><House /> <span>/</span> <strong>{currentName}</strong></div><div className="mobile-brand"><Brand /></div><div className="topbar-right"><span className="topbar-date">{new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul' }).format(new Date())}</span><span className={`sync-state ${online ? '' : 'offline'}`}>{syncing ? <RefreshCw className="spin" /> : online ? <Cloud /> : <CloudOff />}{syncing ? 'Eşitleniyor' : online ? 'Veriler güncel' : 'Çevrimdışı'}</span><button className="mobile-account-icon" onClick={() => setPage('account')} aria-label="Hesabımı aç"><div className="avatar">{initials(user.displayName)}</div></button></div></header><main className="content">
     {data.maintenanceEnabled && <div className="notice test-notice">TEST ORTAMI · Canlı kayıtlarınız etkilenmez. <a href="https://vagontakip.ilyasilmek.workers.dev">Canlı siteye dön</a></div>}
     {!online && <div className="notice" role="status"><CloudOff /><span>Son alınan kayıtları görüntülüyorsunuz. Ekleme ve düzenleme için internet bağlantısı gerekiyor.</span>{connected && <button onClick={() => void refresh()} disabled={syncing}>Yenile</button>}</div>}
     {error && data && connected && <div className="notice error" role="alert"><TriangleAlert /><span>{error}</span><button onClick={() => void refresh()} disabled={syncing}>Tekrar dene</button></div>}

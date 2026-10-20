@@ -213,3 +213,6 @@ button:active:not(:disabled) {transform:translateY(1px)}
 .dashboard-filters .sort-control {flex:1 1 240px;min-width:220px;margin:0}
 .dashboard-filters .sort-control select {max-width:none}
 @media(max-width:700px){.dashboard-filters {gap:10px}.dashboard-filters .sort-control {flex:1 1 100%;min-width:0}.dashboard-filters .sort-control select {max-width:none}}
+
+/* Genel bakış içindeki Vagonlar bölümü, Vagonlar sekmesiyle aynı liste bileşenini kullanır. */
+.dashboard-wagon-collection {margin-top:32px;scroll-margin-top:24px}

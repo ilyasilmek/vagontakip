@@ -101,27 +101,38 @@ test('mobile navigation keeps the maintenance shortcut in the test pilot', async
 });
 
 
-test('dashboard wagon list is full width and can be filtered by status', async ({ page }) => {
+test('dashboard reuses the full wagon collection and sidebar navigation scrolls to it', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await loginThroughPage(page, await credentials());
 
-  await expect(page.getByRole('heading', { name: 'Son güncellenen vagonlar', exact: true })).toBeVisible();
-  await expect(page.locator('.dashboard-columns')).toHaveCSS('grid-template-columns', /\d+(?:\.\d+)?px/);
-  const statusFilter = page.getByRole('combobox', { name: 'Duruma göre filtrele' });
-  await expect(statusFilter.locator('option')).toHaveText(['Tüm durumlar', 'Bekliyor', 'Parça bekliyor', 'Bakım devam ediyor', 'Tamamlandı']);
-  await statusFilter.selectOption('Bakım devam ediyor');
-  await expect(statusFilter).toHaveValue('Bakım devam ediyor');
-  const visibleStatuses = await page.locator('.wagon-table tbody .badge').allTextContents();
+  await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+  const wagonSection = page.locator('#wagon-collection-section');
+  await expect(wagonSection.getByRole('heading', { name: 'Vagonlar', exact: true })).toBeVisible();
+  await expect(wagonSection.getByRole('textbox', { name: 'Vagonlar içinde ara' })).toBeVisible();
+  await expect(wagonSection.getByRole('button', { name: 'Görünen kayıtları Excel uyumlu CSV olarak indir' })).toBeVisible();
+  const statusGroup = wagonSection.getByRole('group', { name: 'Durum filtresi' });
+  await expect(statusGroup.getByRole('button', { name: /Tümü/ })).toBeVisible();
+  await statusGroup.getByRole('button', { name: /Bakım devam ediyor/ }).click();
+  const visibleStatuses = await wagonSection.locator('.record-card .badge').allTextContents();
   expect(visibleStatuses.every(status => status.trim() === 'Bakım devam ediyor')).toBeTruthy();
-  if (visibleStatuses.length === 0) {
-    const hasWagonRows = await page.locator('.wagon-table tbody tr').count();
-    if (hasWagonRows === 0 && await page.locator('.empty-state').count()) {
-      const emptyStateText = await page.locator('.empty-state').innerText();
-      expect(emptyStateText).toMatch(/vagon|kayıt/i);
-    }
-  }
-  await statusFilter.selectOption('');
-  await expect(statusFilter).toHaveValue('');
+  await statusGroup.getByRole('button', { name: /Tümü/ }).click();
+
+  const sidebar = page.getByRole('navigation', { name: 'Ana gezinme' });
+  await sidebar.getByRole('button', { name: 'Vagonlar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+  await expect.poll(() => page.locator('#wagon-collection-section').evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    return rect.top >= -10 && rect.top < 180;
+  })).toBeTruthy();
+
+  await sidebar.getByRole('button', { name: 'Parçalar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Parçalar', exact: true })).toBeVisible();
+  await sidebar.getByRole('button', { name: 'Vagonlar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Genel bakış', exact: true })).toBeVisible();
+  await expect.poll(() => page.locator('#wagon-collection-section').evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    return rect.top >= -10 && rect.top < 180;
+  })).toBeTruthy();
 });

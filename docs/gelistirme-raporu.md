@@ -547,3 +547,8 @@ Kullanıcının isteğiyle Genel bakış sayfasının sağındaki **Son hareketl
 ## 20 Ekim 2026 — Genel bakış vagon listesini ortalama ve durum filtresi
 
 Kullanıcının isteğiyle **Son güncellenen vagonlar** bölümü sağdaki boşluğu bırakmayacak şekilde içerik alanının tam genişliğine alındı. Mevcut **Sıralama** kontrolü korundu ve yanına **Durum** filtresi eklendi: Tüm durumlar, Bekliyor, Parça bekliyor, Bakım devam ediyor ve Tamamlandı. Filtre seçilen duruma uyan vagonları gösterir; eşleşme yoksa açıklayıcı boş durum ve filtreyi temizleme düğmesi görünür. Liste yine seçili sıralamaya göre en fazla ilk beş vagonu gösterir. Hedefli tarayıcı testine genişlik ve filtre doğrulaması eklendi. Değişiklik yalnız `maintenance-test` dalında; canlı uygulama ve veriler değiştirilmedi.
+
+
+# 20 Ekim 2026 — Genel bakışta ortak Vagonlar listesi ve gezinme
+
+Genel bakışın altındaki sınırlı “Son güncellenen vagonlar” tablosu kaldırıldı; yerine Vagonlar sekmesinin kullandığı aynı liste bileşeni yerleştirildi. Böylece arama, CSV indirme, sıralama, durum filtreleri, kart görünümü ve kayıt düzenleme aynı davranışla kullanılabilir. Bölüm başlığı “Vagonlar” olarak görünür. Soldaki Vagonlar menüsü artık hangi ekranda olursa olsun Genel bakışa döner ve liste bölümüne yumuşak kaydırır; Genel bakışta zaten açıksa doğrudan bölüme kayar. Hedefli Playwright testi liste kontrollerini ve gezinme davranışını doğrulayacak şekilde güncellendi. Değişiklik yalnızca maintenance-test dalı ve izole test Worker içindir; canlı uygulama ve canlı veriler değiştirilmedi.
