@@ -37,7 +37,7 @@ Bu rehberde gerçek parola, API tokenı, oturum çerezi, veri şifreleme anahtar
 | Başlık | Canlı uygulama | Bakım test uygulaması |
 | --- | --- | --- |
 | Adres | https://vagontakip.ilyasilmek.workers.dev | https://vagontakip-test.ilyasilmek.workers.dev |
-| Worker adı | `vagontakip` | `dbkk-vagontakip-test` |
+| Worker adı | `vagontakip` | `vagontakip-test` |
 | Kod dalı | `main` | `maintenance-test` |
 | Yapılandırma | `wrangler.jsonc` | `wrangler.test.jsonc` |
 | Kalıcı iş verisi | GitHub `main:data/database.enc.json` | Ayrı Cloudflare SQLite Durable Object |
