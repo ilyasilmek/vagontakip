@@ -96,7 +96,7 @@ test('mobile navigation hides maintenance operations and keeps primary navigatio
 
   const mobileNavigation = page.getByRole('navigation', { name: 'Mobil gezinme' });
   await expect(mobileNavigation.getByRole('button', { name: 'Bakım', exact: true })).toHaveCount(0);
-  for (const label of ['Özet', 'Vagonlar', 'Parçalar', 'Demirbaş', 'Yönetim']) {
+  for (const label of ['Anasayfa', 'Vagonlar', 'Parçalar', 'Demirbaş', 'Yönetim']) {
     await expect(mobileNavigation.getByRole('button', { name: label, exact: true })).toBeVisible();
   }
   await mobileNavigation.getByRole('button', { name: 'Vagonlar', exact: true }).click();
