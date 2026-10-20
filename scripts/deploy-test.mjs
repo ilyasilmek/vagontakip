@@ -17,7 +17,7 @@ if (!process.env.CLOUDFLARE_ACCOUNT_ID) {
 }
 const config = 'wrangler.test.jsonc';
 const parsed = JSON.parse(await readFile(config, 'utf8'));
-if (parsed.name !== 'vagontakip-test' || parsed.vars.STORAGE_MODE !== 'local' || parsed.vars.MAINTENANCE_ENABLED !== 'true' || parsed.vars.GITHUB_REPOSITORY || parsed.vars.GITHUB_DATABASE_PATH) throw new Error('Test deployment isolation check failed.');
+if (!['vagontakip-test', 'dbkk-vagontakip-test'].includes(parsed.name) || parsed.vars.STORAGE_MODE !== 'local' || parsed.vars.MAINTENANCE_ENABLED !== 'true' || parsed.vars.GITHUB_REPOSITORY || parsed.vars.GITHUB_DATABASE_PATH) throw new Error('Test deployment isolation check failed.');
 function run(args, input, env = process.env) {
  return new Promise((resolve,reject)=> {
   const child=spawn(process.execPath,args,{stdio:[input===undefined?'ignore':'pipe','inherit','inherit'],env});
