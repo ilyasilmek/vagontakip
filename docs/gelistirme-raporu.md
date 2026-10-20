@@ -552,3 +552,8 @@ Kullanıcının isteğiyle **Son güncellenen vagonlar** bölümü sağdaki boş
 # 20 Ekim 2026 — Genel bakışta ortak Vagonlar listesi ve gezinme
 
 Genel bakışın altındaki sınırlı “Son güncellenen vagonlar” tablosu kaldırıldı; yerine Vagonlar sekmesinin kullandığı aynı liste bileşeni yerleştirildi. Böylece arama, CSV indirme, sıralama, durum filtreleri, kart görünümü ve kayıt düzenleme aynı davranışla kullanılabilir. Bölüm başlığı “Vagonlar” olarak görünür. Soldaki Vagonlar menüsü artık hangi ekranda olursa olsun Genel bakışa döner ve liste bölümüne yumuşak kaydırır; Genel bakışta zaten açıksa doğrudan bölüme kayar. Hedefli Playwright testi liste kontrollerini ve gezinme davranışını doğrulayacak şekilde güncellendi. Değişiklik yalnızca maintenance-test dalı ve izole test Worker içindir; canlı uygulama ve canlı veriler değiştirilmedi.
+
+
+## 20 Ekim 2026 — Boji Postası iş kalemleri (test)
+
+Hava&Fren iş listesinin seçilebilir iş/adet yaklaşımı temel alınarak Boji postasına Yan Yastık altında beş iş ve Teker İşlemleri altında Teker değişimi eklendi. Teker değişiminde adet sayısına göre sökülen ve yeni takılan teker numaraları için alanlar açılır; dingil yükü (22.5T/20T) ve boji tipi (2 Bojili/3 Bojili/Yaprak sustalı) seçilir. “Teker çapları” düğmesi, seçilen boji tipine göre 4/6/2 isteğe bağlı çap alanını açar. Ayrıntılar bakım kaydında yapılandırılmış olarak saklanır ve sunucuda doğrulanır. İşlerin standart dakika süreleri kullanıcı tarafından henüz verilmediği için sıfır/tanımsız bırakıldı; bu kalemler için A/S standardı varsayılmadı. Değişiklik yalnız maintenance-test dalı ve izole test Worker hedefindedir; canlı sistem/veri değiştirilmez.
