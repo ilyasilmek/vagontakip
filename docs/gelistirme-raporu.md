@@ -606,3 +606,8 @@ Vagon listesindeki birleşik “İşlemi devam eden” filtresi kaldırıldı. L
 ## 20 Ekim 2026 — gezinme regresyon testindeki eski metin
 
 `85d8e517` commit'inde TypeScript derlemesi ve 90 birim/API testi geçti; dağıtımdan önceki Playwright gezinme testi ise eski erişilebilir ad `İşlemi devam eden vagonları göster` ifadesini aradığı için başarısız oldu. Uygulamadaki güncel erişilebilir ad `Bakım devam eden vagonları göster` olduğundan `tests/navigation.spec.ts` testi yeni etikete göre güncellendi; ayrıca “Atölyedeki vagon” kartının yalnız `Bakım devam ediyor` kayıtlarını gösterdiği daha kesin doğrulanıyor. Düzeltme commit'i `fdd14de` (`maintenance-test`). Yeni Actions çalışması ve uzak test sağlık kontrolü bitmeden test Worker'ının güncellendiği kabul edilmez. Canlı `main`/`vagontakip` değişmedi.
+
+
+## 20 Ekim 2026 — mobil Anasayfa ve Vagonlar gezinmesi
+
+`maintenance-test` dalında mobil alt menüdeki `Özet` etiketi `Anasayfa` olarak değiştirildi. Anasayfa düğmesi hangi ekranda olursa olsun Genel bakış ekranına döner ve sayfayı en üste kaydırır. Vagonlar düğmesi, listeye kaydırırken aktif gezinme durumunu alır; Genel bakış ekranında kullanıcı elle Vagonlar listesine indiğinde de kaydırma konumuna göre üst sarı aktif çizgi görünür. Genel bakış başlığındaki yinelenen `Vagon ekle` düğmesi kaldırıldı; liste başlığındaki düğme korunuyor. Mobil gezinme regresyon testleri etiket, aktif durum, yukarı dönüş, elle kaydırma ve yinelenen düğmenin kaldırılması için genişletildi. Test Worker dağıtımı ancak son Actions çalışması başarılı ve sağlık kontrolü onaylı olduğunda tamamlanmış sayılır. Canlı `main`/Worker değiştirilmedi.
