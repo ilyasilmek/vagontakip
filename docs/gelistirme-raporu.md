@@ -523,3 +523,9 @@ Fren tecrübesi seçildiğinde G (yük) ve P (yolcu) saniye girişleri her ekran
 Saha Bakım ekle formunda **Ek iş ekle** ve **Ağır bakım** düğmeleri eşit genişlikli iki sütuna taşındı. Dar ekranda aynı sırada kalmaları için düğmeler kapsayıcıya sığacak şekilde ayarlandı; Ağır bakım açıldığında seçili durum daha belirgin görünür. Ek iş ve ağır bakım kayıt mantığı değişmedi. Yalnız test ortamı hedeflenir.
 
 Özellik commit’i `6bb6e68`. `npm run build` ve `git diff --check` geçti; yalnız `vagontakip-test` Worker sürümü `92d4d25f-cd6f-42be-b7b5-9ebf3c93906a` yayımlandı. Uzak kontrol yayımlanan dosyayı, test girişini, önceki kayıt kimliklerini ve canlı sayfanın değişmediğini doğruladı. Chromium 320 ve 390 piksel görünümünde düğmeler aynı sırada ve eşit genişlikteydi; Ek iş ekle alanı ve Ağır bakım bölümü açıldı, yatay taşma görülmedi. Gerçek kayıt oluşturulmadı. Yalnız görünüm değişikliği için yeni otomatik test yazılmadı.
+
+## 20 Ekim 2026 — Sol menü sadeleştirmesi
+
+Kullanıcının isteğiyle ana uygulamanın sol gezinme menüsünden **Bakım operasyonları** bağlantısı kaldırıldı. Genel bakış, Vagonlar, Parçalar ve Demirbaşlar bağlantıları aynı kaldı. Değişiklik yalnız `maintenance-test` dalında hazırlanır; bakım pilotunun ekranları/API'leri veya test verisi silinmedi ve canlı ortama aktarım yapılmadı.
+
+Doğrulama: kaynak değişikliği ve mevcut gezinme tanımı incelendi. Bu düzenleme GitHub üzerinden yapıldığından yerel TypeScript kontrolü, otomatik testler ve test Worker yayını henüz çalıştırılmadı; test ortamında görsel doğrulama bekliyor. Canlı uygulama değiştirilmedi.

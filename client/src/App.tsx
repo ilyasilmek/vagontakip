@@ -147,7 +147,7 @@ export default function App() {
   }
   async function saved(message: string) { setEditor(null); await refresh(); notify(message); }
   const edit = (collection: CollectionName, record: OperationalRecord | null) => setEditor({ collection, record });
-  const navigation = data?.maintenanceEnabled ? [...primaryNavigation, { page: 'maintenance' as const, label: 'Bakım operasyonları', mobile: 'Bakım', Icon: Wrench }] : primaryNavigation;
+  const navigation = primaryNavigation;
   const currentName = page === 'admin' ? 'Yönetim' : page === 'planning' ? 'Planlama' : page === 'account' ? 'Hesabım' : navigation.find(item => item.page === page)?.label || 'Genel bakış';
 
   if (intro && startupAnimation) return <Startup onDone={finishIntro} />;
