@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: maintenance-test-deployment
+  cancel-in-progress: true
 jobs:
   pilot:
     runs-on: ubuntu-latest
@@ -32,7 +35,7 @@ jobs:
             sleep 1
           done
           # Run the navigation regression suite only; the full maintenance/PWA suite has unrelated baseline failures.
-          E2E_BASE_URL=http://127.0.0.1:8788 npx playwright test tests/navigation.spec.ts --grep "desktop sidebar hides maintenance operations|mobile navigation keeps the maintenance shortcut|dashboard reuses the full wagon collection and sidebar navigation scrolls to it"
+          E2E_BASE_URL=http://127.0.0.1:8788 npx playwright test tests/navigation.spec.ts --grep "desktop sidebar hides maintenance operations|mobile navigation hides maintenance operations and keeps primary navigation|dashboard reuses the full wagon collection and sidebar navigation scrolls to it"
       - name: Deploy only the isolated test Worker
         shell: bash
         env:
